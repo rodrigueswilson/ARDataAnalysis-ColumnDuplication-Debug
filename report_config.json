@@ -1,0 +1,91 @@
+{
+"sheets": [
+    {
+        "pipeline": "DAILY_COUNTS_COLLECTION_ONLY",
+        "sheet_name": "Daily Counts (ACF_PACF)"
+    },
+    {
+        "pipeline": "WEEKLY_COUNTS_WITH_ZEROES",
+        "sheet_name": "Weekly Counts (ACF_PACF)"
+    },
+    {
+        "pipeline": "BIWEEKLY_COUNTS",
+        "sheet_name": "Biweekly Counts (ACF_PACF)"
+    },
+    {
+        "pipeline": "MONTHLY_COUNTS_WITH_ZEROES",
+        "sheet_name": "Monthly Counts (ACF_PACF)"
+    },
+    {
+        "pipeline": "PERIOD_COUNTS_WITH_ZEROES",
+        "sheet_name": "Period Counts (ACF_PACF)"
+    },
+    {
+        "pipeline": "WEEKLY_COUNTS",
+        "sheet_name": "Weekly Counts"
+    },
+    {
+        "pipeline": "DAY_OF_WEEK_COUNTS",
+        "sheet_name": "Day of Week Counts"
+    },
+    {
+        "pipeline": "ACTIVITY_COUNTS",
+        "sheet_name": "Activity Counts"
+    },
+    {
+        "pipeline": "CAMERA_USAGE_BY_YEAR",
+        "sheet_name": "Camera Usage by Year"
+    },
+    {
+        "pipeline": "CAMERA_USAGE_DATE_RANGE",
+        "sheet_name": "Camera Usage Dates"
+    },
+    {
+        "pipeline": "CAMERA_USAGE_BY_YEAR_RANGE",
+        "sheet_name": "Camera Usage by Year Range"
+    },
+    {
+        "pipeline": "CAMERA_USAGE_BY_YEAR_RANGE_DETAILED",
+        "sheet_name": "Camera Usage by Year Range Detailed"
+    },
+    {
+        "pipeline": "FILE_SIZE_SUMMARY_BY_DAY",
+        "sheet_name": "File Size by Day"
+    },
+    {
+        "pipeline": "CAPTURE_VOLUME_PER_MONTH",
+        "sheet_name": "Monthly Capture Volume"
+    },
+    {
+        "pipeline": "TIME_OF_DAY_DISTRIBUTION",
+        "sheet_name": "Time of Day"
+    },
+    {
+        "pipeline": "FILE_SIZE_STATS",
+        "sheet_name": "File Size Stats"
+    },
+    {
+        "pipeline": "COLLECTION_PERIODS_DISTRIBUTION",
+        "sheet_name": "Collection Periods"
+    },
+    {
+        "pipeline": "WEEKDAY_BY_PERIOD",
+        "sheet_name": "Weekday by Period"
+    },
+    {
+        "pipeline": "SY_DAY_COUNT",
+        "sheet_name": "SY Days"
+    },
+    {
+        "pipeline": "DATA_QUALITY_CHECK",
+        "sheet_name": "Data Quality"
+    }
+],
+"forecast_options": {
+    "enabled": true,
+    "metrics": ["Total_Files"],
+    "time_scales": ["daily", "weekly"],
+    "export_csv": true,
+    "include_confidence_intervals": true
+}
+}

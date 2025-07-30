@@ -1,0 +1,89 @@
+school_calendar:
+  2021-2022:
+    start_date: 2021-09-13
+    end_date: 2022-05-30
+    periods:
+      'SY 21-22 P1': ['2021-09-13', '2021-11-05']
+      'SY 21-22 P2': ['2021-11-08', '2022-02-18']
+      'SY 21-22 P3': ['2022-02-22', '2022-05-27']
+  2022-2023:
+    start_date: 2022-09-08
+    end_date: 2023-06-01
+    periods:
+      'SY 22-23 P1': ['2022-09-12', '2022-12-12']
+      'SY 22-23 P2': ['2022-12-13', '2023-03-15']
+      'SY 22-23 P3': ['2023-03-16', '2023-06-01']
+
+non_collection_days:
+  # SY 2021-2022
+  '2021-09-06': { event: "Labor Day", type: "Non-Collection" }
+  '2021-09-20': { event: "Early Dismissal - Professional Development", type: "Partial" }
+  '2021-10-04': { event: "Early Dismissal - Professional Development", type: "Partial" }
+  '2021-10-11': { event: "Indigenous Peoples' Day", type: "Non-Collection" }
+  '2021-11-02': { event: "Election Day", type: "Non-Collection" }
+  '2021-11-04': { event: "NJEA Conference", type: "Non-Collection" }
+  '2021-11-05': { event: "NJEA Conference", type: "Non-Collection" }
+  '2021-11-15': { event: "Early Dismissal - Professional Development", type: "Partial" }
+  '2021-11-16': { event: "Early Dismissal - Parent/Teacher Conferences", type: "Partial" }
+  '2021-11-17': { event: "Early Dismissal - Parent/Teacher Conferences", type: "Partial" }
+  '2021-11-18': { event: "Early Dismissal - Parent/Teacher Conferences", type: "Partial" }
+  '2021-11-24': { event: "Thanksgiving Recess", type: "Non-Collection" }
+  '2021-11-25': { event: "Thanksgiving Recess", type: "Non-Collection" }
+  '2021-11-26': { event: "Thanksgiving Recess", type: "Non-Collection" }
+  '2021-12-06': { event: "Early Dismissal - Professional Development", type: "Partial" }
+  '2021-12-23': { event: "Early Dismissal - K-12", type: "Partial" }
+  '2021-12-24': { event: "Winter Recess", type: "Non-Collection" }
+  '2021-12-27': { event: "Winter Recess", type: "Non-Collection" }
+  '2021-12-28': { event: "Winter Recess", type: "Non-Collection" }
+  '2021-12-29': { event: "Winter Recess", type: "Non-Collection" }
+  '2021-12-30': { event: "Winter Recess", type: "Non-Collection" }
+  '2021-12-31': { event: "Winter Recess", type: "Non-Collection" }
+  '2022-01-17': { event: "Martin Luther King Jr. Day", type: "Non-Collection" }
+  '2022-02-21': { event: "Presidents' Day", type: "Non-Collection" }
+  '2022-04-15': { event: "Spring Recess", type: "Non-Collection" }
+  '2022-04-18': { event: "Spring Recess", type: "Non-Collection" }
+  '2022-04-19': { event: "Spring Recess", type: "Non-Collection" }
+  '2022-04-20': { event: "Spring Recess", type: "Non-Collection" }
+  '2022-04-21': { event: "Spring Recess", type: "Non-Collection" }
+  '2022-04-22': { event: "Spring Recess", type: "Non-Collection" }
+  '2022-05-30': { event: "Memorial Day", type: "Non-Collection" }
+
+  # SY 2022-2023
+  '2022-09-05': { event: "Labor Day", type: "Non-Collection" }
+  '2022-09-26': { event: "Rosh Hashanah", type: "Non-Collection" }
+  '2022-10-05': { event: "Yom Kippur", type: "Non-Collection" }
+  '2022-10-10': { event: "Early Dismissal - Professional Development", type: "Partial" }
+  '2022-11-10': { event: "NJEA Conference", type: "Non-Collection" }
+  '2022-11-11': { event: "NJEA Conference", type: "Non-Collection" }
+  '2022-11-21': { event: "Early Dismissal - Parent/Teacher Conferences", type: "Partial" }
+  '2022-11-22': { event: "Early Dismissal - Parent/Teacher Conferences", type: "Partial" }
+  '2022-11-23': { event: "Early Dismissal", type: "Partial" }
+  '2022-11-24': { event: "Thanksgiving Recess", type: "Non-Collection" }
+  '2022-11-25': { event: "Thanksgiving Recess", type: "Non-Collection" }
+  '2022-12-23': { event: "Early Dismissal", type: "Partial" }
+  '2022-12-26': { event: "Winter Recess", type: "Non-Collection" }
+  '2022-12-27': { event: "Winter Recess", type: "Non-Collection" }
+  '2022-12-28': { event: "Winter Recess", type: "Non-Collection" }
+  '2022-12-29': { event: "Winter Recess", type: "Non-Collection" }
+  '2022-12-30': { event: "Winter Recess", type: "Non-Collection" }
+  '2023-01-02': { event: "Winter Recess", type: "Non-Collection" }
+  '2023-01-16': { event: "Martin Luther King Jr. Day", type: "Non-Collection" }
+  '2023-02-20': { event: "Presidents' Day", type: "Non-Collection" }
+  '2023-04-03': { event: "Spring Recess", type: "Non-Collection" }
+  '2023-04-04': { event: "Spring Recess", type: "Non-Collection" }
+  '2023-04-05': { event: "Spring Recess", type: "Non-Collection" }
+  '2023-04-06': { event: "Spring Recess", type: "Non-Collection" }
+  '2023-04-07': { event: "Spring Recess", type: "Non-Collection" }
+  '2023-05-29': { event: "Memorial Day", type: "Non-Collection" }
+
+activity_schedule:
+  - ["08:00", "09:00", "Arrival/Free Play"]
+  - ["09:00", "09:30", "Morning Meeting"]
+  - ["09:30", "10:30", "Work Time I"]
+  - ["10:30", "11:15", "Playground"]
+  - ["11:15", "11:45", "Story/Music"]
+  - ["11:45", "12:30", "Lunch"]
+  - ["12:30", "13:00", "Quiet Time"]
+  - ["13:00", "14:00", "Work Time II"]
+  - ["14:00", "14:30", "Closing Meeting"]
+  - ["14:30", "15:00", "Dismissal"]
