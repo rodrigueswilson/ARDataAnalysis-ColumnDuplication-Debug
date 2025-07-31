@@ -25,6 +25,36 @@ class DashboardCreator:
         """
         self.db = db
         self.formatter = formatter
+        # Cache for pipeline results to prevent duplicate executions
+        self._pipeline_cache = {}
+    
+    def _run_aggregation_cached(self, pipeline_name, pipeline, use_base_filter=True, collection_name='media_records'):
+        """
+        Runs a MongoDB aggregation pipeline with caching to prevent duplicates.
+        
+        Args:
+            pipeline_name: Name/identifier for the pipeline (for caching)
+            pipeline: MongoDB aggregation pipeline
+            use_base_filter: Whether to apply base filtering
+            collection_name: Name of the MongoDB collection
+            
+        Returns:
+            pandas.DataFrame: Results of the aggregation (cached if previously run)
+        """
+        # Create cache key
+        cache_key = f"{pipeline_name}_{use_base_filter}_{collection_name}"
+        
+        # Return cached result if available
+        if cache_key in self._pipeline_cache:
+            print(f"[CACHE HIT] Using cached result for {pipeline_name}")
+            return self._pipeline_cache[cache_key].copy()
+        
+        # Execute pipeline and cache result
+        print(f"[PIPELINE EXEC] Running {pipeline_name}")
+        result = self._run_aggregation(pipeline, use_base_filter, collection_name)
+        self._pipeline_cache[cache_key] = result.copy()
+        
+        return result
     
     def _run_aggregation(self, pipeline, use_base_filter=True, collection_name='media_records'):
         """
@@ -129,24 +159,49 @@ class DashboardCreator:
                 expected_days_21_22 = 180  # Default reasonable values
                 expected_days_22_23 = 180
             
-            # Load all required data
+            # Clear cache at start of dashboard creation
+            self._pipeline_cache = {}
+            
+            # ========================================
+            # SINGLE EXECUTION BLOCK - Load all data once
+            # ========================================
+            print("[DASHBOARD] Loading all pipeline data (single execution per pipeline)...")
+            
             try:
-                df_year_summary = self._run_aggregation(PIPELINES["DASHBOARD_YEAR_SUMMARY"], use_base_filter=False)
-                df_daily_counts = self._run_aggregation(PIPELINES['DAILY_COUNTS_ALL_WITH_ZEROES'])
+                # Load each pipeline exactly once using cached execution
+                df_year_summary = self._run_aggregation_cached(
+                    "DASHBOARD_YEAR_SUMMARY",
+                    PIPELINES["DASHBOARD_YEAR_SUMMARY"], 
+                    use_base_filter=False
+                )
+                
+                df_daily_counts = self._run_aggregation_cached(
+                    "DAILY_COUNTS_ALL_WITH_ZEROES",
+                    PIPELINES['DAILY_COUNTS_ALL_WITH_ZEROES']
+                )
                 df_daily_counts = self._zero_fill_daily_counts(df_daily_counts)
-                df_quality = self._run_aggregation(PIPELINES["DASHBOARD_DATA_QUALITY"], use_base_filter=False)
-                df_period_summary = self._run_aggregation(PIPELINES["DASHBOARD_PERIOD_SUMMARY"], use_base_filter=False)
+                
+                df_quality = self._run_aggregation_cached(
+                    "DASHBOARD_DATA_QUALITY",
+                    PIPELINES["DASHBOARD_DATA_QUALITY"], 
+                    use_base_filter=False
+                )
+                
+                df_period_summary = self._run_aggregation_cached(
+                    "DASHBOARD_PERIOD_SUMMARY",
+                    PIPELINES["DASHBOARD_PERIOD_SUMMARY"], 
+                    use_base_filter=False
+                )
+                
             except Exception as e:
                 print(f"[WARNING] Could not load some dashboard data: {e}")
             
             # Section 1: Executive Summary
             print("  Building Executive Summary...")
             try:
-                df_year_summary = self._run_aggregation(PIPELINES["DASHBOARD_YEAR_SUMMARY"], use_base_filter=False)
-                # Use zero-filled daily counts for consistent "Days with Files" calculation
-                df_daily_counts = self._run_aggregation(PIPELINES['DAILY_COUNTS_ALL_WITH_ZEROES'])
-                df_daily_counts = self._zero_fill_daily_counts(df_daily_counts)
-                df_quality = self._run_aggregation(PIPELINES["DASHBOARD_DATA_QUALITY"], use_base_filter=False)
+                # ✅ FIXED: Reuse DataFrames already loaded above (lines 134-138) to eliminate duplicate pipeline executions
+                # df_year_summary, df_daily_counts, df_quality, df_period_summary are already available
+                # No need to re-execute the same pipelines - this was causing the 24x multiplication!
                 
                 # Get basic metrics for audio duration
                 pipeline_dashboard = [
@@ -160,7 +215,11 @@ class DashboardCreator:
                         }
                     }
                 ]
-                df_basic_metrics = self._run_aggregation(pipeline_dashboard, use_base_filter=False)
+                df_basic_metrics = self._run_aggregation_cached(
+                    "DASHBOARD_BASIC_METRICS",
+                    pipeline_dashboard, 
+                    use_base_filter=False
+                )
                 
                 # Create executive summary table
                 exec_summary = []
@@ -253,7 +312,7 @@ class DashboardCreator:
             # Section 3: Period Breakdown
             print("  Building Period Breakdown...")
             try:
-                df_period_summary = self._run_aggregation(PIPELINES["DASHBOARD_PERIOD_SUMMARY"], use_base_filter=False)
+                # ✅ FIXED: Reuse df_period_summary already loaded above (line 138) to eliminate duplicate pipeline execution
                 
                 if not df_period_summary.empty:
                     period_data = []
@@ -366,7 +425,11 @@ class DashboardCreator:
 
             # Add the dashboard as the first sheet
             self._add_dashboard_sheet(workbook, df_dashboard)
-            print("[SUCCESS] Comprehensive Dashboard created successfully")
+            
+            # Clear cache after dashboard creation
+            self._pipeline_cache = {}
+            
+            print("[SUCCESS] Comprehensive Dashboard created successfully (no duplicate pipelines)")
             
         except Exception as e:
             print(f"[ERROR] Failed to create comprehensive dashboard: {e}")

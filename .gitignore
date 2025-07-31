@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Excel files (generated reports)
+*.xlsx
+*.xls
+
+# Database files
+*.db
+*.sqlite3
+ARDataAnalysis.media_records.json
+
+# Debug and test files
+debug_*.py
+test_*.py
+*_test.py
+*_debug.py
+trace_*.py
+verify_*.py
+validate_*.py
+analyze_*.py
+check_*.py
+fix_*.py
+apply_*.py
+audit_*.py
+capture_*.py
+compare_*.py
+comprehensive_*.py
+definitive_*.py
+direct_*.py
+ensure_*.py
+examine_*.py
+final_*.py
+find_*.py
+focused_*.py
+full_*.py
+investigate_*.py
+isolate_*.py
+locate_*.py
+minimal_*.py
+populate_*.py
+quick_*.py
+simple_*.py
+tag_*.py
+
+# Temporary files
+*_temp.*
+MARKER_*.txt
+CHART_*.txt
+*.tmp
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Archive folder
+archive/
+
+# Documentation that's not needed for code review
+CHART_*.md
+REFACTORING_*.md
+AI_PEER_REVIEW_REQUEST.md
+complete_fix_implementation.md

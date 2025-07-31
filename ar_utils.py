@@ -393,181 +393,92 @@ def add_acf_pacf_analysis(
 ) -> pd.DataFrame:
     """
     Calculates and adds ACF and PACF statistics to a time series DataFrame.
-
-    This function computes the Autocorrelation Function (ACF) and Partial
-    Autocorrelation Function (PACF) for a specified column in the DataFrame.
-    These statistics are essential for identifying temporal patterns, seasonality,
-    and appropriate lags for ARIMA modeling.
-
-    Args:
-        df: The DataFrame containing the time series data.
-        value_col: The name of the column to analyze (e.g., 'Total_Files').
-        sheet_type: The time scale of the data ('daily', 'weekly', etc.), used to
-                    determine the number of lags for the analysis.
-        include_confidence: If True, includes boolean columns indicating whether
-                            ACF/PACF values are outside the confidence interval.
-
-    Returns:
-        The original DataFrame with new columns for ACF, PACF, and optionally,
-        confidence interval significance.
+    Returns a new DataFrame containing ONLY the new analysis columns.
     """
-    
-
     if not STATSMODELS_AVAILABLE:
-        print("[WARNING]  Warning: statsmodels not available. ACF/PACF analysis skipped.")
-        return df
-    
+        return pd.DataFrame(index=df.index)
+
     if value_col not in df.columns:
-        print(f"[WARNING]  Warning: Column '{value_col}' not found for ACF/PACF analysis.")
-        return df
+        return pd.DataFrame(index=df.index)
+
+    series_data = df[value_col].fillna(0)
     
-    series = df[value_col].fillna(0)
-    n_obs = len(series)
-    
-    # Determine maximum lags based on sheet_type and available observations
-    # These are reasonable defaults for different time scales
-    max_lags_config = {
-        "daily": 30,      # ~1 month of lags for daily data
-        "weekly": 12,    # ~3 months of lags for weekly data
-        "biweekly": 8,   # ~4 months of lags for biweekly data
-        "monthly": 6,    # ~6 months of lags for monthly data
-        "period": 3      # 3 lags for period data (typically only 6-9 periods total)
+    lag_config = {
+        'daily': [1, 7, 14],
+        'weekly': [1, 4, 8],
+        'biweekly': [1, 2, 4],
+        'monthly': [1, 3, 6],
+        'period': [1, 2, 3]
     }
-    
-    max_lags = max_lags_config.get(sheet_type, 20)  # Default to 20 if sheet_type not recognized
-    
-    # Ensure we have enough data for a meaningful analysis
-    # statsmodels requires nlags < n_obs
-    effective_max_lags = min(max_lags, n_obs - 1)
-    
-    # Skip if insufficient data
-    min_required_obs = 10  # Minimum observations for statistical validity
-    if n_obs < min_required_obs or effective_max_lags < 2:
-        print(f"[WARNING]  Skipping ACF/PACF calculation: not enough data points ({n_obs}) or lags ({effective_max_lags}).")
-        return df
-    
-    try:
-        # Calculate ACF and PACF values
-        acf_vals, acf_ci = acf(series, nlags=effective_max_lags, alpha=0.05, fft=False)
-        pacf_vals = pacf(series, nlags=effective_max_lags, method='ywm')
-        
-        # Calculate confidence bound (typically 95% = 1.96/sqrt(n))
-        confidence = 1.96 / np.sqrt(n_obs)
-        
-        # Create a copy of the original DataFrame to preserve all original data
-        enhanced_df = df.copy()
-        
-        # Add specific lag columns that are commonly used in analysis
-        # Configure lags based on the time scale of the data
-        key_lags_config = {
-            "daily": [1, 7, 14],        # 1 day, 1 week, 2 weeks
-            "weekly": [1, 4, 8],        # 1 week, 1 month, 2 months  
-            "biweekly": [1, 2, 4],      # 1 period, 1 month, 2 months
-            "monthly": [1, 3, 6],       # 1 month, 3 months, 6 months
-            "period": [1, 2, 3]         # 1 period, 2 periods, 3 periods
-        }
-        
-        key_lags = key_lags_config.get(sheet_type, [1, 7, 14])  # Default to daily pattern
-        
+    key_lags = lag_config.get(sheet_type, [1, 7, 14])
+    max_lag = max(key_lags)
+
+    # Create a new DataFrame for the results
+    result_df = pd.DataFrame(index=df.index)
+
+    # Initialize columns with NaN
+    new_col_names = []
+    for lag in key_lags:
+        acf_col = f"{value_col}_ACF_Lag{lag}"
+        pacf_col = f"{value_col}_PACF_Lag{lag}"
+        result_df[acf_col] = np.nan
+        result_df[pacf_col] = np.nan
+        new_col_names.extend([acf_col, pacf_col])
+        if include_confidence:
+            sig_acf_col = f'{acf_col}_Significant'
+            sig_pacf_col = f'{pacf_col}_Significant'
+            result_df[sig_acf_col] = pd.NA
+            result_df[sig_pacf_col] = pd.NA
+            new_col_names.extend([sig_acf_col, sig_pacf_col])
+
+    # The minimum number of observations required to calculate PACF for a given number of lags (nlags) is 2 * nlags.
+    # We will dynamically adjust the number of lags based on the available data points for each row.
+    for i in range(1, len(df)):
+        expanding_series = series_data.iloc[:i+1]
+        n_obs = len(expanding_series)
+
+        if n_obs < 4 or expanding_series.nunique() <= 1:
+            continue
+
+        try:
+            # Dynamically determine the max number of lags we can calculate
+            # PACF calculation requires at least 2*nlags observations
+            current_nlags = min(max_lag, (n_obs // 2) - 1)
+
+            if current_nlags <= 0:
+                continue
+
+            acf_vals = acf(expanding_series, nlags=current_nlags, fft=True)
+            pacf_vals = pacf(expanding_series, nlags=current_nlags, method='ywm')
+            confidence = 1.96 / np.sqrt(n_obs)
+
+            for lag in key_lags:
+                if lag < len(acf_vals):
+                    acf_col = f"{value_col}_ACF_Lag{lag}"
+                    pacf_col = f"{value_col}_PACF_Lag{lag}"
+                    result_df.loc[result_df.index[i], acf_col] = acf_vals[lag]
+                    result_df.loc[result_df.index[i], pacf_col] = pacf_vals[lag]
+                    if include_confidence:
+                        sig_acf_col = f'{acf_col}_Significant'
+                        sig_pacf_col = f'{pacf_col}_Significant'
+                        result_df.loc[result_df.index[i], sig_acf_col] = np.abs(acf_vals[lag]) > confidence
+                        result_df.loc[result_df.index[i], sig_pacf_col] = np.abs(pacf_vals[lag]) > confidence
+        except Exception:
+            continue
+
+    # Drop columns that are all NaN, which can happen if analysis fails on all rows
+    result_df.dropna(axis=1, how='all', inplace=True)
+            
+    if include_confidence:
         for lag in key_lags:
-            if lag <= effective_max_lags:
-                # Add ACF and PACF columns for this lag (using 1-based indexing)
-                enhanced_df[f'ACF_Lag{lag}'] = acf_vals[lag]  # acf_vals[0] is lag 0, acf_vals[1] is lag 1, etc.
-                enhanced_df[f'PACF_Lag{lag}'] = pacf_vals[lag]  # pacf_vals[0] is lag 0, pacf_vals[1] is lag 1, etc.
-                
-                if include_confidence:
-                    enhanced_df[f'ACF_Lag{lag}_Sig'] = np.abs(acf_vals[lag]) > confidence
-                    enhanced_df[f'PACF_Lag{lag}_Sig'] = np.abs(pacf_vals[lag]) > confidence
-        
-        # Add confidence interval for reference (can be used by charting functions)
-        enhanced_df['Confidence_95pct'] = confidence
-        
-        print(f"[OK] Added ACF/PACF analysis columns to original DataFrame for lags: {[lag for lag in key_lags if lag <= effective_max_lags]}.")
-        return enhanced_df
-    
-    except Exception as e:
-        print(f"[ERROR] Error calculating ACF/PACF: {e}")
-        return df
+            sig_acf_col = f"{value_col}_ACF_Lag{lag}_Significant"
+            sig_pacf_col = f"{value_col}_PACF_Lag{lag}_Significant"
+            if sig_acf_col in result_df.columns:
+                result_df[sig_acf_col] = result_df[sig_acf_col].astype('boolean')
+            if sig_pacf_col in result_df.columns:
+                result_df[sig_pacf_col] = result_df[sig_pacf_col].astype('boolean')
 
-def add_acf_pacf_chart(
-    ws,
-    start_row: int,
-    end_row: int,
-    sheet_type: str = "daily"
-) -> None:
-    """
-    Creates and adds a combined ACF/PACF chart to an Excel worksheet.
-
-    This function generates a combo chart visualizing the ACF and PACF values
-    along with their confidence intervals, which is then added to the specified
-    worksheet. This provides a clear visual tool for time series diagnostics.
-
-    Note: The 'ws' parameter is intentionally not type-hinted to avoid a hard
-    dependency on 'openpyxl' at the type-checking level, allowing for more
-    flexible use of the module.
-
-    Args:
-        ws: The openpyxl worksheet object to which the chart will be added.
-        start_row: The starting row of the data range in the worksheet.
-        end_row: The ending row of the data range in the worksheet.
-        sheet_type: The time scale of the data, used for the chart title.
-    """
-
-
-    from openpyxl.chart import BarChart, LineChart, Series, Reference
-    from openpyxl.chart.axis import ChartLines
-
-    try:
-        # --- Create the Bar Chart for ACF --- #
-        bar_chart = BarChart()
-        bar_chart.style = 13
-        bar_chart.y_axis.title = "Correlation"
-        bar_chart.x_axis.title = "Lag"
-        
-        # ACF data series (Column C)
-        acf_data = Reference(ws, min_col=3, min_row=start_row, max_row=end_row)
-        # Lag labels (Column B)
-        cats = Reference(ws, min_col=2, min_row=start_row, max_row=end_row)
-        
-        bar_chart.add_data(acf_data, titles_from_data=True)
-        bar_chart.set_categories(cats)
-        bar_chart.legend.position = 't'
-
-        # --- Create the Line Chart for PACF and Confidence Intervals --- #
-        line_chart = LineChart()
-        
-        # PACF data series (Column D)
-        pacf_data = Reference(ws, min_col=4, min_row=start_row, max_row=end_row)
-        line_chart.add_data(pacf_data, titles_from_data=True)
-
-        # Confidence Interval data series (Columns E and F)
-        ci_upper_data = Reference(ws, min_col=5, min_row=start_row, max_row=end_row)
-        ci_lower_data = Reference(ws, min_col=6, min_row=start_row, max_row=end_row)
-        line_chart.add_data(ci_upper_data, titles_from_data=True)
-        line_chart.add_data(ci_lower_data, titles_from_data=True)
-
-        # Style the confidence interval lines
-        s_upper = line_chart.series[1]
-        s_upper.graphicalProperties.line.dashStyle = "dot"
-        s_upper.graphicalProperties.line.width = 15000 # thin line
-        s_upper.graphicalProperties.line.solidFill = "808080" # grey
-
-        s_lower = line_chart.series[2]
-        s_lower.graphicalProperties.line.dashStyle = "dot"
-        s_lower.graphicalProperties.line.width = 15000 # thin line
-        s_lower.graphicalProperties.line.solidFill = "808080" # grey
-
-        # --- Combine Charts --- #
-        # The BarChart is primary, so its axes are used
-        bar_chart.y_axis.crossAx = 500
-        bar_chart.x_axis.crossAx = 500
-        bar_chart += line_chart
-        
-        return bar_chart
-
-    except Exception as e:
-        print(f"[ERROR] Error creating ACF/PACF chart: {e}")
-        return None
+    return result_df
 
 
 def infer_sheet_type(sheet_name: str) -> str:
@@ -582,90 +493,65 @@ def infer_sheet_type(sheet_name: str) -> str:
     """
     sheet_name_lower = sheet_name.lower()
 
-    if "weekly" in sheet_name_lower and "biweekly" not in sheet_name_lower:
+    if "biweekly" in sheet_name_lower:
+        return "biweekly"
+    elif "weekly" in sheet_name_lower:
         return "weekly"
     elif "monthly" in sheet_name_lower:
         return "monthly"
     elif "period" in sheet_name_lower:
         return "period"
-    elif "biweekly" in sheet_name_lower:
-        return "biweekly"
     else:
         return "daily"  # Default fallback
 
 def reorder_with_acf_pacf(df: pd.DataFrame, base_order: list) -> pd.DataFrame:
     """
-    Reorders DataFrame columns to place ACF/PACF columns after base metrics.
-
-    This function intelligently finds all ACF/PACF-related columns (including
-    significance indicators) and reorders them to appear immediately after the
-    columns specified in `base_order`.
+    Reorders DataFrame columns to place ACF/PACF/Forecast columns immediately
+    after the specific metric they relate to.
 
     Args:
-        df: DataFrame to reorder
-        base_order: List of base columns to appear first (e.g. Date, Total_Files)
-        
+        df: DataFrame to reorder.
+        base_order: List of base metric columns (e.g., ['Total_Files', 'JPG_Files']).
+
     Returns:
-        DataFrame with columns reordered according to the pattern
+        DataFrame with columns reordered.
     """
-    # Create groups for different column types
-    acf_pacf_cols = []
-    confidence_cols = []
-    metadata_cols = ['_id', 'Total_Size_MB', 'has_files', 'First_Date', 'Last_Date', 
-                     'Days_With_Data', 'Avg_Files_Per_Day']
-    forecast_cols = []
-    
-    # Find lag numbers present in the data
-    lag_numbers = set()
-    for col in df.columns:
-        if col.startswith('ACF_Lag') and '_Sig' not in col:
-            lag_num = col.replace('ACF_Lag', '')
-            if lag_num.isdigit():
-                lag_numbers.add(int(lag_num))
-        elif col.startswith('PACF_Lag') and '_Sig' not in col:
-            lag_num = col.replace('PACF_Lag', '')
-            if lag_num.isdigit():
-                lag_numbers.add(int(lag_num))
+    if df.empty:
+        return df
 
-    # Build the interleaved ACF/PACF column order by lag
-    for lag in sorted(list(lag_numbers)):
-        # First add ACF column and its significance flag
-        acf_col = f'ACF_Lag{lag}'
-        acf_sig_col = f'ACF_Lag{lag}_Sig'
-        if acf_col in df.columns:
-            acf_pacf_cols.append(acf_col)
-            if acf_sig_col in df.columns:
-                acf_pacf_cols.append(acf_sig_col)
-        
-        # Then add PACF column and its significance flag
-        pacf_col = f'PACF_Lag{lag}'
-        pacf_sig_col = f'PACF_Lag{lag}_Sig'
-        if pacf_col in df.columns:
-            acf_pacf_cols.append(pacf_col)
-            if pacf_sig_col in df.columns:
-                acf_pacf_cols.append(pacf_sig_col)
+    final_order = []
+    processed_cols = set()
 
-    # Add confidence column if present
-    if 'Confidence_95pct' in df.columns:
-        confidence_cols.append('Confidence_95pct')
-    
-    # Find forecast columns and sort them
-    for col in df.columns:
-        if 'Forecast' in col or col in ['Forecast_Quality', 'Forecast_Message', 'Forecast_Model']:
-            forecast_cols.append(col)
-    forecast_cols.sort()
-    
-    # Create the desired column order
-    metadata_present = [col for col in metadata_cols if col in df.columns]
-    
-    # Build final order: base columns, ACF/PACF columns, confidence, metadata, forecasts
-    desired_order = base_order + acf_pacf_cols + confidence_cols + metadata_present + forecast_cols
-    
-    # Make sure we only include columns that exist and add any remaining columns
-    existing_cols = [col for col in desired_order if col in df.columns]
-    remaining_cols = [col for col in df.columns if col not in existing_cols]
+    # Start with the primary key if it exists
+    if '_id' in df.columns:
+        final_order.append('_id')
+        processed_cols.add('_id')
 
-    return df[existing_cols + remaining_cols]
+    # Identify all metric-related columns
+    for metric in base_order:
+        if metric in df.columns and metric not in processed_cols:
+            final_order.append(metric)
+            processed_cols.add(metric)
+
+            # Find all related analysis columns for this specific metric
+            related_cols = []
+            for col in df.columns:
+                if col.startswith(f"{metric}_"):
+                    related_cols.append(col)
+            
+            # A simple sort is often good enough, but a more specific one is better
+            # This sorting logic can be enhanced if needed
+            final_order.extend(sorted(related_cols))
+            processed_cols.update(related_cols)
+
+    # Add any remaining columns that were not processed
+    remaining_cols = [col for col in df.columns if col not in processed_cols]
+    final_order.extend(remaining_cols)
+    
+    # Ensure the final list of columns only contains columns that actually exist
+    existing_final_order = [col for col in final_order if col in df.columns]
+
+    return df[existing_final_order]
 
 
 # ==============================================================================
@@ -1155,6 +1041,13 @@ def add_arima_forecast_columns(df: pd.DataFrame, value_col: str = "Total_Files",
     Returns:
         pd.DataFrame: DataFrame with forecast columns added
     """
+    # TEMPORARY FIX: Disable ARIMA forecasting to prevent freeze during migration testing
+    print("[INFO] ARIMA forecasting temporarily disabled for migration testing")
+    df[f'{value_col}_Forecast'] = '<ARIMA Disabled>'
+    df[f'{value_col}_Forecast_Lower'] = '<ARIMA Disabled>'
+    df[f'{value_col}_Forecast_Upper'] = '<ARIMA Disabled>'
+    return df
+    
     if not STATSMODELS_AVAILABLE:
         print("[WARNING]  ARIMA forecasting skipped: statsmodels not available")
         return df

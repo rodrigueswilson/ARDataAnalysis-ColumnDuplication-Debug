@@ -31,18 +31,18 @@ def add_acf_pacf_chart(worksheet, data_start_row, data_end_row, sheet_type="dail
         Chart object that was added to the worksheet
     """
     
-    # Find ACF and PACF columns
-    headers = [cell.value for cell in worksheet[1]]
-    acf_cols = [(i+1, h) for i, h in enumerate(headers) if str(h).startswith('ACF_')]
-    pacf_cols = [(i+1, h) for i, h in enumerate(headers) if str(h).startswith('PACF_')]
+    # Find ACF and PACF columns (updated pattern for Total_Files_ACF_Lag_X format)
+    headers = [cell.value for cell in worksheet[3]]  # Headers are in row 3
+    acf_cols = [(i+1, h) for i, h in enumerate(headers) if str(h).endswith('_ACF_Lag_1') or str(h).endswith('_ACF_Lag_7') or str(h).endswith('_ACF_Lag_14') or '_ACF_Lag_' in str(h)]
+    pacf_cols = [(i+1, h) for i, h in enumerate(headers) if str(h).endswith('_PACF_Lag_1') or str(h).endswith('_PACF_Lag_7') or str(h).endswith('_PACF_Lag_14') or '_PACF_Lag_' in str(h)]
     
     if not acf_cols and not pacf_cols:
-        print(f"[EMOJI]  No ACF/PACF columns found in {worksheet.title}")
+        print(f"No ACF/PACF columns found in {worksheet.title}")
         return None
     
     # Create line chart
     chart = LineChart()
-    chart.title = f"ACF/PACF Analysis - {sheet_type.title()} Total Files"
+    chart.title = f"ACF_PACF Analysis - {sheet_type.title()} Total Files"
     chart.style = 10  # Professional style
     chart.height = 10  # Reasonable height
     chart.width = 15   # Good width for readability
@@ -53,19 +53,20 @@ def add_acf_pacf_chart(worksheet, data_start_row, data_end_row, sheet_type="dail
     chart.y_axis.scaling.min = -1.0
     chart.y_axis.scaling.max = 1.0
     
-    # Work with actual column structure: ACF_Lag1, PACF_Lag1, etc.
+    # Work with actual column structure: Total_Files_ACF_Lag_X, Total_Files_PACF_Lag_X, etc.
     # Find the first ACF and PACF columns for charting
     acf_col_idx = None
     pacf_col_idx = None
     
     for i, header in enumerate(headers):
-        if str(header).startswith('ACF_Lag') and acf_col_idx is None:
+        if '_ACF_Lag_' in str(header) and '_Significant' not in str(header) and acf_col_idx is None:
             acf_col_idx = i + 1  # Convert to 1-based indexing
-        elif str(header).startswith('PACF_Lag') and pacf_col_idx is None:
+        elif '_PACF_Lag_' in str(header) and '_Significant' not in str(header) and pacf_col_idx is None:
             pacf_col_idx = i + 1  # Convert to 1-based indexing
     
     if acf_col_idx is None and pacf_col_idx is None:
-        print(f"[EMOJI]  No ACF_Lag or PACF_Lag columns found in {worksheet.title}")
+        print(f"No _ACF_Lag_ or _PACF_Lag_ columns found in {worksheet.title}")
+        print(f"Available headers: {[str(h) for h in headers if 'ACF' in str(h) or 'PACF' in str(h)]}")
         return None
     
     # Create ACF/PACF correlation plot data
@@ -76,20 +77,20 @@ def add_acf_pacf_chart(worksheet, data_start_row, data_end_row, sheet_type="dail
     pacf_data = []
     lag_numbers = []
     
-    # Extract lag numbers and values from column headers
+    # Extract lag numbers and values from column headers (updated for Total_Files_ACF_Lag_X format)
     for col_idx, header in enumerate(headers):
-        if str(header).startswith('ACF_Lag') and '_Sig' not in str(header):
-            # Extract lag number, handling cases like 'ACF_Lag1' -> '1'
-            lag_part = str(header).split('Lag')[1]
+        if '_ACF_Lag_' in str(header) and '_Significant' not in str(header):
+            # Extract lag number, handling cases like 'Total_Files_ACF_Lag_1' -> '1'
+            lag_part = str(header).split('_Lag_')[1]
             if lag_part.isdigit():
                 lag_num = int(lag_part)
                 acf_value = worksheet.cell(row=data_start_row, column=col_idx + 1).value
                 if isinstance(acf_value, (int, float)):
                     lag_numbers.append(lag_num)
                     acf_data.append(acf_value)
-        elif str(header).startswith('PACF_Lag') and '_Sig' not in str(header):
-            # Extract lag number, handling cases like 'PACF_Lag1' -> '1'
-            lag_part = str(header).split('Lag')[1]
+        elif '_PACF_Lag_' in str(header) and '_Significant' not in str(header):
+            # Extract lag number, handling cases like 'Total_Files_PACF_Lag_1' -> '1'
+            lag_part = str(header).split('_Lag_')[1]
             if lag_part.isdigit():
                 lag_num = int(lag_part)
                 pacf_value = worksheet.cell(row=data_start_row, column=col_idx + 1).value
@@ -330,14 +331,16 @@ def enhance_acf_pacf_visualization(workbook):
         List of sheets that were enhanced
     """
     
-    print("[CHART_DEBUG] enhance_acf_pacf_visualization called")
+    print("enhance_acf_pacf_visualization called")
+    print(f"Workbook type: {type(workbook)}")
     enhanced_sheets = []
     acf_pacf_sheet_names = []
     
-    print(f"[CHART_DEBUG] Scanning {len(workbook.sheetnames)} sheets for ACF/PACF sheets")
+    print(f"Scanning {len(workbook.sheetnames)} sheets for ACF/PACF sheets")
     for sheet_name in workbook.sheetnames:
-        if "ACF_PACF" in sheet_name or "ACF/PACF" in sheet_name:
-            print(f"[CHART_DEBUG] Found ACF/PACF sheet: {sheet_name}")
+        # Updated detection logic to match actual sheet names
+        if any(pattern in sheet_name for pattern in ["ACF_PACF", "(ACF_PACF)"]):
+            print(f"Found ACF/PACF sheet: {sheet_name}")
             acf_pacf_sheet_names.append(sheet_name)
             worksheet = workbook[sheet_name]
             
@@ -359,11 +362,15 @@ def enhance_acf_pacf_visualization(workbook):
             data_start_row = 2  # After headers
             data_end_row = worksheet.max_row
             
-            # Count ACF/PACF columns
-            headers = [cell.value for cell in worksheet[1]]
-            acf_cols = [h for h in headers if str(h).startswith('ACF_')]
-            pacf_cols = [h for h in headers if str(h).startswith('PACF_')]
-            total_lags = len(set([h.split('_Lag')[1] for h in acf_cols + pacf_cols if '_Lag' in str(h)]))
+            # Count ACF/PACF columns (updated for Total_Files_ACF_Lag_X format)
+            headers = [cell.value for cell in worksheet[3]]  # Headers are in row 3
+            acf_cols = [h for h in headers if h and '_ACF_Lag_' in str(h)]
+            pacf_cols = [h for h in headers if h and '_PACF_Lag_' in str(h)]
+            total_lags = len(set([h.split('_Lag_')[1] for h in acf_cols + pacf_cols if '_Lag_' in str(h)]))
+            
+            print(f"Found {len(acf_cols)} ACF columns and {len(pacf_cols)} PACF columns")
+            if acf_cols or pacf_cols:
+                print(f"Sample ACF/PACF columns: {(acf_cols + pacf_cols)[:3]}")
             
             # Add ACF/PACF chart
             chart = add_acf_pacf_chart(worksheet, data_start_row, data_end_row, sheet_type)
@@ -381,6 +388,9 @@ def enhance_acf_pacf_visualization(workbook):
         create_acf_pacf_dashboard_sheet(workbook, acf_pacf_sheet_names)
     
     print(f"[OK] Enhanced {len(enhanced_sheets)} sheets with ACF/PACF visualizations")
+    return enhanced_sheets
+
+
 def add_forecast_summary_info(worksheet, data_end_row, sheet_type, forecast_quality=None, model_order=None):
     """
 {{ ... }}

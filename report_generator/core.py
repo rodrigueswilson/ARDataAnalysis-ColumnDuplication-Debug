@@ -13,7 +13,7 @@ import pandas as pd
 import openpyxl
 from pathlib import Path
 
-from pipelines import PIPELINES
+from pipelines import PIPELINES  # Now using modular pipelines/ package
 from ar_utils import (
     add_acf_pacf_analysis, infer_sheet_type, reorder_with_acf_pacf,
     get_school_calendar, get_non_collection_days, add_arima_forecast_columns,
@@ -21,9 +21,10 @@ from ar_utils import (
 )
 # Import chart modules conditionally to avoid import errors
 try:
-    from acf_pacf_charts import enhance_acf_pacf_visualization
+    from acf_pacf_charts import enhance_acf_pacf_visualization, enhance_arima_forecast_visualization
 except ImportError:
     enhance_acf_pacf_visualization = None
+    enhance_arima_forecast_visualization = None
     
 try:
     from dashboard_generator import create_dashboard_summary
@@ -31,7 +32,6 @@ except ImportError:
     create_dashboard_summary = None
 
 from .formatters import ExcelFormatter
-from .sheet_creators import SheetCreator
 from .dashboard import DashboardCreator
 from .raw_data import RawDataCreator
 
@@ -61,7 +61,6 @@ class ReportGenerator:
         
         # Initialize specialized modules
         self.formatter = ExcelFormatter()
-        self.sheet_creator = SheetCreator(self.db, self.formatter)
         self.dashboard_creator = DashboardCreator(self.db, self.formatter)
         self.raw_data_creator = RawDataCreator(self.db, self.formatter)
     
@@ -309,23 +308,30 @@ class ReportGenerator:
             print("[INFO] Creating comprehensive dashboard...")
             self.dashboard_creator.create_comprehensive_dashboard(self.workbook)
             
+            # Create all non-pipeline sheets using unified sheet creator
+            print("[INFO] Creating non-pipeline sheets using unified architecture...")
+            from .sheet_creators import SheetCreator
+            unified_sheet_creator = SheetCreator(self.db, self.formatter)
+            
             # Create summary statistics sheet
             print("[INFO] Creating summary statistics sheet...")
-            self.sheet_creator.create_summary_statistics_sheet(self.workbook)
+            unified_sheet_creator.create_summary_statistics_sheet(self.workbook)
             
             # Create data cleaning sheet
             print("[INFO] Creating data cleaning sheet...")
-            self.sheet_creator.create_data_cleaning_sheet(self.workbook)
+            unified_sheet_creator.create_data_cleaning_sheet(self.workbook)
             
             # Create MP3 Duration Analysis sheet
             print("[INFO] Creating MP3 Duration Analysis sheet...")
-            self.sheet_creator.create_mp3_duration_analysis_sheet(self.workbook)
+            unified_sheet_creator.create_mp3_duration_analysis_sheet(self.workbook)
             
-            # Process all configured pipelines from report_config.json
+            # Process all configured pipelines from report_config.json using unified architecture
             print("[INFO] Processing pipeline configurations...")
-            self.sheet_creator.process_pipeline_configurations(self.workbook)
+            # Each sheet will fetch its own fresh pipeline data to prevent column duplication
+            unified_sheet_creator.process_pipeline_configurations(self.workbook)
             
             # Create Raw Data sheet (critical for peer reviewers)
+            with open("MARKER_1_RAW_DATA.txt", "w") as f: f.write("Reached Raw Data section")
             print("[INFO] Creating Raw Data sheet...")
             try:
                 self.raw_data_creator.create_raw_data_sheet(self.workbook)
@@ -333,27 +339,8 @@ class ReportGenerator:
             except Exception as e:
                 print(f"[ERROR] Could not create Raw Data sheet: {e}")
             
-            # Add ARIMA forecast charts
-            print("[CHARTS] Adding ARIMA forecast charts...")
-            try:
-                # ARIMA forecasting is handled within individual sheet processing
-                # This section is disabled as forecasting is integrated into ACF/PACF sheets
-                print("[INFO] ARIMA forecasting integrated into ACF/PACF sheet processing")
-            except Exception as e:
-                print(f"[ERROR] Could not add ARIMA forecast charts: {e}")
-            
-            # Add ACF/PACF charts
-            print("[CHARTS] Generating ACF/PACF charts...")
-            try:
-                if enhance_acf_pacf_visualization:
-                    acf_enhanced_sheets = enhance_acf_pacf_visualization(self.workbook)
-                    print(f"[SUCCESS] Added ACF/PACF charts to {len(acf_enhanced_sheets)} sheets")
-                else:
-                    print("[WARNING] ACF/PACF chart module not available")
-            except Exception as e:
-                print(f"[ERROR] Could not add ACF/PACF charts: {e}")
-            
             # Create ACF/PACF Dashboard
+            with open("MARKER_4_DASHBOARD.txt", "w") as f: f.write("Reached Dashboard section")
             print("[INFO] Creating ACF/PACF Dashboard...")
             try:
                 if create_dashboard_summary:
@@ -364,7 +351,23 @@ class ReportGenerator:
             except Exception as e:
                 print(f"[WARNING] Could not create ACF/PACF Dashboard: {e}")
             
+            print("[INFO] ACF/PACF charts integrated during sheet creation")
+        
+            # Add dashboard-level charts if needed
+            try:
+                if enhance_acf_pacf_visualization:
+                    # Only enhance dashboard and summary sheets that weren't created by PipelineSheetCreator
+                    dashboard_sheets = [name for name in self.workbook.sheetnames if 'Dashboard' in name or 'Summary' in name]
+                    if dashboard_sheets:
+                        enhance_acf_pacf_visualization(self.workbook)
+                        print("[SUCCESS] Dashboard charts enhanced successfully")
+                else:
+                    print("[INFO] Chart enhancement module not available for dashboard")
+            except Exception as e:
+                print(f"[WARNING] Could not enhance dashboard charts: {e}")
+            
             # Save the final workbook
+            with open("MARKER_5_SAVE.txt", "w") as f: f.write("Reached Save section")
             print("[SAVE] Saving final workbook...")
             self.workbook.save(output_path)
             

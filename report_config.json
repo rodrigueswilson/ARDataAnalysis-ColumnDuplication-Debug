@@ -1,91 +1,352 @@
 {
-"sheets": [
-    {
-        "pipeline": "DAILY_COUNTS_COLLECTION_ONLY",
-        "sheet_name": "Daily Counts (ACF_PACF)"
+    "pipeline_modules": {
+        "daily_counts": {
+            "enabled": true,
+            "description": "Daily aggregation pipelines",
+            "pipelines": [
+                "DAILY_COUNTS_ALL",
+                "DAILY_COUNTS_ALL_WITH_ZEROES",
+                "DAILY_COUNTS_COLLECTION_ONLY"
+            ]
+        },
+        "weekly_counts": {
+            "enabled": true,
+            "description": "Weekly and monthly aggregation pipelines",
+            "pipelines": [
+                "WEEKLY_COUNTS",
+                "WEEKLY_COUNTS_WITH_ZEROES",
+                "WEEKLY_COUNTS_FUTURE_PROOF",
+                "MONTHLY_COUNTS_WITH_ZEROES",
+                "PERIOD_COUNTS_WITH_ZEROES"
+            ]
+        },
+        "biweekly_counts": {
+            "enabled": true,
+            "description": "Biweekly aggregation pipeline",
+            "pipelines": [
+                "BIWEEKLY_COUNTS"
+            ]
+        },
+        "activity_analysis": {
+            "enabled": true,
+            "description": "Activity pattern analysis pipelines",
+            "pipelines": [
+                "DAY_OF_WEEK_COUNTS",
+                "SCHEDULED_ACTIVITY_COUNTS",
+                "ACTIVITY_COUNTS",
+                "TIME_OF_DAY_DISTRIBUTION",
+                "COLLECTION_PERIODS_DISTRIBUTION",
+                "WEEKDAY_BY_PERIOD",
+                "SY_DAY_COUNT"
+            ]
+        },
+        "camera_usage": {
+            "enabled": true,
+            "description": "Camera usage analysis pipelines",
+            "pipelines": [
+                "CAMERA_USAGE_BY_YEAR",
+                "CAMERA_USAGE_DATE_RANGE",
+                "CAMERA_USAGE_BY_YEAR_RANGE",
+                "CAMERA_USAGE_BY_YEAR_RANGE_DETAILED",
+                "AUDIO_NOTE_CHARACTERISTICS"
+            ]
+        },
+        "file_analysis": {
+            "enabled": true,
+            "description": "File size and distribution analysis",
+            "pipelines": [
+                "FILE_SIZE_SUMMARY_BY_DAY",
+                "CAPTURE_VOLUME_PER_MONTH",
+                "FILE_SIZE_STATS",
+                "AUDIO_EFFICIENCY_ANALYSIS"
+            ]
+        },
+        "dashboard_data": {
+            "enabled": true,
+            "description": "Dashboard-specific data pipelines",
+            "pipelines": [
+                "DASHBOARD_SUMMARY",
+                "DATA_QUALITY_CHECK",
+                "DASHBOARD_COVERAGE",
+                "DASHBOARD_DATA_CLEANING",
+                "DASHBOARD_OUTLIERS",
+                "DASHBOARD_COLLECTION_SUMMARY"
+            ]
+        },
+        "mp3_analysis": {
+            "enabled": true,
+            "description": "MP3 duration analysis pipelines",
+            "pipelines": [
+                "MP3_DURATION_BY_SCHOOL_YEAR",
+                "MP3_DURATION_BY_PERIOD",
+                "MP3_DURATION_BY_MONTH"
+            ]
+        },
+        "time_series": {
+            "enabled": true,
+            "description": "Time series analysis pipelines",
+            "pipelines": []
+        }
     },
-    {
-        "pipeline": "WEEKLY_COUNTS_WITH_ZEROES",
-        "sheet_name": "Weekly Counts (ACF_PACF)"
+    "sheet_categories": {
+        "time_series": {
+            "name": "Time Series Analysis",
+            "description": "Sheets for ACF/PACF and temporal analysis",
+            "enabled": true,
+            "order": 1
+        },
+        "summary": {
+            "name": "Summary Analysis",
+            "description": "High-level summary and overview sheets",
+            "enabled": true,
+            "order": 2
+        },
+        "detailed": {
+            "name": "Detailed Analysis",
+            "description": "Detailed breakdowns and specific analysis",
+            "enabled": true,
+            "order": 3
+        },
+        "quality": {
+            "name": "Data Quality",
+            "description": "Data quality and validation sheets",
+            "enabled": true,
+            "order": 4
+        }
     },
-    {
-        "pipeline": "BIWEEKLY_COUNTS",
-        "sheet_name": "Biweekly Counts (ACF_PACF)"
+    "sheets": [
+        {
+            "name": "Daily Counts (ACF_PACF)",
+            "pipeline": "DAILY_COUNTS_COLLECTION_ONLY",
+            "sheet_name": "Daily Counts (ACF_PACF)",
+            "category": "time_series",
+            "enabled": true,
+            "order": 1,
+            "description": "Daily file counts for ACF/PACF analysis",
+            "module": "daily_counts"
+        },
+        {
+            "name": "Weekly Counts (ACF_PACF)",
+            "pipeline": "WEEKLY_COUNTS_WITH_ZEROES",
+            "sheet_name": "Weekly Counts (ACF_PACF)",
+            "category": "time_series",
+            "enabled": true,
+            "order": 2,
+            "description": "Weekly file counts for ACF/PACF analysis",
+            "module": "weekly_counts"
+        },
+        {
+            "name": "Biweekly Counts (ACF_PACF)",
+            "pipeline": "BIWEEKLY_COUNTS",
+            "sheet_name": "Biweekly Counts (ACF_PACF)",
+            "category": "time_series",
+            "enabled": true,
+            "order": 3,
+            "description": "Biweekly file counts for ACF/PACF analysis",
+            "module": "biweekly_counts"
+        },
+        {
+            "name": "Monthly Counts (ACF_PACF)",
+            "pipeline": "MONTHLY_COUNTS_WITH_ZEROES",
+            "sheet_name": "Monthly Counts (ACF_PACF)",
+            "category": "time_series",
+            "enabled": true,
+            "order": 4,
+            "description": "Monthly file counts for ACF/PACF analysis",
+            "module": "weekly_counts"
+        },
+        {
+            "name": "Period Counts (ACF_PACF)",
+            "pipeline": "PERIOD_COUNTS_WITH_ZEROES",
+            "sheet_name": "Period Counts (ACF_PACF)",
+            "category": "time_series",
+            "enabled": true,
+            "order": 5,
+            "description": "Collection period counts for ACF/PACF analysis",
+            "module": "weekly_counts"
+        },
+        {
+            "name": "Weekly Counts",
+            "pipeline": "WEEKLY_COUNTS",
+            "sheet_name": "Weekly Counts",
+            "category": "summary",
+            "enabled": true,
+            "order": 10,
+            "description": "Basic weekly file counts",
+            "module": "weekly_counts"
+        },
+        {
+            "name": "Day of Week Counts",
+            "pipeline": "DAY_OF_WEEK_COUNTS",
+            "sheet_name": "Day of Week Counts",
+            "category": "detailed",
+            "enabled": true,
+            "order": 20,
+            "description": "File counts by day of week",
+            "module": "activity_analysis"
+        },
+        {
+            "name": "Activity Counts",
+            "pipeline": "ACTIVITY_COUNTS",
+            "sheet_name": "Activity Counts",
+            "category": "detailed",
+            "enabled": true,
+            "order": 21,
+            "description": "File counts by scheduled activities",
+            "module": "activity_analysis"
+        },
+        {
+            "name": "Camera Usage by Year",
+            "pipeline": "CAMERA_USAGE_BY_YEAR",
+            "sheet_name": "Camera Usage by Year",
+            "category": "summary",
+            "enabled": true,
+            "order": 11,
+            "description": "Camera usage statistics by school year",
+            "module": "camera_usage"
+        },
+        {
+            "pipeline": "CAMERA_USAGE_DATE_RANGE",
+            "sheet_name": "Camera Usage Dates",
+            "category": "detailed",
+            "enabled": true,
+            "order": 22,
+            "description": "Camera usage date ranges",
+            "module": "camera_usage",
+            "name": "Camera Usage Dates"
+        },
+        {
+            "pipeline": "CAMERA_USAGE_BY_YEAR_RANGE",
+            "sheet_name": "Camera Usage by Year Range",
+            "category": "detailed",
+            "enabled": true,
+            "order": 23,
+            "description": "Camera usage by year range analysis",
+            "module": "camera_usage",
+            "name": "Camera Usage by Year Range"
+        },
+        {
+            "pipeline": "CAMERA_USAGE_BY_YEAR_RANGE_DETAILED",
+            "sheet_name": "Camera Usage by Year Range Detailed",
+            "category": "detailed",
+            "enabled": false,
+            "order": 24,
+            "description": "Detailed camera usage by year range",
+            "module": "camera_usage",
+            "name": "Camera Usage by Year Range Detailed"
+        },
+        {
+            "pipeline": "FILE_SIZE_SUMMARY_BY_DAY",
+            "sheet_name": "File Size by Day",
+            "category": "detailed",
+            "enabled": true,
+            "order": 25,
+            "description": "Daily file size summaries",
+            "module": "file_analysis",
+            "name": "File Size by Day"
+        },
+        {
+            "pipeline": "CAPTURE_VOLUME_PER_MONTH",
+            "sheet_name": "Monthly Capture Volume",
+            "category": "summary",
+            "enabled": true,
+            "order": 12,
+            "description": "Monthly capture volume analysis",
+            "module": "file_analysis",
+            "name": "Monthly Capture Volume"
+        },
+        {
+            "pipeline": "TIME_OF_DAY_DISTRIBUTION",
+            "sheet_name": "Time of Day",
+            "category": "detailed",
+            "enabled": true,
+            "order": 26,
+            "description": "File distribution by time of day",
+            "module": "activity_analysis",
+            "name": "Time of Day"
+        },
+        {
+            "pipeline": "FILE_SIZE_STATS",
+            "sheet_name": "File Size Stats",
+            "category": "summary",
+            "enabled": true,
+            "order": 13,
+            "description": "File size statistics summary",
+            "module": "file_analysis",
+            "name": "File Size Stats"
+        },
+        {
+            "pipeline": "COLLECTION_PERIODS_DISTRIBUTION",
+            "sheet_name": "Collection Periods",
+            "category": "detailed",
+            "enabled": true,
+            "order": 27,
+            "description": "Distribution across collection periods",
+            "module": "activity_analysis",
+            "name": "Collection Periods"
+        },
+        {
+            "pipeline": "WEEKDAY_BY_PERIOD",
+            "sheet_name": "Weekday by Period",
+            "category": "detailed",
+            "enabled": true,
+            "order": 28,
+            "description": "Weekday patterns by collection period",
+            "module": "activity_analysis",
+            "name": "Weekday by Period"
+        },
+        {
+            "pipeline": "SY_DAY_COUNT",
+            "sheet_name": "SY Days",
+            "category": "summary",
+            "enabled": true,
+            "order": 14,
+            "description": "School year day counts",
+            "module": "activity_analysis",
+            "name": "SY Days"
+        },
+        {
+            "pipeline": "DATA_QUALITY_CHECK",
+            "sheet_name": "Data Quality",
+            "category": "quality",
+            "enabled": true,
+            "order": 30,
+            "description": "Data quality validation metrics",
+            "module": "dashboard_data",
+            "name": "Data Quality"
+        }
+    ],
+    "forecast_options": {
+        "enabled": true,
+        "metrics": [
+            "Total_Files"
+        ],
+        "time_scales": [
+            "daily",
+            "weekly"
+        ],
+        "export_csv": true,
+        "include_confidence_intervals": true
     },
-    {
-        "pipeline": "MONTHLY_COUNTS_WITH_ZEROES",
-        "sheet_name": "Monthly Counts (ACF_PACF)"
+    "sheet_management": {
+        "enable_disable_sheets": true,
+        "reorder_sheets": true,
+        "validate_dependencies": true,
+        "auto_resolve_conflicts": true,
+        "backup_on_changes": true
     },
-    {
-        "pipeline": "PERIOD_COUNTS_WITH_ZEROES",
-        "sheet_name": "Period Counts (ACF_PACF)"
+    "validation_rules": {
+        "require_enabled_module": true,
+        "check_pipeline_exists": true,
+        "validate_category": true,
+        "enforce_unique_orders": false,
+        "max_sheets_per_category": 50
     },
-    {
-        "pipeline": "WEEKLY_COUNTS",
-        "sheet_name": "Weekly Counts"
-    },
-    {
-        "pipeline": "DAY_OF_WEEK_COUNTS",
-        "sheet_name": "Day of Week Counts"
-    },
-    {
-        "pipeline": "ACTIVITY_COUNTS",
-        "sheet_name": "Activity Counts"
-    },
-    {
-        "pipeline": "CAMERA_USAGE_BY_YEAR",
-        "sheet_name": "Camera Usage by Year"
-    },
-    {
-        "pipeline": "CAMERA_USAGE_DATE_RANGE",
-        "sheet_name": "Camera Usage Dates"
-    },
-    {
-        "pipeline": "CAMERA_USAGE_BY_YEAR_RANGE",
-        "sheet_name": "Camera Usage by Year Range"
-    },
-    {
-        "pipeline": "CAMERA_USAGE_BY_YEAR_RANGE_DETAILED",
-        "sheet_name": "Camera Usage by Year Range Detailed"
-    },
-    {
-        "pipeline": "FILE_SIZE_SUMMARY_BY_DAY",
-        "sheet_name": "File Size by Day"
-    },
-    {
-        "pipeline": "CAPTURE_VOLUME_PER_MONTH",
-        "sheet_name": "Monthly Capture Volume"
-    },
-    {
-        "pipeline": "TIME_OF_DAY_DISTRIBUTION",
-        "sheet_name": "Time of Day"
-    },
-    {
-        "pipeline": "FILE_SIZE_STATS",
-        "sheet_name": "File Size Stats"
-    },
-    {
-        "pipeline": "COLLECTION_PERIODS_DISTRIBUTION",
-        "sheet_name": "Collection Periods"
-    },
-    {
-        "pipeline": "WEEKDAY_BY_PERIOD",
-        "sheet_name": "Weekday by Period"
-    },
-    {
-        "pipeline": "SY_DAY_COUNT",
-        "sheet_name": "SY Days"
-    },
-    {
-        "pipeline": "DATA_QUALITY_CHECK",
-        "sheet_name": "Data Quality"
+    "export_options": {
+        "include_metadata": true,
+        "export_disabled_sheets": false,
+        "sort_by_category": true,
+        "sort_by_order": true,
+        "include_descriptions": true
     }
-],
-"forecast_options": {
-    "enabled": true,
-    "metrics": ["Total_Files"],
-    "time_scales": ["daily", "weekly"],
-    "export_csv": true,
-    "include_confidence_intervals": true
-}
 }

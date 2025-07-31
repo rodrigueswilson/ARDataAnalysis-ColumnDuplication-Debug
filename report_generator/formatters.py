@@ -6,7 +6,8 @@ This module contains all Excel formatting functions, styling utilities,
 and worksheet appearance management for the report generator.
 """
 
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.formatting.rule import CellIsRule
 from openpyxl.utils import get_column_letter
 
 class ExcelFormatter:
@@ -208,3 +209,136 @@ class ExcelFormatter:
                                      fill_type='solid')
                 for col in range(1, 5):
                     ws.cell(row=row_idx, column=col).fill = alt_fill
+    
+    def apply_title_style(self, ws, cell_range):
+        """Apply title styling to a cell or range."""
+        title_font = Font(bold=True, size=14, color='1F497D')
+        title_alignment = Alignment(horizontal='center', vertical='center')
+        
+        if ':' in cell_range:
+            # Range of cells
+            for row in ws[cell_range]:
+                for cell in row:
+                    cell.font = title_font
+                    cell.alignment = title_alignment
+        else:
+            # Single cell
+            cell = ws[cell_range]
+            cell.font = title_font
+            cell.alignment = title_alignment
+    
+    def apply_header_style(self, ws, cell_range):
+        """Apply header styling to a cell or range."""
+        header_font = Font(bold=True, color=self.color_scheme['header_font'])
+        header_fill = PatternFill(start_color=self.color_scheme['header_bg'], 
+                                 end_color=self.color_scheme['header_bg'], 
+                                 fill_type='solid')
+        header_alignment = Alignment(horizontal='center', vertical='center')
+        
+        if ':' in cell_range:
+            # Range of cells
+            for row in ws[cell_range]:
+                for cell in row:
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.alignment = header_alignment
+        else:
+            # Single cell
+            cell = ws[cell_range]
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+    
+    def apply_data_style(self, ws, cell_range):
+        """Apply data styling to a cell or range with optimized performance for large datasets."""
+        data_alignment = Alignment(horizontal='left', vertical='center')
+        
+        if ':' in cell_range:
+            # Parse the range to determine size
+            start_cell, end_cell = cell_range.split(':')
+            start_col_letter = ''.join(filter(str.isalpha, start_cell))
+            start_row = int(''.join(filter(str.isdigit, start_cell)))
+            end_col_letter = ''.join(filter(str.isalpha, end_cell))
+            end_row = int(''.join(filter(str.isdigit, end_cell)))
+            
+            # Convert column letters to indices for calculation
+            from openpyxl.utils import column_index_from_string
+            start_col_num = column_index_from_string(start_col_letter)
+            end_col_num = column_index_from_string(end_col_letter)
+            
+            # Calculate total cells in range
+            total_cells = (end_row - start_row + 1) * (end_col_num - start_col_num + 1)
+            
+            # Use optimized approach for large ranges (>1000 cells)
+            if total_cells > 1000:
+                print(f"[INFO] Applying optimized styling to large range: {cell_range} ({total_cells} cells)")
+                self._apply_bulk_data_style(ws, start_row, end_row, start_col_num, end_col_num)
+            else:
+                # Use original approach for smaller ranges
+                for row in ws[cell_range]:
+                    for cell in row:
+                        cell.alignment = data_alignment
+        else:
+            # Single cell
+            cell = ws[cell_range]
+            cell.alignment = data_alignment
+    
+    def _apply_bulk_data_style(self, ws, start_row, end_row, start_col, end_col):
+        """Apply data styling efficiently to large ranges using batch operations."""
+        data_alignment = Alignment(horizontal='left', vertical='center')
+        
+        # Apply alignment in batches to reduce openpyxl overhead
+        batch_size = 100  # Process 100 rows at a time
+        
+        for batch_start in range(start_row, end_row + 1, batch_size):
+            batch_end = min(batch_start + batch_size - 1, end_row)
+            
+            # Apply styling to this batch
+            for row_num in range(batch_start, batch_end + 1):
+                for col_num in range(start_col, end_col + 1):
+                    try:
+                        cell = ws.cell(row=row_num, column=col_num)
+                        if cell.alignment is None or cell.alignment.horizontal != 'left':
+                            cell.alignment = data_alignment
+                    except Exception:
+                        # Skip problematic cells to prevent crashes
+                        continue
+            
+            # Progress indicator for very large ranges
+            if end_row - start_row > 500:
+                progress = ((batch_end - start_row + 1) / (end_row - start_row + 1)) * 100
+                if progress % 25 == 0 or batch_end == end_row:  # Show progress every 25%
+                    print(f"[INFO] Styling progress: {progress:.0f}% complete")
+    
+    def apply_section_header_style(self, ws, cell_range):
+        """Apply section header styling."""
+        section_font = Font(bold=True, size=12, color='1F497D')
+        section_alignment = Alignment(horizontal='left', vertical='center')
+        
+        if ':' in cell_range:
+            # Range of cells
+            for row in ws[cell_range]:
+                for cell in row:
+                    cell.font = section_font
+                    cell.alignment = section_alignment
+        else:
+            # Single cell
+            cell = ws[cell_range]
+            cell.font = section_font
+            cell.alignment = section_alignment
+    
+    def auto_adjust_columns(self, ws):
+        """Auto-adjust column widths based on content."""
+        for column in ws.columns:
+            max_length = 0
+            column_letter = get_column_letter(column[0].column)
+            
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            
+            adjusted_width = min(max_length + 2, 50)  # Cap at 50 characters
+            ws.column_dimensions[column_letter].width = adjusted_width
