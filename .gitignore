@@ -29,38 +29,38 @@ wheels/
 *.sqlite3
 ARDataAnalysis.media_records.json
 
-# Debug and test files
-debug_*.py
-test_*.py
-*_test.py
-*_debug.py
-trace_*.py
-verify_*.py
-validate_*.py
-analyze_*.py
-check_*.py
-fix_*.py
-apply_*.py
-audit_*.py
-capture_*.py
-compare_*.py
-comprehensive_*.py
-definitive_*.py
-direct_*.py
-ensure_*.py
-examine_*.py
-final_*.py
-find_*.py
-focused_*.py
-full_*.py
-investigate_*.py
-isolate_*.py
-locate_*.py
-minimal_*.py
-populate_*.py
-quick_*.py
-simple_*.py
-tag_*.py
+# Debug and test files (temporarily commented out for chart debugging)
+# debug_*.py
+# test_*.py
+# *_test.py
+# *_debug.py
+# trace_*.py
+# verify_*.py
+# validate_*.py
+# analyze_*.py
+# check_*.py
+# fix_*.py
+# apply_*.py
+# audit_*.py
+# capture_*.py
+# compare_*.py
+# comprehensive_*.py
+# definitive_*.py
+# direct_*.py
+# ensure_*.py
+# examine_*.py
+# final_*.py
+# find_*.py
+# focused_*.py
+# full_*.py
+# investigate_*.py
+# isolate_*.py
+# locate_*.py
+# minimal_*.py
+# populate_*.py
+# quick_*.py
+# simple_*.py
+# tag_*.py
 
 # Temporary files
 *_temp.*

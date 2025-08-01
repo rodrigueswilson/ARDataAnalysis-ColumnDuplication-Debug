@@ -49,8 +49,11 @@ from .formatting import (
     standardize_date_column
 )
 
+# CRITICAL FIX: Removed add_acf_pacf_analysis export to prevent namespace collision
+# Only ar_utils.py should provide add_acf_pacf_analysis (returns new columns only)
+# The utils/time_series.py version returns full DataFrame and causes 4x duplication
 from .time_series import (
-    add_acf_pacf_analysis,
+    # add_acf_pacf_analysis,  # REMOVED - use ar_utils.py version only
     infer_sheet_type,
     generate_arima_forecast,
     add_arima_forecast_to_dataframe,
@@ -106,7 +109,7 @@ __all__ = [
     'standardize_date_column',
     
     # Time series functions
-    'add_acf_pacf_analysis',
+    # 'add_acf_pacf_analysis',  # REMOVED - use ar_utils.py version only
     'infer_sheet_type',
     'generate_arima_forecast',
     'add_arima_forecast_to_dataframe',
@@ -144,7 +147,8 @@ def get_utils_summary():
             'reorder_with_forecast_columns', 'clean_column_names', 'standardize_date_column'
         ],
         'time_series': [
-            'add_acf_pacf_analysis', 'infer_sheet_type', 'generate_arima_forecast',
+            # 'add_acf_pacf_analysis',  # REMOVED - use ar_utils.py version only
+            'infer_sheet_type', 'generate_arima_forecast',
             'add_arima_forecast_to_dataframe'
         ],
         'enrichment': [

@@ -416,11 +416,11 @@ def add_acf_pacf_analysis(
     # Create a new DataFrame for the results
     result_df = pd.DataFrame(index=df.index)
 
-    # Initialize columns with NaN
+    # Initialize columns with NaN - FIXED: Use consistent underscore pattern
     new_col_names = []
     for lag in key_lags:
-        acf_col = f"{value_col}_ACF_Lag{lag}"
-        pacf_col = f"{value_col}_PACF_Lag{lag}"
+        acf_col = f"{value_col}_ACF_Lag_{lag}"  # FIXED: Added underscore before lag
+        pacf_col = f"{value_col}_PACF_Lag_{lag}"  # FIXED: Added underscore before lag
         result_df[acf_col] = np.nan
         result_df[pacf_col] = np.nan
         new_col_names.extend([acf_col, pacf_col])
@@ -454,8 +454,8 @@ def add_acf_pacf_analysis(
 
             for lag in key_lags:
                 if lag < len(acf_vals):
-                    acf_col = f"{value_col}_ACF_Lag{lag}"
-                    pacf_col = f"{value_col}_PACF_Lag{lag}"
+                    acf_col = f"{value_col}_ACF_Lag_{lag}"
+                    pacf_col = f"{value_col}_PACF_Lag_{lag}"
                     result_df.loc[result_df.index[i], acf_col] = acf_vals[lag]
                     result_df.loc[result_df.index[i], pacf_col] = pacf_vals[lag]
                     if include_confidence:
@@ -471,8 +471,8 @@ def add_acf_pacf_analysis(
             
     if include_confidence:
         for lag in key_lags:
-            sig_acf_col = f"{value_col}_ACF_Lag{lag}_Significant"
-            sig_pacf_col = f"{value_col}_PACF_Lag{lag}_Significant"
+            sig_acf_col = f"{value_col}_ACF_Lag_{lag}_Significant"  # FIXED: Added underscore before lag
+            sig_pacf_col = f"{value_col}_PACF_Lag_{lag}_Significant"  # FIXED: Added underscore before lag
             if sig_acf_col in result_df.columns:
                 result_df[sig_acf_col] = result_df[sig_acf_col].astype('boolean')
             if sig_pacf_col in result_df.columns:
@@ -1041,13 +1041,7 @@ def add_arima_forecast_columns(df: pd.DataFrame, value_col: str = "Total_Files",
     Returns:
         pd.DataFrame: DataFrame with forecast columns added
     """
-    # TEMPORARY FIX: Disable ARIMA forecasting to prevent freeze during migration testing
-    print("[INFO] ARIMA forecasting temporarily disabled for migration testing")
-    df[f'{value_col}_Forecast'] = '<ARIMA Disabled>'
-    df[f'{value_col}_Forecast_Lower'] = '<ARIMA Disabled>'
-    df[f'{value_col}_Forecast_Upper'] = '<ARIMA Disabled>'
-    return df
-    
+
     if not STATSMODELS_AVAILABLE:
         print("[WARNING]  ARIMA forecasting skipped: statsmodels not available")
         return df
@@ -1108,9 +1102,14 @@ def add_arima_forecast_columns(df: pd.DataFrame, value_col: str = "Total_Files",
                 'Upper_CI': f'{value_col}_Forecast_Upper'
             })
             
-            # Add forecast values as constant columns (since they represent future predictions)
+            # Distribute forecast values across rows (cycling through the forecast sequence)
             for col in forecast_df.columns:
-                df[col] = forecast_df[col].iloc[0]  # Use first forecast value for all rows
+                # Create a cycling pattern through the forecast values for visual variety
+                forecast_values = []
+                for i in range(len(df)):
+                    forecast_idx = i % len(forecast_df)  # Cycle through forecast sequence
+                    forecast_values.append(forecast_df[col].iloc[forecast_idx])
+                df[col] = forecast_values
             
             combined_df = df
         

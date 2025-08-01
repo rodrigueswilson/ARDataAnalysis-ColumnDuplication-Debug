@@ -327,6 +327,68 @@ class ExcelFormatter:
             cell.font = section_font
             cell.alignment = section_alignment
     
+    def apply_alternating_row_colors(self, ws, start_row, end_row, start_col=1, end_col=None):
+        """
+        Applies alternating row colors to a specific range with performance optimization.
+        
+        Args:
+            ws: openpyxl worksheet object
+            start_row: First row to apply alternating colors (inclusive)
+            end_row: Last row to apply alternating colors (inclusive)
+            start_col: First column to apply colors (default: 1)
+            end_col: Last column to apply colors (default: worksheet max column)
+        """
+        try:
+            if end_col is None:
+                end_col = ws.max_column
+            
+            if start_row > end_row or start_col > end_col:
+                return  # Invalid range
+            
+            total_rows = end_row - start_row + 1
+            total_cells = total_rows * (end_col - start_col + 1)
+        
+            print(f"[INFO] Applying alternating row colors to range: {get_column_letter(start_col)}{start_row}:{get_column_letter(end_col)}{end_row}")
+            print(f"[INFO] Total rows: {total_rows}, Total cells: {total_cells}")
+        
+            # For very large datasets (>50,000 cells), use a more aggressive optimization
+            if total_cells > 50000:
+                print(f"[INFO] Very large dataset detected ({total_cells} cells), using aggressive optimization")
+                batch_size = 500  # Larger batches for very large datasets
+            else:
+                batch_size = 100  # Standard batch size
+        
+            # Use the same color scheme as format_sheet for consistency
+            alt_fill = PatternFill(start_color=self.color_scheme['alt_row_bg'], 
+                                  end_color=self.color_scheme['alt_row_bg'], 
+                                  fill_type='solid')
+            
+            for batch_start in range(start_row, end_row + 1, batch_size):
+                batch_end = min(batch_start + batch_size - 1, end_row)
+                
+                # Apply alternating colors to this batch
+                for row_num in range(batch_start, batch_end + 1):
+                    # Apply color to even rows (relative to data start)
+                    if (row_num - start_row) % 2 == 1:  # Odd index = even row (since we start at 0)
+                        # Apply fill to entire row within the specified column range
+                        for col_num in range(start_col, end_col + 1):
+                            cell = ws.cell(row=row_num, column=col_num)
+                            # Only apply if not already formatted (preserve existing formatting)
+                            if cell.fill.start_color.index == "00000000":
+                                cell.fill = alt_fill
+                
+                # Progress indicator for very large datasets
+                if total_rows > 500 and (batch_end - start_row + 1) % 500 == 0:
+                    progress = ((batch_end - start_row + 1) / total_rows) * 100
+                    print(f"[INFO] Alternating row colors: {progress:.0f}% complete")
+            
+            print(f"[INFO] Alternating row colors applied successfully to {total_rows} rows")
+            
+        except Exception as e:
+            print(f"[WARNING] Could not apply alternating row colors: {e}")
+            # Fallback to no alternating colors rather than crash
+            pass
+
     def auto_adjust_columns(self, ws):
         """Auto-adjust column widths based on content."""
         for column in ws.columns:

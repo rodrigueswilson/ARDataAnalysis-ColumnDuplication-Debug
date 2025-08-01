@@ -1,117 +1,42 @@
-# AR Data Analysis - Column Duplication Bug Investigation
+# AR Data Analysis Documentation
 
-## 🚨 CRITICAL ISSUE: 4x Column Duplication in ACF/PACF Sheets
+Welcome to the AR Data Analysis documentation. This repository contains comprehensive documentation for the AR Data Analysis project, including technical guides, troubleshooting information, and architectural overviews.
 
-This repository contains an AR (Augmented Reality) data analysis system that generates Excel reports with time series analysis. **There is a persistent critical bug causing 4x column duplication in ACF/PACF sheets** that we need help diagnosing.
+## Documentation Structure
 
-## Problem Summary
+The documentation is organized into the following categories:
 
-- **Expected**: ACF/PACF sheets should have ~15-18 columns (base + ACF + PACF columns)
-- **Actual**: ACF/PACF sheets have ~45-50 columns (4x duplication)
-- **Status**: Multiple fixes attempted, pipeline caching implemented, but duplication persists
 
-## System Architecture
+## Documentation Index
 
-```
-ARDataAnalysis_Refactored/
-├── report_generator/           # Main report generation system
-│   ├── core.py                # ReportGenerator orchestration
-│   ├── dashboard.py           # Dashboard creation (FIXED with caching)
-│   └── sheet_creators/        # Modular sheet creation
-│       ├── base.py           # BaseSheetCreator (FIXED with caching)
-│       ├── pipeline.py       # PipelineSheetCreator
-│       └── specialized.py    # Specialized sheets
-├── pipelines/                 # MongoDB aggregation pipelines
-├── ar_utils.py               # ACF/PACF analysis utilities
-└── config files, tests, etc.
-```
+| Document | Category | Description |
+|----------|----------|-------------|
 
-## Key Components Involved in the Bug
+## Using This Documentation
 
-### 1. ACF/PACF Analysis (`ar_utils.py`)
-- `add_acf_pacf_analysis()`: Adds ACF/PACF columns to DataFrames
-- `reorder_with_acf_pacf()`: Reorders columns after analysis
-- These functions work correctly in isolation
+This documentation is designed to be:
 
-### 2. Pipeline Sheet Creation (`sheet_creators/pipeline.py`)
-- `PipelineSheetCreator._create_pipeline_sheet()`: Creates individual sheets
-- Calls ACF/PACF analysis for time series sheets
-- Each sheet should get fresh pipeline data
+1. **Modular**: Each document focuses on a specific topic or issue
+2. **Indexed**: All documents are cataloged in this central index
+3. **Cross-referenced**: Documents link to related content where appropriate
+4. **Searchable**: Use the search function to find specific information
 
-### 3. Report Orchestration (`core.py`)
-- `ReportGenerator.generate_report()`: Main orchestration method
-- Coordinates dashboard, pipeline sheets, and other components
+## Contributing to Documentation
 
-## Investigation History
+When adding new documentation:
 
-### ✅ Fixes Already Implemented
-1. **Dashboard Caching**: Added `_run_aggregation_cached()` to prevent duplicate pipeline executions in dashboard
-2. **Base Sheet Creator Caching**: Added pipeline caching to `BaseSheetCreator`
-3. **Fresh Data Per Sheet**: Each sheet fetches its own pipeline data
-4. **Deduplication Logic**: Added column deduplication before Excel export
+1. Place it in the appropriate category folder
+2. Add an entry to the index table in this README
+3. Follow the established Markdown formatting guidelines
+4. Include links to related documents where relevant
 
-### ❌ Issue Persists Despite Fixes
-- Pipeline caching is working correctly (cache hit/miss messages visible)
-- No duplicate pipeline executions detected
-- Column duplication still occurs: 50 columns instead of ~15
+## Documentation Standards
 
-## Current Hypothesis
+All documentation should follow these standards:
 
-Since pipeline caching eliminated duplicate executions but duplication persists, the root cause likely involves:
-
-1. **DataFrame Reference/Mutation Issues**: Shared DataFrame references being mutated
-2. **Hidden Column Accumulation**: ACF/PACF columns being added multiple times through different code paths
-3. **Orchestration Logic**: Some orchestration process accumulating columns across sheets
-
-## Key Files to Investigate
-
-### Primary Suspects
-- `ar_utils.py` - ACF/PACF analysis functions
-- `sheet_creators/pipeline.py` - Sheet creation logic
-- `report_generator/core.py` - Orchestration logic
-
-### Recent Changes
-- `dashboard.py` - Added comprehensive pipeline caching
-- `sheet_creators/base.py` - Added `_run_aggregation_cached()` method
-
-## Debugging Evidence
-
-### Cache Behavior (Working Correctly)
-```
-[CACHE MISS] BaseSheetCreator: Executing and caching base_[pipeline]_True_media_records
-[CACHE HIT] BaseSheetCreator: Reusing cached result for base_[pipeline]_True_media_records
-```
-
-### Column Analysis (Problem Persists)
-```
-Daily Counts (ACF_PACF): 50 columns (Expected: ~15)
-- Base columns: ~8
-- ACF columns: ~21 (Expected: ~5)
-- PACF columns: ~21 (Expected: ~5)
-```
-
-## Request for ChatGPT Analysis
-
-We need help identifying:
-
-1. **Where column accumulation occurs**: Which code path is causing 4x multiplication?
-2. **DataFrame handling issues**: Are there reference/mutation problems?
-3. **Hidden orchestration logic**: Is there orchestration code we missed that accumulates columns?
-
-## How to Reproduce
-
-1. Run `python validate_comprehensive_fix.py`
-2. Check generated Excel report ACF/PACF sheets
-3. Observe 50 columns instead of expected ~15
-
-## Technical Stack
-
-- **Database**: MongoDB with aggregation pipelines
-- **Data Processing**: pandas DataFrames
-- **Excel Generation**: openpyxl
-- **Time Series Analysis**: Custom ACF/PACF implementation
-- **Architecture**: Modular sheet creators with caching
-
----
-
-**Please help us identify the root cause of this persistent 4x column duplication issue!**
+- Use Markdown formatting for consistency
+- Include a clear title and description
+- Organize content with appropriate headings
+- Include code examples where relevant
+- Link to related documentation
+- Include version information where appropriate

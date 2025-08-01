@@ -112,6 +112,10 @@ class SpecializedSheetCreator(BaseSheetCreator):
             
             # Apply formatting
             self.formatter.apply_data_style(ws, f'A4:H{row-1}')
+            
+            # Apply alternating row colors for better readability
+            self.formatter.apply_alternating_row_colors(ws, 4, row-1, 1, 8)
+            
             self.formatter.auto_adjust_columns(ws)
             
             print("[SUCCESS] Audio Efficiency Details sheet created")
@@ -289,6 +293,10 @@ class SpecializedSheetCreator(BaseSheetCreator):
             
             current_row += 1
         
+        # Apply alternating row colors to this table
+        if current_row > start_row + 3:  # Only if we have data rows
+            self.formatter.apply_alternating_row_colors(ws, start_row + 3, current_row - 1, 1, 6)
+        
         return current_row
 
     def _add_period_duration_table(self, ws, df, start_row, seconds_to_hms):
@@ -332,6 +340,10 @@ class SpecializedSheetCreator(BaseSheetCreator):
             ws.cell(row=current_row, column=8, value=period_efficiency)
             
             current_row += 1
+        
+        # Apply alternating row colors to this table
+        if current_row > start_row + 3:  # Only if we have data rows
+            self.formatter.apply_alternating_row_colors(ws, start_row + 3, current_row - 1, 1, 8)
         
         return current_row
     
@@ -402,5 +414,9 @@ class SpecializedSheetCreator(BaseSheetCreator):
             ws.cell(row=current_row, column=8, value=seconds_to_hms(avg_duration))
             
             current_row += 1
+        
+        # Apply alternating row colors to this table
+        if current_row > start_row + 3:  # Only if we have data rows
+            self.formatter.apply_alternating_row_colors(ws, start_row + 3, current_row - 1, 1, 8)
         
         return current_row

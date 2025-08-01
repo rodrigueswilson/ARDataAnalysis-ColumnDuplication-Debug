@@ -12,9 +12,10 @@ from pathlib import Path
 from datetime import datetime
 
 # Local imports
+# CRITICAL FIX: Import add_acf_pacf_analysis from ar_utils.py to avoid namespace collision
+from ar_utils import add_acf_pacf_analysis, reorder_with_acf_pacf, infer_sheet_type
 from utils import (
-    get_school_calendar, get_non_collection_days, precompute_collection_days,
-    add_acf_pacf_analysis, infer_sheet_type, reorder_with_acf_pacf
+    get_school_calendar, get_non_collection_days, precompute_collection_days
 )
 from pipelines import PIPELINES  # Now using modular pipelines/ package
 
@@ -93,12 +94,12 @@ class BaseSheetCreator:
         # Check cache first
         if cache_key in self._pipeline_cache:
             print(f"[CACHE HIT] BaseSheetCreator: Reusing cached result for {cache_key}")
-            return self._pipeline_cache[cache_key].copy()
+            return self._pipeline_cache[cache_key].copy(deep=True)
         
         # Execute pipeline and cache result
         print(f"[CACHE MISS] BaseSheetCreator: Executing and caching {cache_key}")
         result = self._run_aggregation_original(pipeline, use_base_filter, collection_name)
-        self._pipeline_cache[cache_key] = result.copy()
+        self._pipeline_cache[cache_key] = result.copy(deep=True)
         return result
     
     def _run_aggregation_original(self, pipeline, use_base_filter=True, collection_name='media_records'):
@@ -136,10 +137,10 @@ class BaseSheetCreator:
 
     def create_summary_statistics_sheet(self, workbook):
         """
-        Creates the detailed Summary Statistics sheet.
+        Creates the detailed Summary Statistics sheet with enhanced day analysis.
         """
         try:
-            # Get the data for each school year
+            # Get the data for each school year (original statistics)
             pipeline = [
                 {"$match": {"file_type": {"$in": ["JPG", "MP3"]}}},
                 {"$group": {
@@ -194,15 +195,34 @@ class BaseSheetCreator:
                 if collection_days_df.empty:
                     return {}
                 
-                # Calculate collection days using the same logic as Period Counts
+                # Calculate collection days using the correct period-based summation approach
                 if school_year and school_year != 'Overall':
                     from utils.calendar import calculate_collection_days_for_period
-                    collection_days = calculate_collection_days_for_period(school_year)
+                    if school_year == '2021-2022':
+                        # Sum all periods for 2021-2022 school year
+                        collection_days = (
+                            calculate_collection_days_for_period('SY 21-22 P1') +
+                            calculate_collection_days_for_period('SY 21-22 P2') +
+                            calculate_collection_days_for_period('SY 21-22 P3')
+                        )
+                    else:  # 2022-2023
+                        # Sum all periods for 2022-2023 school year
+                        collection_days = (
+                            calculate_collection_days_for_period('SY 22-23 P1') +
+                            calculate_collection_days_for_period('SY 22-23 P2') +
+                            calculate_collection_days_for_period('SY 22-23 P3')
+                        )
                 else:
-                    # For overall, sum both periods
+                    # For overall, sum all periods from both school years
                     from utils.calendar import calculate_collection_days_for_period
-                    collection_days = (calculate_collection_days_for_period('2021-2022') + 
-                                     calculate_collection_days_for_period('2022-2023'))
+                    collection_days = (
+                        calculate_collection_days_for_period('SY 21-22 P1') +
+                        calculate_collection_days_for_period('SY 21-22 P2') +
+                        calculate_collection_days_for_period('SY 21-22 P3') +
+                        calculate_collection_days_for_period('SY 22-23 P1') +
+                        calculate_collection_days_for_period('SY 22-23 P2') +
+                        calculate_collection_days_for_period('SY 22-23 P3')
+                    )
                 
                 stats = {
                     'total_files': collection_days_df['Total_Files'].sum(),
@@ -271,12 +291,490 @@ class BaseSheetCreator:
             
             # Apply formatting
             self.formatter.apply_data_style(ws, f'A4:D{3 + len(metrics)}')
+            
+            # Apply alternating row colors for better readability
+            self.formatter.apply_alternating_row_colors(ws, 4, 3 + len(metrics), 1, 4)
+            
+            # Add enhanced day analysis tables
+            current_row = self._add_day_analysis_tables(ws, 3 + len(metrics) + 3)
+            
             self.formatter.auto_adjust_columns(ws)
             
-            print("[SUCCESS] Summary Statistics sheet created")
+            print("[SUCCESS] Summary Statistics sheet created with day analysis")
             
         except Exception as e:
             print(f"[ERROR] Failed to create Summary Statistics sheet: {e}")
+    
+    def _add_day_analysis_tables(self, ws, start_row):
+        """
+        Add comprehensive day analysis tables to the Summary Statistics sheet.
+        Only includes cleaned data (is_collection_day=TRUE, Is_outlier=FALSE).
+        """
+        try:
+            # Get cleaned data with proper filtering
+            cleaned_pipeline = [
+                {"$match": {
+                    "file_type": {"$in": ["JPG", "MP3"]},
+                    "is_collection_day": True,
+                    "Outlier_Status": False
+                }},
+                {"$group": {
+                    "_id": {
+                        "date": "$ISO_Date",
+                        "school_year": "$School_Year",
+                        "period": "$Collection_Period",
+                        "month": {"$dateToString": {"format": "%Y-%m", "date": {"$dateFromString": {"dateString": "$ISO_Date"}}}}
+                    },
+                    "Total_Files": {"$sum": 1},
+                    "MP3_Files": {"$sum": {"$cond": [{"$eq": ["$file_type", "MP3"]}, 1, 0]}},
+                    "JPG_Files": {"$sum": {"$cond": [{"$eq": ["$file_type", "JPG"]}, 1, 0]}}
+                }},
+                {"$sort": {"_id.date": 1}}
+            ]
+            
+            cleaned_df = self._run_aggregation(cleaned_pipeline)
+            if cleaned_df.empty:
+                print("[WARNING] No cleaned data found for day analysis")
+                return start_row
+            
+            # Process the cleaned data
+            cleaned_df['Date'] = pd.to_datetime(cleaned_df['date'])
+            cleaned_df['School_Year'] = cleaned_df['school_year']
+            cleaned_df['Period'] = cleaned_df['period']
+            cleaned_df['Month'] = cleaned_df['month']
+            
+            current_row = start_row
+            
+            # Table 1: School Year Summary
+            current_row = self._create_school_year_summary_table(ws, cleaned_df, current_row)
+            current_row += 3  # Add spacing
+            
+            # Table 2: Period Breakdown
+            current_row = self._create_period_breakdown_table(ws, cleaned_df, current_row)
+            current_row += 3  # Add spacing
+            
+            # Table 3: Monthly Breakdown
+            current_row = self._create_monthly_breakdown_table(ws, cleaned_df, current_row)
+            
+            return current_row
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to create day analysis tables: {e}")
+            return start_row
+    
+    def _create_school_year_summary_table(self, ws, df, start_row):
+        """
+        Create the school year summary table for day analysis.
+        """
+        # Section title
+        ws.cell(row=start_row, column=1, value="Day Analysis - School Year Summary (Collection Days Only, Non-Outliers)")
+        self.formatter.apply_title_style(ws, f'A{start_row}')
+        start_row += 2
+        
+        # Headers
+        headers = ['Metric', '2021-2022', '2022-2023', 'Overall']
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=start_row, column=col, value=header)
+        self.formatter.apply_header_style(ws, f'A{start_row}:D{start_row}')
+        start_row += 1
+        
+        # Calculate metrics for each school year
+        def calc_year_metrics(df, school_year=None):
+            if school_year:
+                year_df = df[df['School_Year'] == school_year].copy()
+            else:
+                year_df = df.copy()
+            
+            if year_df.empty:
+                return {}
+            
+            # Get collection days for the year by summing all periods
+            if school_year:
+                from utils.calendar import calculate_collection_days_for_period
+                if school_year == '2021-2022':
+                    # Sum all periods for 2021-2022 school year
+                    collection_days = (
+                        calculate_collection_days_for_period('SY 21-22 P1') +
+                        calculate_collection_days_for_period('SY 21-22 P2') +
+                        calculate_collection_days_for_period('SY 21-22 P3')
+                    )
+                else:  # 2022-2023
+                    # Sum all periods for 2022-2023 school year
+                    collection_days = (
+                        calculate_collection_days_for_period('SY 22-23 P1') +
+                        calculate_collection_days_for_period('SY 22-23 P2') +
+                        calculate_collection_days_for_period('SY 22-23 P3')
+                    )
+            else:
+                from utils.calendar import calculate_collection_days_for_period
+                # Sum all periods for both school years
+                collection_days = (
+                    calculate_collection_days_for_period('SY 21-22 P1') +
+                    calculate_collection_days_for_period('SY 21-22 P2') +
+                    calculate_collection_days_for_period('SY 21-22 P3') +
+                    calculate_collection_days_for_period('SY 22-23 P1') +
+                    calculate_collection_days_for_period('SY 22-23 P2') +
+                    calculate_collection_days_for_period('SY 22-23 P3')
+                )
+            
+            # Calculate metrics
+            unique_dates = year_df['Date'].dt.date.unique()
+            days_with_data = len(unique_dates)
+            days_with_zero = collection_days - days_with_data
+            coverage_pct = (days_with_data / collection_days * 100) if collection_days > 0 else 0
+            
+            total_files = year_df['Total_Files'].sum()
+            avg_files_per_collection_day = total_files / collection_days if collection_days > 0 else 0
+            avg_files_per_data_day = year_df['Total_Files'].mean() if not year_df.empty else 0
+            avg_files_including_zeros = total_files / collection_days if collection_days > 0 else 0
+            
+            # Calculate consecutive days
+            consecutive_data, consecutive_zero = self._calculate_consecutive_days(year_df, collection_days)
+            
+            return {
+                'collection_days': collection_days,
+                'days_with_data': days_with_data,
+                'days_with_zero': days_with_zero,
+                'coverage_pct': coverage_pct,
+                'avg_files_per_collection_day': avg_files_per_collection_day,
+                'avg_files_per_data_day': avg_files_per_data_day,
+                'avg_files_including_zeros': avg_files_including_zeros,
+                'max_consecutive_data': consecutive_data,
+                'max_consecutive_zero': consecutive_zero
+            }
+        
+        # Calculate for each year
+        metrics_2122 = calc_year_metrics(df, '2021-2022')
+        metrics_2223 = calc_year_metrics(df, '2022-2023')
+        metrics_overall = calc_year_metrics(df)
+        
+        # Data rows
+        metrics = [
+            ('Total Collection Days', 'collection_days'),
+            ('Days with Data', 'days_with_data'),
+            ('Days with Zero Files', 'days_with_zero'),
+            ('Data Coverage %', 'coverage_pct'),
+            ('Avg Files per Collection Day', 'avg_files_per_collection_day'),
+            ('Avg Files per Day with Data', 'avg_files_per_data_day'),
+            ('Avg Files per Day (incl. zeros)', 'avg_files_including_zeros'),
+            ('Max Consecutive Days with Data', 'max_consecutive_data'),
+            ('Max Consecutive Days without Data', 'max_consecutive_zero')
+        ]
+        
+        for row_offset, (label, key) in enumerate(metrics):
+            row = start_row + row_offset
+            ws.cell(row=row, column=1, value=label)
+            
+            # Format values appropriately
+            for col, stats in enumerate([metrics_2122, metrics_2223, metrics_overall], 2):
+                if key in stats and stats[key] is not None:
+                    value = stats[key]
+                    if key == 'coverage_pct':
+                        # Store as numeric value (decimal) and apply percentage formatting
+                        cell = ws.cell(row=row, column=col)
+                        cell.value = value / 100  # Convert percentage to decimal for Excel
+                        cell.number_format = '0.0%'  # Apply Excel percentage formatting
+                    elif key in ['avg_files_per_collection_day', 'avg_files_per_data_day', 'avg_files_including_zeros']:
+                        ws.cell(row=row, column=col, value=round(value, 1))
+                    else:
+                        ws.cell(row=row, column=col, value=int(value) if isinstance(value, (int, float)) else value)
+                else:
+                    ws.cell(row=row, column=col, value='N/A')
+        
+        # Apply formatting
+        end_row = start_row + len(metrics) - 1
+        self.formatter.apply_data_style(ws, f'A{start_row}:D{end_row}')
+        self.formatter.apply_alternating_row_colors(ws, start_row, end_row, 1, 4)
+        
+        return end_row + 1
+
+def _create_period_breakdown_table(self, ws, df, start_row):
+    """
+    Create the period breakdown table for day analysis.
+    """
+    # Section title
+    ws.cell(row=start_row, column=1, value="Day Analysis - Period Breakdown (Collection Days Only, Non-Outliers)")
+    self.formatter.apply_title_style(ws, f'A{start_row}')
+    start_row += 2
+    
+    # Headers
+    headers = ['Period', 'Collection Days', 'Days with Data', 'Zero Days', 'Coverage %', 'Avg Files/Day', 'Max Consec. Data', 'Max Consec. Zero']
+    for col, header in enumerate(headers, 1):
+        ws.cell(row=start_row, column=col, value=header)
+    self.formatter.apply_header_style(ws, f'A{start_row}:H{start_row}')
+    start_row += 1
+    
+    # Get all periods
+    from utils.calendar import get_all_periods
+    periods = get_all_periods()
+    
+    # Sort periods logically
+    period_order = ['SY 21-22 P1', 'SY 21-22 P2', 'SY 21-22 P3', 'SY 22-23 P1', 'SY 22-23 P2', 'SY 22-23 P3']
+    periods = [p for p in period_order if p in periods]
+    
+    for row_offset, period in enumerate(periods):
+        row = start_row + row_offset
+        period_df = df[df['Period'] == period].copy()
+        
+        # Calculate period metrics
+        from utils.calendar import calculate_collection_days_for_period
+        collection_days = calculate_collection_days_for_period(period)
+        
+        if not period_df.empty:
+            unique_dates = period_df['Date'].dt.date.unique()
+            days_with_data = len(unique_dates)
+            days_with_zero = collection_days - days_with_data
+            coverage_pct = (days_with_data / collection_days * 100) if collection_days > 0 else 0
+            
+            total_files = year_df['Total_Files'].sum()
+            avg_files_per_collection_day = total_files / collection_days if collection_days > 0 else 0
+            avg_files_per_data_day = year_df['Total_Files'].mean() if not year_df.empty else 0
+            avg_files_including_zeros = total_files / collection_days if collection_days > 0 else 0
+            
+            # Calculate consecutive days
+            consecutive_data, consecutive_zero = self._calculate_consecutive_days(year_df, collection_days)
+            
+            return {
+                'collection_days': collection_days,
+                'days_with_data': days_with_data,
+                'days_with_zero': days_with_zero,
+                'coverage_pct': coverage_pct,
+                'avg_files_per_collection_day': avg_files_per_collection_day,
+                'avg_files_per_data_day': avg_files_per_data_day,
+                'avg_files_including_zeros': avg_files_including_zeros,
+                'max_consecutive_data': consecutive_data,
+                'max_consecutive_zero': consecutive_zero
+            }
+        
+        # Calculate for each year
+        metrics_2122 = calc_year_metrics(df, '2021-2022')
+        metrics_2223 = calc_year_metrics(df, '2022-2023')
+        metrics_overall = calc_year_metrics(df)
+        
+        # Data rows
+        metrics = [
+            ('Total Collection Days', 'collection_days'),
+            ('Days with Data', 'days_with_data'),
+            ('Days with Zero Files', 'days_with_zero'),
+            ('Data Coverage %', 'coverage_pct'),
+            ('Avg Files per Collection Day', 'avg_files_per_collection_day'),
+            ('Avg Files per Day with Data', 'avg_files_per_data_day'),
+            ('Avg Files per Day (incl. zeros)', 'avg_files_including_zeros'),
+            ('Max Consecutive Days with Data', 'max_consecutive_data'),
+            ('Max Consecutive Days without Data', 'max_consecutive_zero')
+        ]
+        
+        for row_offset, (label, key) in enumerate(metrics):
+            row = start_row + row_offset
+            ws.cell(row=row, column=1, value=label)
+            
+            # Format values appropriately
+            for col, stats in enumerate([metrics_2122, metrics_2223, metrics_overall], 2):
+                if key in stats and stats[key] is not None:
+                    value = stats[key]
+                    if key == 'coverage_pct':
+                        # Store as numeric value (decimal) and apply percentage formatting
+                        cell = ws.cell(row=row, column=col)
+                        cell.value = value / 100  # Convert percentage to decimal for Excel
+                        cell.number_format = '0.0%'  # Apply Excel percentage formatting
+                    elif key in ['avg_files_per_collection_day', 'avg_files_per_data_day', 'avg_files_including_zeros']:
+                        ws.cell(row=row, column=col, value=round(value, 1))
+                    else:
+                        ws.cell(row=row, column=col, value=int(value) if isinstance(value, (int, float)) else value)
+                else:
+                    ws.cell(row=row, column=col, value='N/A')
+        
+        # Apply formatting
+        end_row = start_row + len(metrics) - 1
+        self.formatter.apply_data_style(ws, f'A{start_row}:D{end_row}')
+        self.formatter.apply_alternating_row_colors(ws, start_row, end_row, 1, 4)
+        
+        return end_row + 1
+    
+    def _create_period_breakdown_table(self, ws, df, start_row):
+        """
+        Create the period breakdown table for day analysis.
+        """
+        # Section title
+        ws.cell(row=start_row, column=1, value="Day Analysis - Period Breakdown (Collection Days Only, Non-Outliers)")
+        self.formatter.apply_title_style(ws, f'A{start_row}')
+        start_row += 2
+        
+        # Headers
+        headers = ['Period', 'Collection Days', 'Days with Data', 'Zero Days', 'Coverage %', 'Avg Files/Day', 'Max Consec. Data', 'Max Consec. Zero']
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=start_row, column=col, value=header)
+        self.formatter.apply_header_style(ws, f'A{start_row}:H{start_row}')
+        start_row += 1
+        
+        # Get all periods
+        from utils.calendar import get_all_periods
+        periods = get_all_periods()
+        
+        # Sort periods logically
+        period_order = ['SY 21-22 P1', 'SY 21-22 P2', 'SY 21-22 P3', 'SY 22-23 P1', 'SY 22-23 P2', 'SY 22-23 P3']
+        periods = [p for p in period_order if p in periods]
+        
+        for row_offset, period in enumerate(periods):
+            row = start_row + row_offset
+            period_df = df[df['Period'] == period].copy()
+            
+            # Calculate period metrics
+            from utils.calendar import calculate_collection_days_for_period
+            collection_days = calculate_collection_days_for_period(period)
+            
+            if not period_df.empty:
+                unique_dates = period_df['Date'].dt.date.unique()
+                days_with_data = len(unique_dates)
+                days_with_zero = collection_days - days_with_data
+                coverage_pct = (days_with_data / collection_days * 100) if collection_days > 0 else 0
+                avg_files_per_day = period_df['Total_Files'].mean()
+                consecutive_data, consecutive_zero = self._calculate_consecutive_days(period_df, collection_days)
+            else:
+                days_with_data = 0
+                days_with_zero = collection_days
+                coverage_pct = 0
+                avg_files_per_day = 0
+                consecutive_data = 0
+                consecutive_zero = collection_days
+            
+            # Fill row data
+            ws.cell(row=row, column=1, value=period)
+            ws.cell(row=row, column=2, value=collection_days)
+            ws.cell(row=row, column=3, value=days_with_data)
+            ws.cell(row=row, column=4, value=days_with_zero)
+            # Store coverage percentage as numeric value with Excel formatting
+            cell = ws.cell(row=row, column=5)
+            cell.value = coverage_pct / 100  # Convert percentage to decimal for Excel
+            cell.number_format = '0.0%'  # Apply Excel percentage formatting
+            ws.cell(row=row, column=6, value=round(avg_files_per_day, 1))
+            ws.cell(row=row, column=7, value=consecutive_data)
+            ws.cell(row=row, column=8, value=consecutive_zero)
+        
+        # Apply formatting
+        end_row = start_row + len(periods) - 1
+        self.formatter.apply_data_style(ws, f'A{start_row}:H{end_row}')
+        self.formatter.apply_alternating_row_colors(ws, start_row, end_row, 1, 8)
+        
+        return end_row + 1
+    
+    def _create_monthly_breakdown_table(self, ws, df, start_row):
+        """
+        Create the monthly breakdown table for day analysis.
+        """
+        # Section title
+        ws.cell(row=start_row, column=1, value="Day Analysis - Monthly Breakdown (Collection Days Only, Non-Outliers)")
+        self.formatter.apply_title_style(ws, f'A{start_row}')
+        start_row += 2
+        
+        # Headers
+        headers = ['Month', 'School Year', 'Collection Days', 'Days with Data', 'Zero Days', 'Coverage %', 'Avg Files/Day']
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=start_row, column=col, value=header)
+        self.formatter.apply_header_style(ws, f'A{start_row}:G{start_row}')
+        start_row += 1
+        
+        # Group by month and school year
+        monthly_data = []
+        for month in sorted(df['Month'].unique()):
+            month_df = df[df['Month'] == month].copy()
+            if not month_df.empty:
+                school_year = month_df['School_Year'].iloc[0]
+                unique_dates = month_df['Date'].dt.date.unique()
+                days_with_data = len(unique_dates)
+                avg_files_per_day = month_df['Total_Files'].mean()
+                
+                # Calculate collection days for this month (approximate)
+                month_date = pd.to_datetime(month + '-01')
+                month_name = month_date.strftime('%b %Y')
+                
+                # Estimate collection days in month (weekdays excluding holidays)
+                import calendar
+                year = month_date.year
+                month_num = month_date.month
+                days_in_month = calendar.monthrange(year, month_num)[1]
+                
+                # Count weekdays in month (rough estimate)
+                weekdays_in_month = 0
+                for day in range(1, days_in_month + 1):
+                    date_obj = datetime(year, month_num, day)
+                    if date_obj.weekday() < 5:  # Monday to Friday
+                        weekdays_in_month += 1
+                
+                # Use actual collection days from data or estimate
+                collection_days_estimate = min(weekdays_in_month, 23)  # Max ~23 collection days per month
+                days_with_zero = max(0, collection_days_estimate - days_with_data)
+                coverage_pct = (days_with_data / collection_days_estimate * 100) if collection_days_estimate > 0 else 0
+                
+                monthly_data.append({
+                    'month': month_name,
+                    'school_year': school_year,
+                    'collection_days': collection_days_estimate,
+                    'days_with_data': days_with_data,
+                    'days_with_zero': days_with_zero,
+                    'coverage_pct': coverage_pct,
+                    'avg_files_per_day': avg_files_per_day
+                })
+        
+        # Fill monthly data
+        for row_offset, month_data in enumerate(monthly_data):
+            row = start_row + row_offset
+            ws.cell(row=row, column=1, value=month_data['month'])
+            ws.cell(row=row, column=2, value=month_data['school_year'])
+            ws.cell(row=row, column=3, value=month_data['collection_days'])
+            ws.cell(row=row, column=4, value=month_data['days_with_data'])
+            ws.cell(row=row, column=5, value=month_data['days_with_zero'])
+            # Store coverage percentage as numeric value with Excel formatting
+            cell = ws.cell(row=row, column=6)
+            cell.value = month_data['coverage_pct'] / 100  # Convert percentage to decimal for Excel
+            cell.number_format = '0.0%'  # Apply Excel percentage formatting
+            ws.cell(row=row, column=7, value=round(month_data['avg_files_per_day'], 1))
+        
+        # Apply formatting
+        end_row = start_row + len(monthly_data) - 1
+        self.formatter.apply_data_style(ws, f'A{start_row}:G{end_row}')
+        self.formatter.apply_alternating_row_colors(ws, start_row, end_row, 1, 7)
+        
+        return end_row + 1
+    
+    def _calculate_consecutive_days(self, df, total_collection_days):
+        """
+        Calculate maximum consecutive days with and without data.
+        """
+        try:
+            if df.empty:
+                return 0, total_collection_days
+            
+            # Get unique dates with data
+            dates_with_data = set(df['Date'].dt.date)
+            
+            # Create a simple consecutive day calculation
+            # This is a simplified version - in a full implementation,
+            # you'd want to consider the actual collection day calendar
+            
+            sorted_dates = sorted(dates_with_data)
+            if not sorted_dates:
+                return 0, total_collection_days
+            
+            # Calculate consecutive days with data
+            max_consecutive_data = 1
+            current_consecutive_data = 1
+            
+            for i in range(1, len(sorted_dates)):
+                if (sorted_dates[i] - sorted_dates[i-1]).days == 1:
+                    current_consecutive_data += 1
+                    max_consecutive_data = max(max_consecutive_data, current_consecutive_data)
+                else:
+                    current_consecutive_data = 1
+            
+            # Estimate consecutive days without data (simplified)
+            max_consecutive_zero = max(1, total_collection_days - len(dates_with_data))
+            
+            return max_consecutive_data, max_consecutive_zero
+            
+        except Exception as e:
+            print(f"[WARNING] Error calculating consecutive days: {e}")
+            return 0, 0
 
     def create_raw_data_sheet(self, workbook):
         """
@@ -304,7 +802,9 @@ class BaseSheetCreator:
                 ws.cell(row=3, column=col, value=str(column_name))
             
             # Apply header formatting
-            self.formatter.apply_header_style(ws, f'A3:{chr(64 + len(df.columns))}3')
+            from openpyxl.utils import get_column_letter
+            last_col_letter = get_column_letter(len(df.columns))
+            self.formatter.apply_header_style(ws, f'A3:{last_col_letter}3')
             
             # Add data rows
             for row_idx, (_, row) in enumerate(df.iterrows(), 4):
@@ -312,13 +812,18 @@ class BaseSheetCreator:
                     ws.cell(row=row_idx, column=col_idx, value=str(value))
             
             # Apply data formatting
-            self.formatter.apply_data_style(ws, f'A4:{chr(64 + len(df.columns))}{3 + len(df)}')
+            self.formatter.apply_data_style(ws, f'A4:{last_col_letter}{3 + len(df)}')
+            
+            # Apply alternating row colors for better readability
+            self.formatter.apply_alternating_row_colors(ws, 4, 3 + len(df), 1, len(df.columns))
+            
             self.formatter.auto_adjust_columns(ws)
             
             print(f"[SUCCESS] Raw Data sheet created with {len(df)} records")
             
         except Exception as e:
             print(f"[ERROR] Failed to create Raw Data sheet: {e}")
+
 
     def create_data_cleaning_sheet(self, workbook):
         """
@@ -375,6 +880,9 @@ class BaseSheetCreator:
             # Apply formatting
             self.formatter.apply_data_style(ws, f'A6:E{row-1}')
             
+            # Apply alternating row colors for better readability
+            self.formatter.apply_alternating_row_colors(ws, 6, row-1, 1, 5)
+            
             # Section 2: Data Quality Metrics
             ws[f'A{row+2}'] = "Data Quality Metrics"
             self.formatter.apply_section_header_style(ws, f'A{row+2}')
@@ -391,13 +899,19 @@ class BaseSheetCreator:
                 ('Total Records', total_records),
                 ('Valid Records', valid_records),
                 ('Outlier Records', outlier_records),
-                ('Data Quality Rate', f"{(valid_records/total_records*100):.1f}%" if total_records > 0 else "N/A")
+                ('Data Quality Rate', (valid_records/total_records) if total_records > 0 else "N/A")
             ]
             
             metrics_row = row + 4
             for i, (metric, value) in enumerate(quality_metrics):
                 ws.cell(row=metrics_row + i, column=1, value=metric)
-                ws.cell(row=metrics_row + i, column=2, value=value)
+                cell = ws.cell(row=metrics_row + i, column=2)
+                if metric == 'Data Quality Rate' and isinstance(value, (int, float)):
+                    # Store as numeric value and apply percentage formatting
+                    cell.value = value  # Already a decimal (0.0 to 1.0)
+                    cell.number_format = '0.0%'  # Apply Excel percentage formatting
+                else:
+                    cell.value = value
             
             # Apply formatting
             self.formatter.apply_data_style(ws, f'A{metrics_row}:B{metrics_row + len(quality_metrics) - 1}')

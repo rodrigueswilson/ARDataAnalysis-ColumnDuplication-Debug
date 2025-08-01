@@ -298,7 +298,11 @@ class DashboardCreator:
                         comparison_data.extend([
                             ["Expected Collection Days", expected_days_21_22, expected_days_22_23, "-"],
                             ["Days with Files", days_21_22, days_22_23, f"+{days_22_23 - days_21_22}"],
-                            ["Completeness %", f"{(days_21_22/expected_days_21_22)*100:.1f}%", f"{(days_22_23/expected_days_22_23)*100:.1f}%", f"{((days_22_23/expected_days_22_23) - (days_21_22/expected_days_21_22))*100:+.1f}%"],
+                            ["Completeness %", 
+                             f"{(days_21_22/expected_days_21_22)*100:.1f}%" if expected_days_21_22 > 0 else "N/A", 
+                             f"{(days_22_23/expected_days_22_23)*100:.1f}%" if expected_days_22_23 > 0 else "N/A", 
+                             f"{((days_22_23/expected_days_22_23 if expected_days_22_23 > 0 else 0) - (days_21_22/expected_days_21_22 if expected_days_21_22 > 0 else 0))*100:+.1f}%" 
+                             if expected_days_21_22 > 0 and expected_days_22_23 > 0 else "N/A"],
                             ["Total Files", f"{files_21_22:,}", f"{files_22_23:,}", f"+{files_22_23 - files_21_22:,}"],
                             ["Avg Files/Day", f"{avg_21_22:.1f}", f"{avg_22_23:.1f}", f"{avg_22_23 - avg_21_22:+.1f}"],
                             ["Outlier Rate", "2.0%", "3.0%", "+1.0%"],  # Simplified for now

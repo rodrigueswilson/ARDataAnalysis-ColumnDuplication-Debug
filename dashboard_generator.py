@@ -224,15 +224,22 @@ def create_dashboard_header(ws):
     """Create dashboard title and description."""
     # Title
     ws['A1'] = 'ACF/PACF Analysis Dashboard'
-    ws['A1'].font = Font(size=18, bold=True, color='003366')
+    ws['A1'].font = Font(size=16, bold=True, color='003366')
     ws.merge_cells('A1:F1')
-    ws['A1'].alignment = Alignment(horizontal='center')
     
     # Description
-    ws['A3'] = 'Comparative Autocorrelation Analysis Across Time Scales'
-    ws['A3'].font = Font(size=12, italic=True, color='666666')
+    ws['A3'] = 'This dashboard provides a comparative view of autocorrelation and partial autocorrelation patterns across different time scales.'
+    ws['A3'].font = Font(size=10)
     ws.merge_cells('A3:F3')
-    ws['A3'].alignment = Alignment(horizontal='center')
+    
+    ws['A4'] = 'Use this dashboard to identify consistent patterns and differences in temporal dependencies based on aggregation level.'
+    ws['A4'].font = Font(size=10)
+    ws.merge_cells('A4:F4')
+    
+    # Navigation instructions
+    ws['A6'] = 'Click on any time scale name to navigate to the corresponding sheet.'
+    ws['A6'].font = Font(size=10, italic=True, color='666666')
+    ws.merge_cells('A6:F6')
     
     # Timestamp
     from datetime import datetime
@@ -258,10 +265,30 @@ def create_summary_table(ws, acf_pacf_data):
         cell.fill = PatternFill(start_color='4472C4', end_color='4472C4', fill_type='solid')
         cell.alignment = Alignment(horizontal='center')
     
+    # Map time scales to sheet names
+    sheet_map = {
+        'Daily': 'Daily Counts (ACF_PACF)',
+        'Weekly': 'Weekly Counts (ACF_PACF)',
+        'Biweekly': 'Biweekly Counts (ACF_PACF)',
+        'Monthly': 'Monthly Counts (ACF_PACF)',
+        'Period': 'Period Counts (ACF_PACF)'
+    }
+    
     # Data rows
     row = start_row + 3
     for time_scale, data in acf_pacf_data.items():
-        ws.cell(row, 1, time_scale)
+        # Create cell with time scale name
+        time_scale_cell = ws.cell(row, 1, time_scale)
+        
+        # Add hyperlink to corresponding sheet if it exists
+        target_sheet = sheet_map.get(time_scale)
+        if target_sheet and target_sheet in ws.parent.sheetnames:
+            # Create hyperlink formula
+            time_scale_cell.hyperlink = f"#{target_sheet}!A1"
+            time_scale_cell.font = Font(color="0563C1", underline="single")
+            print(f"[LINK] Added hyperlink from dashboard to '{target_sheet}'")
+        else:
+            print(f"[WARNING] Could not create link for '{time_scale}', sheet '{target_sheet}' not found")
         
         # ACF Lag 1
         acf_lag1 = data.get('ACF_Lag1', 'N/A')

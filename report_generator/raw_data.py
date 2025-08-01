@@ -295,19 +295,10 @@ class RawDataCreator:
                 cell.fill = header_fill
                 cell.alignment = header_alignment
             
-            # PERFORMANCE OPTIMIZATION: Skip alternating row colors for large datasets
-            # Alternating colors are very slow with openpyxl for 10,000+ rows
-            if ws.max_row <= 1000:
-                print("[RAW DATA] Applying alternating row colors (small dataset)...")
-                alt_fill = PatternFill(start_color='DDEBF7', end_color='DDEBF7', fill_type='solid')
-                
-                for row_idx in range(2, ws.max_row + 1):
-                    if row_idx % 2 == 0:  # Even rows get alternate color
-                        for col_idx in range(1, ws.max_column + 1):
-                            cell = ws.cell(row=row_idx, column=col_idx)
-                            cell.fill = alt_fill
-            else:
-                print(f"[RAW DATA] Skipping alternating colors for performance (>{ws.max_row-1} rows)")
+            # Apply optimized alternating row colors using centralized ExcelFormatter method
+            # Our new implementation handles large datasets efficiently with batch processing
+            print(f"[RAW DATA] Applying optimized alternating row colors to {ws.max_row-1} data rows...")
+            self.formatter.apply_alternating_row_colors(ws, 2, ws.max_row, 1, ws.max_column)
             
             # Smart column width adjustment (based on original implementation)
             print("[RAW DATA] Calculating optimal column widths...")

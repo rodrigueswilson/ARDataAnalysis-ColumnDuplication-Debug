@@ -123,7 +123,13 @@
             "enabled": true,
             "order": 1,
             "description": "Daily file counts for ACF/PACF analysis",
-            "module": "daily_counts"
+            "module": "daily_counts",
+            "charts": {
+                "acf_pacf": true,
+                "arima_forecast": true,
+                "dashboard": false
+            },
+            "time_scale": "daily"
         },
         {
             "name": "Weekly Counts (ACF_PACF)",
@@ -133,7 +139,13 @@
             "enabled": true,
             "order": 2,
             "description": "Weekly file counts for ACF/PACF analysis",
-            "module": "weekly_counts"
+            "module": "weekly_counts",
+            "charts": {
+                "acf_pacf": true,
+                "arima_forecast": true,
+                "dashboard": false
+            },
+            "time_scale": "weekly"
         },
         {
             "name": "Biweekly Counts (ACF_PACF)",
@@ -143,7 +155,13 @@
             "enabled": true,
             "order": 3,
             "description": "Biweekly file counts for ACF/PACF analysis",
-            "module": "biweekly_counts"
+            "module": "biweekly_counts",
+            "charts": {
+                "acf_pacf": true,
+                "arima_forecast": false,
+                "dashboard": false
+            },
+            "time_scale": "biweekly"
         },
         {
             "name": "Monthly Counts (ACF_PACF)",
@@ -153,7 +171,13 @@
             "enabled": true,
             "order": 4,
             "description": "Monthly file counts for ACF/PACF analysis",
-            "module": "weekly_counts"
+            "module": "weekly_counts",
+            "charts": {
+                "acf_pacf": true,
+                "arima_forecast": false,
+                "dashboard": false
+            },
+            "time_scale": "monthly"
         },
         {
             "name": "Period Counts (ACF_PACF)",
@@ -162,8 +186,14 @@
             "category": "time_series",
             "enabled": true,
             "order": 5,
-            "description": "Collection period counts for ACF/PACF analysis",
-            "module": "weekly_counts"
+            "description": "Period file counts for ACF/PACF analysis",
+            "module": "weekly_counts",
+            "charts": {
+                "acf_pacf": true,
+                "arima_forecast": false,
+                "dashboard": false
+            },
+            "time_scale": "period"
         },
         {
             "name": "Weekly Counts",
@@ -227,13 +257,13 @@
         },
         {
             "pipeline": "CAMERA_USAGE_BY_YEAR_RANGE_DETAILED",
-            "sheet_name": "Camera Usage by Year Range Detailed",
+            "sheet_name": "Camera Usage YR Detailed",
             "category": "detailed",
             "enabled": false,
             "order": 24,
             "description": "Detailed camera usage by year range",
             "module": "camera_usage",
-            "name": "Camera Usage by Year Range Detailed"
+            "name": "Camera Usage YR Detailed"
         },
         {
             "pipeline": "FILE_SIZE_SUMMARY_BY_DAY",

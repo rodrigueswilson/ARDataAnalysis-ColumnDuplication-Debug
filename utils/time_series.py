@@ -59,7 +59,14 @@ def add_acf_pacf_analysis(
         return df
 
     # Check if ACF/PACF columns already exist to prevent duplication
-    existing_acf_cols = [col for col in df.columns if f'{value_col}_ACF_Lag_' in str(col)]
+    # Robust check for both naming conventions: ACF_Lag_ and ACF_Lag
+    existing_acf_cols = []
+    for col in df.columns:
+        col_str = str(col)
+        # Check for both underscore patterns: ACF_Lag_ and ACF_Lag
+        if (f'{value_col}_ACF_Lag_' in col_str or 
+            (f'{value_col}_ACF_Lag' in col_str and f'{value_col}_ACF_Lag_' not in col_str)):
+            existing_acf_cols.append(col)
     if existing_acf_cols:
         print(f"[INFO] ACF/PACF columns already exist ({len(existing_acf_cols)} found). Skipping duplicate analysis.")
         print(f"[DEBUG] Existing ACF columns: {existing_acf_cols}")

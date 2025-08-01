@@ -12,11 +12,12 @@ import pandas as pd
 from pathlib import Path
 from openpyxl.utils import get_column_letter
 
-# Local imports
-from utils import (
-    add_acf_pacf_analysis, infer_sheet_type, reorder_with_acf_pacf,
-    reorder_with_forecast_columns
-)
+# Local imports - CRITICAL: Use explicit imports to avoid namespace collision
+# The utils package also exports add_acf_pacf_analysis (problematic version)
+# We must ensure ONLY the ar_utils.py version (correct) is used
+from ar_utils import add_acf_pacf_analysis, reorder_with_acf_pacf, infer_sheet_type
+from column_cleanup_utils import cleanup_duplicate_acf_pacf_columns
+from utils.formatting import reorder_with_forecast_columns  # Explicit submodule import
 from pipelines import PIPELINES  # Now using modular pipelines/ package
 from .base import BaseSheetCreator
 
@@ -48,6 +49,10 @@ class PipelineSheetCreator(BaseSheetCreator):
                     continue
                 
                 try:
+                    # CRITICAL FIX: Clear pipeline cache before each sheet to prevent shared state contamination
+                    print(f"[DEBUG] Clearing pipeline cache before creating sheet: {sheet_config['name']}")
+                    self._pipeline_cache.clear()
+                    
                     # Each sheet gets its own fresh pipeline data to prevent column accumulation
                     self._create_pipeline_sheet(workbook, sheet_config)
                 except Exception as e:
@@ -81,8 +86,25 @@ class PipelineSheetCreator(BaseSheetCreator):
             return
         
         pipeline = PIPELINES[pipeline_name]
-        df = self._run_aggregation(pipeline)
+        
+        # CRITICAL FIX: Use non-cached aggregation to prevent DataFrame contamination
+        # The caching mechanism was storing DataFrames that had been mutated with ACF/PACF columns
+        # This caused each subsequent sheet to inherit previously added columns
+        print(f"[DEBUG] Using fresh (non-cached) pipeline execution to prevent column contamination")
+        df = self._run_aggregation_original(pipeline)
         print(f"    - Fresh pipeline data: {len(df)} rows × {len(df.columns)} columns")
+        
+        # ADDITIONAL SAFETY: Verify no ACF/PACF columns exist in fresh data
+        acf_pacf_patterns = ['ACF_Lag_', 'PACF_Lag_', '_Significant']
+        existing_acf_pacf_cols = [col for col in df.columns 
+                                if any(pattern in str(col) for pattern in acf_pacf_patterns)]
+        
+        if existing_acf_pacf_cols:
+            print(f"[CRITICAL ERROR] Fresh pipeline data already contains ACF/PACF columns: {existing_acf_pacf_cols}")
+            print(f"[CRITICAL ERROR] This indicates contamination in the MongoDB aggregation pipeline itself")
+            # Remove them as emergency fallback
+            df = df.drop(columns=existing_acf_pacf_cols)
+            print(f"[EMERGENCY FIX] Removed contaminated columns, proceeding with clean data")
         
         if df.empty:
             print(f"[WARNING] No data returned for pipeline '{pipeline_name}'")
@@ -94,8 +116,10 @@ class PipelineSheetCreator(BaseSheetCreator):
         # Determine sheet type and apply appropriate analysis
         sheet_type = infer_sheet_type(sheet_name)
         
-        # Apply ACF/PACF analysis for time series sheets
-        if sheet_type in ['daily', 'weekly', 'biweekly', 'monthly', 'period']:
+        # Apply ACF/PACF analysis based on configuration (not just sheet type)
+        from chart_config_helper import should_add_acf_pacf_columns
+        
+        if should_add_acf_pacf_columns(sheet_name):
             print(f"[INFO] Adding ACF/PACF analysis for {sheet_type} sheet")
             original_columns = df.columns.tolist()
             
@@ -105,64 +129,150 @@ class PipelineSheetCreator(BaseSheetCreator):
                 print(f"    - Before ACF/PACF: {len(df.columns)} columns")
                 print(f"    - Existing ACF columns: {[col for col in df.columns if 'ACF_Lag_' in str(col)]}")
                 
-                # Apply ACF/PACF analysis - get new columns and concatenate properly
-                acf_pacf_results = add_acf_pacf_analysis(df, value_col='Total_Files', sheet_type=sheet_type)
-                if not acf_pacf_results.empty:
-                    # Check for overlapping columns before concatenation
-                    overlapping_cols = set(df.columns) & set(acf_pacf_results.columns)
-                    if overlapping_cols:
-                        print(f"    - WARNING: Overlapping columns detected: {overlapping_cols}")
-                        # Remove overlapping columns from ACF/PACF results to prevent duplication
-                        acf_pacf_results = acf_pacf_results.drop(columns=list(overlapping_cols))
+                # Apply ACF/PACF analysis - FIXED: Proper column deduplication
+                # CRITICAL: Ensure we start with a completely fresh DataFrame copy
+                df_for_analysis = df.copy(deep=True)
+                
+                # DEBUG: Log DataFrame state before ACF/PACF analysis
+                print(f"    - [DEBUG] DataFrame before ACF/PACF analysis:")
+                print(f"      - Shape: {df.shape}")
+                print(f"      - Columns: {list(df.columns)}")
+                print(f"      - ACF columns already present: {[col for col in df.columns if 'ACF_Lag_' in str(col)]}")
+                print(f"      - PACF columns already present: {[col for col in df.columns if 'PACF_Lag_' in str(col)]}")
+                
+                # Get ACF/PACF results (returns ONLY new columns)
+                print(f"    - [DEBUG] Calling add_acf_pacf_analysis...")
+                acf_pacf_results = add_acf_pacf_analysis(df_for_analysis, value_col='Total_Files', sheet_type=sheet_type)
+                
+                # DEBUG: Log ACF/PACF results
+                print(f"    - [DEBUG] ACF/PACF analysis results:")
+                print(f"      - Shape: {acf_pacf_results.shape}")
+                print(f"      - Columns: {list(acf_pacf_results.columns)}")
+                
+                # CRITICAL DEBUG: Check for PACF columns specifically
+                acf_cols_generated = [col for col in acf_pacf_results.columns if 'ACF_Lag_' in col and '_Significant' not in col]
+                pacf_cols_generated = [col for col in acf_pacf_results.columns if 'PACF_Lag_' in col and '_Significant' not in col]
+                print(f"      - ACF columns generated: {acf_cols_generated}")
+                print(f"      - PACF columns generated: {pacf_cols_generated}")
+                
+                if not pacf_cols_generated:
+                    print(f"    - [CRITICAL ERROR] NO PACF COLUMNS GENERATED BY add_acf_pacf_analysis!")
+                    print(f"    - [CRITICAL ERROR] This indicates the PACF calculation is failing in the main pipeline")
                     
+                if not acf_pacf_results.empty:
+                    print(f"    - ACF/PACF analysis returned {len(acf_pacf_results.columns)} new columns")
+                    
+                    # VERIFICATION: Confirm no ACF/PACF columns exist before adding new ones
+                    # With the fix above, this should never trigger, but kept as safety check
+                    acf_pacf_patterns = ['ACF_Lag_', 'PACF_Lag_', '_Significant']
+                    existing_acf_pacf_cols = [col for col in df.columns 
+                                            if any(pattern in str(col) for pattern in acf_pacf_patterns)]
+                    
+                    if existing_acf_pacf_cols:
+                        print(f"    - WARNING: Found unexpected ACF/PACF columns (should not happen with fix): {existing_acf_pacf_cols}")
+                        print(f"    - REMOVING them as safety measure")
+                        df = df.drop(columns=existing_acf_pacf_cols)
+                    
+                    # Now safely concatenate the new ACF/PACF columns
+                    # Perform concatenation
                     df = pd.concat([df, acf_pacf_results], axis=1)
                     
-                    # Ensure no duplicate columns after concatenation
-                    original_col_count = len(df.columns)
-                    seen_columns = set()
-                    unique_columns = []
-                    for col in df.columns:
-                        if col not in seen_columns:
-                            unique_columns.append(col)
-                            seen_columns.add(col)
+                    # CRITICAL DEBUG: Check PACF columns after concatenation
+                    acf_cols_after_concat = [col for col in df.columns if 'ACF_Lag_' in col and '_Significant' not in col]
+                    pacf_cols_after_concat = [col for col in df.columns if 'PACF_Lag_' in col and '_Significant' not in col]
+                    print(f"    - [DEBUG] After concatenation:")
+                    print(f"      - ACF columns: {acf_cols_after_concat}")
+                    print(f"      - PACF columns: {pacf_cols_after_concat}")
                     
-                    if len(unique_columns) != original_col_count:
-                        print(f"    - DEDUPLICATION: Removed {original_col_count - len(unique_columns)} duplicate columns")
-                        df = df[unique_columns]
-                
-                print(f"    - After ACF/PACF: {len(df.columns)} columns")
-                print(f"    - New ACF columns: {[col for col in df.columns if 'ACF_Lag_' in str(col)]}")
+                    if not pacf_cols_after_concat:
+                        print(f"    - [CRITICAL ERROR] PACF COLUMNS LOST DURING CONCATENATION!")
+                    
+                    # Check for duplicates immediately after concatenation
+                    if len(df.columns) != len(set(df.columns)):
+                        print(f"    - WARNING: Duplicate columns detected after concatenation, removing...")
+                        df = df.loc[:, ~df.columns.duplicated()]
+                    
+                    # Clean up any duplicate ACF/PACF columns from inconsistent naming
+                    df = cleanup_duplicate_acf_pacf_columns(df, 'Total_Files')
+                    
+                    print(f"    - After ACF/PACF: {len(df.columns)} columns")
+                    print(f"    - New ACF columns: {[col for col in df.columns if 'ACF_Lag_' in str(col)]}")
+                    print(f"    - New PACF columns: {[col for col in df.columns if 'PACF_Lag_' in str(col)]}")
+                    
+                    # CRITICAL DEBUG: Final PACF check after all processing
+                    final_acf_cols = [col for col in df.columns if 'ACF_Lag_' in col and '_Significant' not in col]
+                    final_pacf_cols = [col for col in df.columns if 'PACF_Lag_' in col and '_Significant' not in col]
+                    print(f"    - [FINAL DEBUG] After all processing:")
+                    print(f"      - Final ACF columns: {final_acf_cols}")
+                    print(f"      - Final PACF columns: {final_pacf_cols}")
+                    
+                    if not final_pacf_cols:
+                        print(f"    - [CRITICAL ERROR] PACF COLUMNS COMPLETELY MISSING FROM FINAL DATAFRAME!")
+                        print(f"    - [CRITICAL ERROR] This will result in missing PACF columns in Excel output")
             else:
                 print(f"    - Skipping ACF/PACF analysis: Total_Files column not found")
                 
+            # Ensure no duplicate columns before reordering
+            if len(df.columns) != len(set(df.columns)):
+                print(f"    - WARNING: Duplicate columns detected before reordering, removing...")
+                df = df.loc[:, ~df.columns.duplicated(keep='first')]
+                
             df = reorder_with_acf_pacf(df, original_columns)
             
-            # Apply ARIMA forecasting if enabled
-            if self._should_apply_forecasting(sheet_config, sheet_type):
-                print(f"[INFO] Adding ARIMA forecasting for {sheet_type} sheet")
+            # Apply ARIMA forecasting based on configuration (not just sheet type)
+            from chart_config_helper import should_add_arima_columns
+            
+            if should_add_arima_columns(sheet_name):
+                print(f"[INFO] Adding ARIMA forecasting for {sheet_type} sheet (configuration-driven)")
                 # Store columns before forecasting for reordering
                 columns_before_forecast = df.columns.tolist()
                 df = self._apply_arima_forecasting(df, sheet_type)
                 df = reorder_with_forecast_columns(df, columns_before_forecast)
+            else:
+                print(f"[INFO] Skipping ARIMA forecasting for {sheet_name} (not enabled in configuration)")
         
-        # CRITICAL FIX: Ensure no duplicate columns before writing to Excel
-        print(f"    - Before deduplication: {len(df.columns)} columns")
+        # CRITICAL FIX: Smart deduplication that preserves PACF columns
+        print(f"    - [DEBUG] Before deduplication: {len(df.columns)} columns")
+        print(f"    - [DEBUG] Columns before dedup: {list(df.columns)}")
         original_col_count = len(df.columns)
         
-        # Remove duplicate columns while preserving order
-        seen_columns = set()
-        unique_columns = []
-        for col in df.columns:
-            if col not in seen_columns:
-                unique_columns.append(col)
-                seen_columns.add(col)
-        
-        if len(unique_columns) != original_col_count:
-            print(f"    - DEDUPLICATION: Removed {original_col_count - len(unique_columns)} duplicate columns")
-            df = df[unique_columns]
-            print(f"    - After deduplication: {len(df.columns)} columns")
+        # Check for duplicates first
+        if len(df.columns) != len(set(df.columns)):
+            print(f"    - [CRITICAL] Duplicate columns detected before Excel export!")
+            duplicate_cols = [col for col in df.columns if list(df.columns).count(col) > 1]
+            print(f"    - [CRITICAL] Duplicate columns: {set(duplicate_cols)}")
+            
+            # SMART DEDUPLICATION: Remove true duplicates while preserving unique columns
+            # Use pandas built-in deduplication but with proper validation
+            columns_before = list(df.columns)
+            df = df.loc[:, ~df.columns.duplicated(keep='first')]
+            columns_after = list(df.columns)
+            
+            # Log which columns were removed
+            removed_columns = [col for col in columns_before if col not in columns_after or columns_before.count(col) > columns_after.count(col)]
+            for col in set(removed_columns):
+                count_before = columns_before.count(col)
+                count_after = columns_after.count(col)
+                if count_before > count_after:
+                    print(f"    - [DEDUP] Removed {count_before - count_after} duplicate(s) of: {col}")
+            
+            print(f"    - [FIX] After smart deduplication: {len(df.columns)} columns")
+            print(f"    - [FIX] Removed {original_col_count - len(df.columns)} duplicate columns")
+            print(f"    - [DEBUG] Columns after dedup: {list(df.columns)}")
+            
+            # VALIDATION: Ensure PACF columns are still present
+            pacf_cols_after = [col for col in df.columns if 'PACF_Lag_' in col and '_Significant' not in col]
+            acf_cols_after = [col for col in df.columns if 'ACF_Lag_' in col and '_Significant' not in col]
+            print(f"    - [VALIDATION] ACF columns after dedup: {acf_cols_after}")
+            print(f"    - [VALIDATION] PACF columns after dedup: {pacf_cols_after}")
+            
+            if not pacf_cols_after and acf_cols_after:
+                print(f"    - [CRITICAL ERROR] PACF columns lost during deduplication!")
+                print(f"    - [CRITICAL ERROR] This will cause chart overlap issue!")
+            elif pacf_cols_after:
+                print(f"    - [SUCCESS] PACF columns preserved after deduplication")
         else:
-            print(f"    - No duplicate columns found")
+            print(f"    - [OK] No duplicate columns found before Excel export")
         
         # Create the worksheet
         ws = workbook.create_sheet(sheet_name)
@@ -209,9 +319,15 @@ class PipelineSheetCreator(BaseSheetCreator):
             
             # For large datasets, apply minimal formatting to avoid performance issues
             self._apply_minimal_data_formatting(ws, 4, 3 + len(df), len(df.columns))
+            
+            # Apply alternating row colors for better readability
+            self.formatter.apply_alternating_row_colors(ws, 4, 3 + len(df), 1, len(df.columns))
         else:
             # For smaller datasets, use full formatting
             self.formatter.apply_data_style(ws, data_range)
+            
+            # Apply alternating row colors for better readability
+            self.formatter.apply_alternating_row_colors(ws, 4, 3 + len(df), 1, len(df.columns))
         
         # Apply special formatting for ACF/PACF data
         self._apply_acf_pacf_data_formatting(ws, df.columns, 4, len(df))
@@ -219,11 +335,14 @@ class PipelineSheetCreator(BaseSheetCreator):
         # Auto-adjust column widths
         self.formatter.auto_adjust_columns(ws)
         
-        # Add ACF/PACF charts if this is a time series sheet with ACF/PACF data
-        if sheet_type in ['daily', 'weekly', 'biweekly', 'monthly', 'period']:
+        # Add ACF/PACF charts based on configuration
+        from chart_config_helper import should_add_chart
+        if sheet_type in ['daily', 'weekly', 'biweekly', 'monthly', 'period'] and should_add_chart(sheet_name, 'acf_pacf'):
             chart_added = self._add_acf_pacf_charts(ws, 4, 3 + len(df), sheet_type)
             if chart_added:
-                print(f"[SUCCESS] Added ACF/PACF charts to sheet '{sheet_name}'")
+                print(f"[SUCCESS] Added ACF/PACF charts to sheet '{sheet_name}' (config-driven)")
+        elif sheet_type in ['daily', 'weekly', 'biweekly', 'monthly', 'period']:
+            print(f"[INFO] Skipping ACF/PACF charts for '{sheet_name}' - not enabled in configuration")
         
         print(f"[SUCCESS] Created sheet '{sheet_name}' with {len(df)} rows")
     
@@ -311,22 +430,13 @@ class PipelineSheetCreator(BaseSheetCreator):
         Returns:
             DataFrame with forecast columns added
         """
-        # TEMPORARILY DISABLED FOR MIGRATION TESTING
-        print(f"[INFO] ARIMA forecasting temporarily disabled for migration testing")
-        
-        # Add disabled forecast columns to maintain column structure
-        target_metrics = ['Total_Files']  # Default metric
-        for metric in target_metrics:
-            if metric in df.columns:
-                df[f'{metric}_Forecast'] = "<ARIMA Disabled>"
-                df[f'{metric}_Forecast_Lower'] = "<ARIMA Disabled>"
-                df[f'{metric}_Forecast_Upper'] = "<ARIMA Disabled>"
-        
-        return df
+        # ARIMA forecasting is now enabled - use ar_utils implementation
+        from ar_utils import add_arima_forecast_columns
+        return add_arima_forecast_columns(df, "Total_Files", "daily")
     
     def _apply_acf_pacf_header_formatting(self, ws, columns, header_row):
         """
-        Applies special formatting to ACF/PACF column headers.
+        Applies special formatting to ACF/PACF column headers with enhanced readability.
         
         Args:
             ws: Worksheet object
@@ -334,22 +444,27 @@ class PipelineSheetCreator(BaseSheetCreator):
             header_row: Row number containing headers
         """
         try:
-            from openpyxl.styles import PatternFill
+            from openpyxl.styles import PatternFill, Font
             
-            # Define ACF/PACF header fill (light blue)
-            acf_pacf_fill = PatternFill(start_color="E6F3FF", end_color="E6F3FF", fill_type="solid")
+            # Enhanced ACF/PACF header styling for better readability and contrast
+            # Darker background for better contrast
+            acf_pacf_fill = PatternFill(start_color="B8D4F0", end_color="B8D4F0", fill_type="solid")
+            
+            # Dark blue font for excellent contrast against light blue background
+            acf_pacf_font = Font(color="003366", bold=True, size=10)
             
             for col_idx, column_name in enumerate(columns, 1):
                 if any(pattern in str(column_name) for pattern in ['ACF_', 'PACF_']):
                     cell = ws.cell(row=header_row, column=col_idx)
                     cell.fill = acf_pacf_fill
+                    cell.font = acf_pacf_font
                     
         except Exception as e:
             print(f"[WARNING] Could not apply ACF/PACF header formatting: {e}")
     
     def _apply_acf_pacf_data_formatting(self, ws, columns, start_row, num_rows):
         """
-        Applies special formatting to ACF/PACF data cells.
+        Applies special formatting to ACF/PACF data cells with enhanced readability.
         
         Args:
             ws: Worksheet object
@@ -358,16 +473,21 @@ class PipelineSheetCreator(BaseSheetCreator):
             num_rows: Number of data rows
         """
         try:
-            from openpyxl.styles import PatternFill
+            from openpyxl.styles import PatternFill, Font
             
-            # Define ACF/PACF data fill (very light blue)
-            acf_pacf_fill = PatternFill(start_color="F5F9FF", end_color="F5F9FF", fill_type="solid")
+            # Enhanced ACF/PACF data styling for better readability
+            # Subtle background that complements the header styling
+            acf_pacf_fill = PatternFill(start_color="F0F6FC", end_color="F0F6FC", fill_type="solid")
+            
+            # Slightly darker font for better readability
+            acf_pacf_font = Font(color="1F4E79", size=9)
             
             for col_idx, column_name in enumerate(columns, 1):
                 if any(pattern in str(column_name) for pattern in ['ACF_', 'PACF_']):
                     for row_idx in range(start_row, start_row + num_rows):
                         cell = ws.cell(row=row_idx, column=col_idx)
                         cell.fill = acf_pacf_fill
+                        cell.font = acf_pacf_font
                         
         except Exception as e:
             print(f"[WARNING] Could not apply ACF/PACF data formatting: {e}")
@@ -414,3 +534,4 @@ class PipelineSheetCreator(BaseSheetCreator):
             print(f"[WARNING] Could not apply minimal data formatting: {e}")
             # Fallback to no formatting rather than crash
             pass
+
