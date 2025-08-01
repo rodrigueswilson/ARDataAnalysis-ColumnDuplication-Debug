@@ -164,28 +164,29 @@ class FullMaintenanceWorkflow:
             self.log_error(f"Integrated decluttering failed: {str(e)}")
             return False
     
-    def run_git_command(self, command: list, description: str) -> bool:
-        """Run a git command and return success status."""
+    def run_git_command(self, command: list, description: str) -> Tuple[bool, str]:
+        """Run a git command and return success status and output."""
         try:
-            print(f"\n🔄 {description}...")
+            print(f"\n {description}...")
             result = subprocess.run(['git'] + command, 
-                                  capture_output=True, 
-                                  text=True, 
-                                  check=True)
+                                   capture_output=True, 
+                                   text=True, 
+                                   check=True)
             
-            if result.stdout.strip():
-                print(result.stdout.strip())
+            output = result.stdout.strip()
+            if output:
+                print(output)
             
             self.log_success(f"{description} completed successfully")
-            return True
+            return True, output
             
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else f"Exit code {e.returncode}"
             self.log_error(f"{description} failed: {error_msg}")
-            return False
+            return False, error_msg
         except Exception as e:
             self.log_error(f"{description} failed: {str(e)}")
-            return False
+            return False, str(e)
     
     def check_git_status(self) -> Tuple[bool, int]:
         """Check if there are pending git changes."""
@@ -348,7 +349,7 @@ class FullMaintenanceWorkflow:
                 if commits_to_push > 0:
                     print(f"🔍 Found {commits_to_push} commits ready to push")
                     if self.confirm_operation("push commits to remote repository"):
-                        step3_success = self.run_git_command(['push', 'origin', 'main'], 
+                        step3_success, _ = self.run_git_command(['push', 'origin', 'main'], 
                                                            'Push commits to remote repository')
                         if not step3_success:
                             self.log_warning("Git push failed but maintenance steps completed")

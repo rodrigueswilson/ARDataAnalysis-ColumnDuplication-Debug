@@ -87,16 +87,6 @@ class SpecializedSheetCreator(BaseSheetCreator):
                 seconds = int(seconds % 60)
                 return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
             
-            # Helper function to convert decimal hours to HH:MM:SS format
-            def hours_to_hms(decimal_hours):
-                if pd.isna(decimal_hours) or decimal_hours == 0:
-                    return "00:00:00"
-                total_seconds = decimal_hours * 3600
-                hours = int(total_seconds // 3600)
-                minutes = int((total_seconds % 3600) // 60)
-                seconds = int(total_seconds % 60)
-                return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-            
             # Add data rows
             row = 4
             for _, record in df.iterrows():

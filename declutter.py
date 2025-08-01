@@ -33,6 +33,8 @@ from typing import Set, Dict, List, Tuple, Optional, Any
 ESSENTIAL_DIRS = ['docs', 'utils', 'report_generator', 'pipelines', 'db', 'venv', '__pycache__']
 ESSENTIAL_FILES = [
     # Core analysis modules
+    'declutter.py',
+    'full_maintenance.py',
     'ar_utils.py',
     'acf_pacf_charts.py', 
     'dashboard_generator.py',
@@ -185,6 +187,18 @@ def detect_codebase_files() -> Set[str]:
             if file.endswith('.py'):
                 file_path = os.path.join(root, file)
                 norm_path = os.path.normpath(file_path)
+                
+                # Skip obvious non-essential files even if they have imports
+                file_name = os.path.basename(file).lower()
+                if (file_name.startswith('test_') or 
+                    file_name.startswith('debug_') or
+                    file_name.startswith('analyze_') or
+                    file_name.startswith('verify_') or
+                    file_name.startswith('check_') or
+                    'improved_declutter' in file_name or
+                    file_name.endswith('_v2.py') or
+                    file_name.endswith('_v3.py')):
+                    continue
                 
                 try:
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
