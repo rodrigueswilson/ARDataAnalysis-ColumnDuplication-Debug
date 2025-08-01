@@ -15,7 +15,11 @@ import os
 import sys
 import subprocess
 import datetime
-from typing import Tuple, Optional
+import zipfile
+import ast
+import glob
+import shutil
+from typing import Tuple, Optional, List, Set
 
 class FullMaintenanceWorkflow:
     """Complete maintenance workflow automation."""
@@ -41,6 +45,155 @@ class FullMaintenanceWorkflow:
         self.error_log.append(f"❌ {message}")
         print(f"❌ {message}")
     
+    def detect_codebase_files(self) -> Set[str]:
+        """Detect essential codebase files using intelligent analysis."""
+        codebase_files = set()
+        
+        # Essential configuration files
+        config_files = [
+            'report_config.json', 'config.yaml', 'requirements.txt', 
+            '.gitignore', '.pre-commit-config.yaml', '.pylintrc'
+        ]
+        
+        for config_file in config_files:
+            if os.path.exists(config_file):
+                codebase_files.add(config_file)
+        
+        # Essential documentation
+        doc_files = ['README.md', 'DIRECTORY_ORGANIZATION.md']
+        for doc_file in doc_files:
+            if os.path.exists(doc_file):
+                codebase_files.add(doc_file)
+        
+        # Analyze Python files for project imports
+        project_modules = {'ar_utils', 'db_utils', 'report_generator', 'pipelines', 'utils'}
+        
+        for py_file in glob.glob('*.py'):
+            # Skip obvious debug/test files
+            if any(py_file.startswith(prefix) for prefix in 
+                   ['debug_', 'test_', 'trace_', 'analyze_', 'verify_', 'check_', 'MARKER_']):
+                continue
+            
+            try:
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Parse AST to find imports
+                try:
+                    tree = ast.parse(content)
+                    for node in ast.walk(tree):
+                        if isinstance(node, (ast.Import, ast.ImportFrom)):
+                            if isinstance(node, ast.ImportFrom) and node.module:
+                                module_parts = node.module.split('.')
+                                if module_parts[0] in project_modules:
+                                    codebase_files.add(py_file)
+                                    break
+                            elif isinstance(node, ast.Import):
+                                for alias in node.names:
+                                    if alias.name.split('.')[0] in project_modules:
+                                        codebase_files.add(py_file)
+                                        break
+                except SyntaxError:
+                    # If AST parsing fails, check for string patterns
+                    for module in project_modules:
+                        if f'import {module}' in content or f'from {module}' in content:
+                            codebase_files.add(py_file)
+                            break
+                
+                # Check for configuration file references
+                config_patterns = ['report_config.json', 'config.yaml', 'requirements.txt']
+                for pattern in config_patterns:
+                    if pattern in content:
+                        codebase_files.add(py_file)
+                        break
+                        
+            except Exception:
+                # If file can't be read, skip it
+                continue
+        
+        # Add essential directories (will be handled separately)
+        essential_dirs = ['pipelines', 'report_generator', 'utils', 'db']
+        for dir_name in essential_dirs:
+            if os.path.isdir(dir_name):
+                for root, dirs, files in os.walk(dir_name):
+                    for file in files:
+                        if file.endswith('.py') or file.endswith('.json'):
+                            codebase_files.add(os.path.join(root, file))
+        
+        return codebase_files
+    
+    def create_comprehensive_backup(self) -> bool:
+        """Create comprehensive ZIP backup of essential codebase files."""
+        try:
+            print("\n🔍 Detecting essential codebase files...")
+            codebase_files = self.detect_codebase_files()
+            
+            if not codebase_files:
+                self.log_warning("No codebase files detected for backup")
+                return False
+            
+            print(f"📁 Detected {len(codebase_files)} essential files for backup")
+            
+            # Create backup directory
+            backup_dir = os.path.join('archive', 'backups')
+            os.makedirs(backup_dir, exist_ok=True)
+            
+            # Create timestamped backup filename
+            backup_filename = f'codebase_backup_{self.timestamp}.zip'
+            backup_path = os.path.join(backup_dir, backup_filename)
+            
+            # Create ZIP backup
+            print(f"📦 Creating comprehensive backup: {backup_filename}")
+            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for file_path in sorted(codebase_files):
+                    if os.path.exists(file_path):
+                        # Preserve directory structure in ZIP
+                        arcname = file_path.replace('\\', '/')
+                        zipf.write(file_path, arcname)
+                        print(f"  + {file_path}")
+            
+            # Verify backup was created
+            if os.path.exists(backup_path):
+                backup_size = os.path.getsize(backup_path)
+                backup_size_mb = backup_size / (1024 * 1024)
+                self.log_success(f"Comprehensive backup created: {backup_path} ({backup_size_mb:.1f} MB)")
+                
+                # Cleanup old backups (keep last 5)
+                self.cleanup_old_backups(backup_dir)
+                return True
+            else:
+                self.log_error("Backup file was not created successfully")
+                return False
+                
+        except Exception as e:
+            self.log_error(f"Comprehensive backup failed: {str(e)}")
+            return False
+    
+    def cleanup_old_backups(self, backup_dir: str) -> None:
+        """Keep only the last 5 backups, remove older ones."""
+        try:
+            backup_pattern = os.path.join(backup_dir, 'codebase_backup_*.zip')
+            backup_files = glob.glob(backup_pattern)
+            
+            if len(backup_files) > 5:
+                # Sort by modification time (oldest first)
+                backup_files.sort(key=os.path.getmtime)
+                
+                # Remove oldest backups, keep last 5
+                files_to_remove = backup_files[:-5]
+                for old_backup in files_to_remove:
+                    try:
+                        os.remove(old_backup)
+                        print(f"  🗑️ Removed old backup: {os.path.basename(old_backup)}")
+                    except Exception as e:
+                        self.log_warning(f"Could not remove old backup {old_backup}: {str(e)}")
+                
+                if files_to_remove:
+                    self.log_success(f"Cleaned up {len(files_to_remove)} old backups (keeping last 5)")
+                    
+        except Exception as e:
+            self.log_warning(f"Backup cleanup failed: {str(e)}")
+    
     def run_integrated_maintenance(self) -> bool:
         """Run integrated git maintenance logic."""
         print(f"\n🚀 Integrated git maintenance...")
@@ -59,19 +212,12 @@ class FullMaintenanceWorkflow:
             
             print(f"📊 Found {len(changes)} pending changes")
             
-            # Create backup (simplified)
-            backup_dir = os.path.join('archive', 'backups')
-            os.makedirs(backup_dir, exist_ok=True)
-            backup_name = f'full_maintenance_backup_{self.timestamp}.txt'
-            backup_path = os.path.join(backup_dir, backup_name)
-            
-            with open(backup_path, 'w') as f:
-                f.write(f"Git status backup - {self.timestamp}\n")
-                f.write("=" * 40 + "\n")
-                for change in changes:
-                    f.write(f"{change}\n")
-            
-            self.log_success(f"Backup created: {backup_path}")
+            # Create comprehensive backup before any changes
+            print("\n🛡️ Creating comprehensive codebase backup before maintenance...")
+            backup_success = self.create_comprehensive_backup()
+            if not backup_success:
+                self.log_error("Backup failed - aborting maintenance for safety")
+                return False
             
             # Ask for confirmation to stage and commit
             print(f"\n🔍 Ready to stage and commit {len(changes)} changes")
