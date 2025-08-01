@@ -1,0 +1,58 @@
+{
+  "project_name": "AR Data Analysis",
+  "version": "1.0.0",
+  "last_updated": "2025-07-31",
+  "categories": [
+    {
+      "name": "Technical Guides",
+      "path": "technical",
+      "description": "In-depth technical documentation on system components"
+    },
+    {
+      "name": "Troubleshooting",
+      "path": "troubleshooting",
+      "description": "Solutions for common issues and warnings"
+    },
+    {
+      "name": "Architecture",
+      "path": "architecture",
+      "description": "System architecture and design documentation"
+    },
+    {
+      "name": "User Guides",
+      "path": "user",
+      "description": "End-user documentation and usage instructions"
+    },
+    {
+      "name": "Development",
+      "path": "development",
+      "description": "Development guidelines and practices"
+    }
+  ],
+  "documents": [
+    {
+      "title": "ARIMA/SARIMAX Warnings",
+      "path": "troubleshooting/arima_warnings_solutions.md",
+      "category": "Troubleshooting",
+      "tags": ["ARIMA", "SARIMAX", "warnings", "time-series", "forecasting"],
+      "created": "2025-07-31",
+      "last_updated": "2025-07-31",
+      "related_docs": []
+    }
+  ],
+  "tags": [
+    "ARIMA",
+    "SARIMAX",
+    "warnings",
+    "time-series",
+    "forecasting",
+    "MongoDB",
+    "Excel",
+    "dashboard",
+    "report"
+  ],
+  "search_config": {
+    "enabled": true,
+    "index_update_frequency": "on_change"
+  }
+}
