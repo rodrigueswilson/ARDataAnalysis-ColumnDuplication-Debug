@@ -18,6 +18,7 @@ from utils import (
     get_school_calendar, get_non_collection_days, precompute_collection_days
 )
 from pipelines import PIPELINES  # Now using modular pipelines/ package
+from ..totals_manager import TotalsManager  # Import totals system
 
 # Import db_utils conditionally to avoid import errors
 try:
@@ -43,6 +44,7 @@ class BaseSheetCreator:
         self.formatter = formatter
         # Global pipeline cache to prevent duplicate executions
         self._pipeline_cache = {}
+        self.totals_manager = TotalsManager()  # Initialize totals manager
     
     def _fill_missing_collection_days(self, df, pipeline_name):
         """
@@ -294,6 +296,68 @@ class BaseSheetCreator:
             
             # Apply alternating row colors for better readability
             self.formatter.apply_alternating_row_colors(ws, 4, 3 + len(metrics), 1, 4)
+            
+            # Add totals to the summary statistics table
+            try:
+                # Create a DataFrame from the summary statistics for totals calculation
+                summary_data = []
+                for label, key in metrics:
+                    row_data = {'Metric': label}
+                    for period, stats in [('2021-2022', stats_2122), ('2022-2023', stats_2223), ('Overall', stats_overall)]:
+                        if key in stats:
+                            value = stats[key]
+                            if key in ['mean_files_per_day', 'median_files_per_day', 'std_files_per_day']:
+                                row_data[period] = round(value, 1)
+                            elif key == 'total_size_mb':
+                                row_data[period] = round(value, 2)
+                            else:
+                                row_data[period] = value
+                        else:
+                            row_data[period] = 0  # Use 0 for N/A values in totals calculation
+                    summary_data.append(row_data)
+                
+                # Convert to DataFrame for totals processing
+                import pandas as pd
+                summary_df = pd.DataFrame(summary_data)
+                
+                # Configure totals for summary statistics
+                totals_config = {
+                    'add_row_totals': True,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'exclude_columns': ['Metric'],  # Don't include metric names in totals
+                    'include_columns': ['2021-2022', '2022-2023', 'Overall'],  # Only numeric columns
+                    'totals_label': 'TOTALS'
+                }
+                
+                # Add totals to the worksheet
+                start_row = 4  # Where the data starts
+                start_col = 1  # Column A
+                
+                # Register this table for cross-sheet validation
+                self.totals_manager.register_totals(
+                    sheet_name='Summary Statistics',
+                    table_name='Main Summary',
+                    totals_data={
+                        'Total_Files_2021_2022': stats_2122.get('total_files', 0),
+                        'Total_Files_2022_2023': stats_2223.get('total_files', 0),
+                        'Total_Files_Overall': stats_overall.get('total_files', 0)
+                    }
+                )
+                
+                # Add totals to the worksheet
+                self.totals_manager.add_totals_to_worksheet(
+                    worksheet=ws,
+                    dataframe=summary_df,
+                    start_row=start_row,
+                    start_col=start_col,
+                    config=totals_config
+                )
+                
+                print("[SUCCESS] Added totals to Summary Statistics table")
+                
+            except Exception as e:
+                print(f"[WARNING] Failed to add totals to Summary Statistics: {e}")
             
             # Add enhanced day analysis tables
             current_row = self._add_day_analysis_tables(ws, 3 + len(metrics) + 3)

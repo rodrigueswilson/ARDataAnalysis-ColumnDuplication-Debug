@@ -1,0 +1,127 @@
+{
+  "validation_rules": {
+    "description": "Cross-sheet validation rules for AR Data Analysis totals system",
+    "version": "1.0",
+    "global_settings": {
+      "default_tolerance_percent": 0.1,
+      "default_tolerance_absolute": 1,
+      "validation_enabled": true,
+      "report_warnings": true,
+      "report_errors": true
+    },
+    "validation_groups": {
+      "total_files_consistency": {
+        "description": "Validates Total_Files consistency across different aggregation levels",
+        "rules": [
+          {
+            "name": "summary_vs_daily_totals",
+            "primary_sheet": "Summary Statistics",
+            "primary_field": "Total_Files_Overall",
+            "compare_sheets": ["Daily Counts", "Daily Counts (ACF_PACF)"],
+            "compare_field": "Total_Files_Sum",
+            "tolerance_percent": 0.0,
+            "tolerance_absolute": 0,
+            "severity": "error"
+          },
+          {
+            "name": "weekly_aggregation_consistency",
+            "primary_sheet": "Daily Counts",
+            "primary_field": "Total_Files_Sum",
+            "compare_sheets": ["Weekly Counts", "Weekly Counts (ACF_PACF)"],
+            "compare_field": "Total_Files_Sum",
+            "tolerance_percent": 0.0,
+            "tolerance_absolute": 0,
+            "severity": "error"
+          }
+        ]
+      },
+      "file_type_consistency": {
+        "description": "Validates MP3 and JPG file counts across sheets",
+        "rules": [
+          {
+            "name": "mp3_files_consistency",
+            "primary_sheet": "Summary Statistics",
+            "primary_field": "MP3_Files_Overall",
+            "compare_sheets": ["MP3 Duration Analysis"],
+            "compare_field": "Total_MP3_Files_Sum",
+            "tolerance_percent": 0.1,
+            "tolerance_absolute": 5,
+            "severity": "warning"
+          },
+          {
+            "name": "jpg_files_consistency",
+            "primary_sheet": "Summary Statistics",
+            "primary_field": "JPG_Files_Overall",
+            "compare_sheets": ["Daily Counts", "Weekly Counts"],
+            "compare_field": "JPG_Files_Sum",
+            "tolerance_percent": 0.1,
+            "tolerance_absolute": 5,
+            "severity": "warning"
+          }
+        ]
+      },
+      "size_consistency": {
+        "description": "Validates file size totals across different views",
+        "rules": [
+          {
+            "name": "total_size_consistency",
+            "primary_sheet": "Summary Statistics",
+            "primary_field": "Total_Size_MB_Overall",
+            "compare_sheets": ["Daily Counts", "Weekly Counts"],
+            "compare_field": "Total_Size_MB_Sum",
+            "tolerance_percent": 1.0,
+            "tolerance_absolute": 100,
+            "severity": "warning"
+          }
+        ]
+      }
+    },
+    "sheet_specific_rules": {
+      "Summary Statistics": {
+        "required_totals": ["Total_Files_Overall", "MP3_Files_Overall", "JPG_Files_Overall"],
+        "validation_priority": "high",
+        "cross_validation": true
+      },
+      "Daily Counts": {
+        "required_totals": ["Total_Files_Sum", "MP3_Files_Sum", "JPG_Files_Sum"],
+        "validation_priority": "high",
+        "cross_validation": true
+      },
+      "Weekly Counts": {
+        "required_totals": ["Total_Files_Sum", "MP3_Files_Sum", "JPG_Files_Sum"],
+        "validation_priority": "medium",
+        "cross_validation": true
+      },
+      "MP3 Duration Analysis": {
+        "required_totals": ["Total_MP3_Files_Sum", "Total_Duration_Hours_Sum"],
+        "validation_priority": "medium",
+        "cross_validation": false
+      },
+      "Audio Efficiency Details": {
+        "required_totals": ["Total_MP3_Files_Sum", "Total_Duration_Hours_Sum"],
+        "validation_priority": "low",
+        "cross_validation": false
+      }
+    },
+    "tolerance_overrides": {
+      "ACF_PACF_sheets": {
+        "description": "ACF/PACF sheets may have slight variations due to statistical processing",
+        "sheets": ["Daily Counts (ACF_PACF)", "Weekly Counts (ACF_PACF)"],
+        "tolerance_percent": 0.5,
+        "tolerance_absolute": 2
+      },
+      "specialized_analysis": {
+        "description": "Specialized analysis sheets may have filtered data",
+        "sheets": ["MP3 Duration Analysis", "Audio Efficiency Details"],
+        "tolerance_percent": 5.0,
+        "tolerance_absolute": 50
+      }
+    },
+    "validation_schedule": {
+      "run_on_report_generation": true,
+      "run_on_sheet_creation": false,
+      "generate_validation_report": true,
+      "validation_report_location": "validation_reports/"
+    }
+  }
+}

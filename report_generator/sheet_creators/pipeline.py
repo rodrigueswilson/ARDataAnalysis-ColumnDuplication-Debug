@@ -335,6 +335,35 @@ class PipelineSheetCreator(BaseSheetCreator):
         # Auto-adjust column widths
         self.formatter.auto_adjust_columns(ws)
         
+        # Add totals to pipeline sheets where appropriate
+        try:
+            # Configure totals based on sheet type and data characteristics
+            totals_config = self._get_totals_config_for_sheet(sheet_name, df, sheet_type)
+            
+            if totals_config and totals_config.get('add_totals', False):
+                # Add totals to the worksheet
+                start_row = 4  # Where the data starts (after headers)
+                start_col = 1  # Column A
+                
+                # Register key totals for cross-sheet validation
+                self._register_sheet_totals(sheet_name, df, sheet_type)
+                
+                # Add totals to the worksheet
+                self.totals_manager.add_totals_to_worksheet(
+                    worksheet=ws,
+                    dataframe=df,
+                    start_row=start_row,
+                    start_col=start_col,
+                    config=totals_config
+                )
+                
+                print(f"[SUCCESS] Added totals to sheet '{sheet_name}'")
+            else:
+                print(f"[INFO] Skipping totals for sheet '{sheet_name}' - not applicable for this sheet type")
+                
+        except Exception as e:
+            print(f"[WARNING] Failed to add totals to sheet '{sheet_name}': {e}")
+        
         # Add ACF/PACF charts based on configuration
         from chart_config_helper import should_add_chart
         if sheet_type in ['daily', 'weekly', 'biweekly', 'monthly', 'period'] and should_add_chart(sheet_name, 'acf_pacf'):
@@ -534,4 +563,3 @@ class PipelineSheetCreator(BaseSheetCreator):
             print(f"[WARNING] Could not apply minimal data formatting: {e}")
             # Fallback to no formatting rather than crash
             pass
-

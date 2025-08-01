@@ -269,6 +269,29 @@ class SpecializedSheetCreator(BaseSheetCreator):
             if not monthly_df.empty:
                 current_row = self._add_monthly_duration_table(ws, monthly_df, current_row, seconds_to_hms, hours_to_hms)
             
+            # Add totals to each table in the MP3 Duration Analysis sheet
+            try:
+                # Add totals to School Year Summary table (if it exists)
+                if not school_year_df.empty:
+                    self._add_totals_to_duration_table(ws, school_year_df, 'School Year Summary', 4, 'duration_summary')
+                
+                # Add totals to Period Breakdown table (if it exists)  
+                if not period_df.empty:
+                    # Find where the period table starts (after summary table)
+                    period_start_row = len(school_year_df) + 7 if not school_year_df.empty else 4
+                    self._add_totals_to_duration_table(ws, period_df, 'Period Breakdown', period_start_row, 'period_breakdown')
+                
+                # Add totals to Monthly Distribution table (if it exists)
+                if not monthly_df.empty:
+                    # Find where the monthly table starts
+                    monthly_start_row = current_row - len(monthly_df) - 3
+                    self._add_totals_to_duration_table(ws, monthly_df, 'Monthly Distribution', monthly_start_row, 'monthly_distribution')
+                
+                print("[SUCCESS] Added totals to MP3 Duration Analysis tables")
+                
+            except Exception as e:
+                print(f"[WARNING] Failed to add totals to MP3 Duration Analysis: {e}")
+            
             # Apply formatting and auto-adjust columns
             self.formatter.auto_adjust_columns(ws)
             
@@ -440,3 +463,42 @@ class SpecializedSheetCreator(BaseSheetCreator):
             self.formatter.apply_alternating_row_colors(ws, start_row + 3, current_row - 1, 1, 8)
         
         return current_row
+
+    def _add_totals_to_duration_table(self, ws, df, table_name, start_row, table_type):
+        """
+        Adds totals to the specified duration table.
+        """
+        # Calculate totals
+        total_files = df['Total_MP3_Files'].sum()
+        total_hours = df['Total_Duration_Hours'].sum()
+        avg_duration = df['Avg_Duration_Seconds'].mean()
+        
+        # Add totals row
+        if table_type == 'duration_summary':
+            ws.cell(row=start_row + len(df) + 1, column=1, value=f'Total {table_name}')
+            ws.cell(row=start_row + len(df) + 1, column=2, value=total_files)
+            ws.cell(row=start_row + len(df) + 1, column=3, value=total_hours)
+            ws.cell(row=start_row + len(df) + 1, column=4, value=avg_duration)
+            ws.cell(row=start_row + len(df) + 1, column=5, value=df['Min_Duration_Seconds'].min())
+            ws.cell(row=start_row + len(df) + 1, column=6, value=df['Max_Duration_Seconds'].max())
+        elif table_type == 'period_breakdown':
+            ws.cell(row=start_row + len(df) + 1, column=1, value=f'Total {table_name}')
+            ws.cell(row=start_row + len(df) + 1, column=2, value='')
+            ws.cell(row=start_row + len(df) + 1, column=3, value=total_files)
+            ws.cell(row=start_row + len(df) + 1, column=4, value=total_hours)
+            ws.cell(row=start_row + len(df) + 1, column=5, value=avg_duration)
+            ws.cell(row=start_row + len(df) + 1, column=6, value=df['Days_With_MP3'].sum())
+            ws.cell(row=start_row + len(df) + 1, column=7, value=df['Avg_Files_Per_Day'].mean())
+            ws.cell(row=start_row + len(df) + 1, column=8, value=df['Period_Efficiency'].mean())
+        elif table_type == 'monthly_distribution':
+            ws.cell(row=start_row + len(df) + 1, column=1, value=f'Total {table_name}')
+            ws.cell(row=start_row + len(df) + 1, column=2, value='')
+            ws.cell(row=start_row + len(df) + 1, column=3, value='')
+            ws.cell(row=start_row + len(df) + 1, column=4, value='')
+            ws.cell(row=start_row + len(df) + 1, column=5, value='')
+            ws.cell(row=start_row + len(df) + 1, column=6, value=total_files)
+            ws.cell(row=start_row + len(df) + 1, column=7, value=total_hours)
+            ws.cell(row=start_row + len(df) + 1, column=8, value=avg_duration)
+        
+        # Apply formatting to totals row
+        self.formatter.apply_totals_style(ws, f'A{start_row + len(df) + 1}:H{start_row + len(df) + 1}')
