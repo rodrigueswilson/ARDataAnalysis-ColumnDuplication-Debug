@@ -1,0 +1,204 @@
+"""
+MP3 Analysis Pipelines for AR Data Analysis
+
+This module contains MongoDB aggregation pipelines specifically for analyzing
+MP3 audio files, including duration analysis, efficiency metrics, and temporal patterns.
+
+Key Pipelines:
+- MP3_DURATION_BY_SCHOOL_YEAR: Duration analysis by school year
+- MP3_DURATION_BY_PERIOD: Duration analysis by collection period
+- MP3_DURATION_BY_MONTH: Monthly duration analysis with year-over-year comparison
+"""
+
+from .utils import PipelineFilterUtils, create_pipeline_with_filters
+
+# =============================================================================
+# MP3 DURATION ANALYSIS CORE STAGES
+# =============================================================================
+# Define common MP3 duration filter to be applied to all pipelines
+MP3_DURATION_FILTER = [
+    PipelineFilterUtils.get_both_filters(),     # Collection days & non-outliers
+    PipelineFilterUtils.get_mp3_filter(),       # Only MP3 files
+    {"$match": {"Duration_Seconds": {"$exists": True, "$gt": 0}}}  # Valid duration
+]
+
+# =============================================================================
+# MP3_DURATION_BY_SCHOOL_YEAR
+# =============================================================================
+# Aggregates MP3 duration metrics by school year with comprehensive statistics
+MP3_BY_SCHOOL_YEAR_STAGES = [
+    {
+        "$group": {
+            "_id": "$School_Year",
+            "Total_MP3_Files": {"$sum": 1},
+            "Total_Duration_Seconds": {"$sum": "$Duration_Seconds"},
+            "Avg_Duration_Seconds": {"$avg": "$Duration_Seconds"},
+            "Min_Duration_Seconds": {"$min": "$Duration_Seconds"},
+            "Max_Duration_Seconds": {"$max": "$Duration_Seconds"},
+            "Unique_Days": {"$addToSet": "$ISO_Date"}
+        }
+    },
+    {
+        "$addFields": {
+            "Total_Duration_Hours": {
+                "$round": [
+                    {"$divide": ["$Total_Duration_Seconds", 3600]}, 2
+                ]
+            },
+            "Days_With_MP3": {"$size": "$Unique_Days"},
+            "Avg_Files_Per_Day": {
+                "$round": [
+                    {"$divide": ["$Total_MP3_Files", {"$size": "$Unique_Days"}]}, 2
+                ]
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "School_Year": "$_id",
+            "Total_MP3_Files": 1,
+            "Total_Duration_Hours": 1,
+            "Avg_Duration_Seconds": {"$round": ["$Avg_Duration_Seconds", 1]},
+            "Min_Duration_Seconds": 1,
+            "Max_Duration_Seconds": 1,
+            "Days_With_MP3": 1,
+            "Avg_Files_Per_Day": 1
+        }
+    },
+    {
+        "$sort": {
+            "School_Year": 1
+        }
+    }
+]
+
+# Create the MP3 duration pipeline with appropriate filters
+MP3_DURATION_BY_SCHOOL_YEAR = create_pipeline_with_filters(
+    MP3_BY_SCHOOL_YEAR_STAGES,
+    MP3_DURATION_FILTER
+)
+
+# =============================================================================
+# MP3_DURATION_BY_PERIOD
+# =============================================================================
+# Aggregates MP3 duration metrics by collection period with efficiency calculations
+MP3_BY_PERIOD_STAGES = [
+    {
+        "$group": {
+            "_id": {
+                "School_Year": "$School_Year",
+                "Period": "$Collection_Period"
+            },
+            "Total_MP3_Files": {"$sum": 1},
+            "Total_Duration_Seconds": {"$sum": "$Duration_Seconds"},
+            "Avg_Duration_Seconds": {"$avg": "$Duration_Seconds"},
+            "Unique_Days": {"$addToSet": "$ISO_Date"}
+        }
+    },
+    {
+        "$addFields": {
+            "Total_Duration_Hours": {
+                "$round": [
+                    {"$divide": ["$Total_Duration_Seconds", 3600]}, 2
+                ]
+            },
+            "Days_With_MP3": {"$size": "$Unique_Days"},
+            "Avg_Files_Per_Day": {
+                "$round": [
+                    {"$divide": ["$Total_MP3_Files", {"$size": "$Unique_Days"}]}, 2
+                ]
+            },
+            "Period_Efficiency": {
+                "$round": [
+                    {"$divide": ["$Total_MP3_Files", "$Total_Duration_Hours"]}, 2
+                ]
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "School_Year": "$_id.School_Year",
+            "Period": "$_id.Period",
+            "Total_MP3_Files": 1,
+            "Total_Duration_Hours": 1,
+            "Avg_Duration_Seconds": {"$round": ["$Avg_Duration_Seconds", 1]},
+            "Days_With_MP3": 1,
+            "Avg_Files_Per_Day": 1,
+            "Period_Efficiency": 1
+        }
+    },
+    {
+        "$sort": {
+            "School_Year": 1,
+            "Period": 1
+        }
+    }
+]
+
+# Add filter condition for non-N/A Collection_Period
+MP3_PERIOD_FILTER = MP3_DURATION_FILTER + [
+    {"$match": {"Collection_Period": {"$ne": "N/A"}}}
+]
+
+MP3_DURATION_BY_PERIOD = create_pipeline_with_filters(
+    MP3_BY_PERIOD_STAGES,
+    MP3_PERIOD_FILTER
+)
+
+# =============================================================================
+# MP3_DURATION_BY_MONTH
+# =============================================================================
+# Aggregates MP3 duration metrics by month with school year comparison
+MP3_BY_MONTH_STAGES = [
+    {
+        "$addFields": {
+            "Month": {
+                "$month": {
+                    "$dateFromString": {
+                        "dateString": "$ISO_Date"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "$group": {
+            "_id": {
+                "Month": "$Month",
+                "School_Year": "$School_Year"
+            },
+            "Total_MP3_Files": {"$sum": 1},
+            "Total_Duration_Seconds": {"$sum": "$Duration_Seconds"},
+            "Avg_Duration_Seconds": {"$avg": "$Duration_Seconds"}
+        }
+    },
+    {
+        "$addFields": {
+            "Total_Duration_Hours": {
+                "$round": [
+                    {"$divide": ["$Total_Duration_Seconds", 3600]}, 2
+                ]
+            }
+        }
+    },
+    {
+        "$sort": {
+            "_id.Month": 1,
+            "_id.School_Year": 1
+        }
+    }
+]
+
+MP3_DURATION_BY_MONTH = create_pipeline_with_filters(
+    MP3_BY_MONTH_STAGES,
+    MP3_DURATION_FILTER
+)
+
+# Export all MP3 analysis pipelines
+MP3_PIPELINES = {
+    "MP3_DURATION_BY_SCHOOL_YEAR": MP3_DURATION_BY_SCHOOL_YEAR,
+    "MP3_DURATION_BY_PERIOD": MP3_DURATION_BY_PERIOD,
+    "MP3_DURATION_BY_MONTH": MP3_DURATION_BY_MONTH
+}

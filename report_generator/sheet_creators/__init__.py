@@ -22,9 +22,11 @@ Usage:
     creator.create_mp3_duration_analysis_sheet(workbook)
 """
 
+import openpyxl
 from .base import BaseSheetCreator
 from .pipeline import PipelineSheetCreator
 from .specialized import SpecializedSheetCreator
+from utils.data_cleaning import DataCleaningUtils
 
 
 class SheetCreator(SpecializedSheetCreator, PipelineSheetCreator):
@@ -50,6 +52,95 @@ class SheetCreator(SpecializedSheetCreator, PipelineSheetCreator):
         """
         # Initialize the base class (all others inherit from it)
         super().__init__(db, formatter)
+        
+        # Initialize data cleaning utils for modular data cleaning operations
+        self.data_cleaning_utils = DataCleaningUtils(db)
+    
+    def _create_filter_impact_summary(self, ws, start_row, totals):
+        """
+        Create Table 3: Filter Impact Summary
+        
+        Args:
+            ws: Worksheet to add the table to
+            start_row: Row to start the table at
+            totals: Dictionary containing the totals for each category
+            
+        Returns:
+            int: The next row after the table
+        """
+        try:
+            print(f"[INFO] Creating Table 3: Filter Impact Summary at row {start_row}")
+            
+            # Table 3 header
+            table3_start_row = start_row
+            ws.cell(row=table3_start_row, column=1, value="Table 3: Filter Impact Summary")
+            self.formatter.apply_section_header_style(ws, f'A{table3_start_row}')
+            
+            # Headers for summary table (human-readable)
+            summary_headers = ['Filter Category', 'Number of Files', '% of All Files', 'TOTAL']
+            summary_header_row = table3_start_row + 2
+            
+            for col, header in enumerate(summary_headers, 1):
+                ws.cell(row=summary_header_row, column=col, value=header)
+            self.formatter.apply_header_style(ws, f'A{summary_header_row}:D{summary_header_row}')
+            
+            # Calculate summary data (clear and descriptive labels)
+            total_files = totals['total_files']
+            summary_data = [
+                ('School Outliers (unusual files from school days)', totals['school_outliers'], 
+                 (totals['school_outliers'] / total_files * 100) if total_files > 0 else 0),
+                ('Non-School Normal (regular files from non-school days)', totals['non_school_normal'], 
+                 (totals['non_school_normal'] / total_files * 100) if total_files > 0 else 0),
+                ('School Normal (final research dataset)', totals['school_normal'], 
+                 (totals['school_normal'] / total_files * 100) if total_files > 0 else 0),
+                ('Non-School Outliers (unusual files from non-school days)', totals['non_school_outliers'], 
+                 (totals['non_school_outliers'] / total_files * 100) if total_files > 0 else 0)
+            ]
+            
+            # Fill summary data
+            summary_row = summary_header_row + 1
+            
+            for criterion, count, percentage in summary_data:
+                ws.cell(row=summary_row, column=1, value=criterion)
+                ws.cell(row=summary_row, column=2, value=count)
+                
+                # Format percentage
+                pct_cell = ws.cell(row=summary_row, column=3, value=percentage / 100)
+                pct_cell.number_format = '0.0%'
+                
+                # Add TOTAL column (same as Number of Files for each row)
+                ws.cell(row=summary_row, column=4, value=count)
+                
+                summary_row += 1
+            
+            # Add formatted total row at the specific position
+            table3_total_values = {
+                2: totals['total_files'],
+                3: 1.0,  # 100%
+                4: totals['total_files']  # Total column should match the total files
+            }
+            
+            # Add total row at the correct position
+            self.formatter.add_total_row_at_position(ws, summary_row, table3_total_values)
+            
+            # Format total percentage (should be 100%)
+            total_pct_cell = ws.cell(row=summary_row, column=3)
+            total_pct_cell.number_format = '0.0%'
+            
+            summary_row += 1
+            
+            # Apply formatting to Table 3 (Filter Impact Summary)
+            self.formatter.apply_data_style(ws, f'A{summary_header_row + 1}:D{summary_row - 1}')
+            self.formatter.apply_alternating_row_colors(ws, summary_header_row + 1, summary_row - 1, 1, 4)
+            
+            print(f"[SUCCESS] Created Table 3: Filter Impact Summary")
+            return summary_row
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to create Table 3: {e}")
+            import traceback
+            traceback.print_exc()
+            return start_row  # Return the original start row if there's an error
     
     def _calculate_consecutive_days(self, df, total_collection_days):
         """
@@ -93,100 +184,493 @@ class SheetCreator(SpecializedSheetCreator, PipelineSheetCreator):
     
     def create_data_cleaning_sheet(self, workbook):
         """
-        Creates the Data Cleaning sheet.
+        Creates the Data Cleaning sheet with intersection analysis of both filtering criteria:
+        - is_collection_day: TRUE
+        - Outlier_Status: FALSE
+        
+        This provides a comprehensive Venn diagram breakdown showing the impact of each filter.
+        Uses DataCleaningUtils for data calculation.
         """
         try:
-            # Get outlier data
-            pipeline = [
-                {"$match": {"file_type": {"$in": ["JPG", "MP3"]}}},
-                {"$group": {
-                    "_id": {
-                        "outlier_status": "$Outlier_Status",
-                        "file_type": "$file_type"
-                    },
-                    "count": {"$sum": 1},
-                    "total_size_mb": {"$sum": "$File_Size_MB"},
-                    "avg_size_mb": {"$avg": "$File_Size_MB"}
-                }},
-                {"$sort": {"_id.file_type": 1, "_id.outlier_status": 1}}
-            ]
+            # Use the utility class for data calculation
+            print("[INFO] Using DataCleaningUtils for data cleaning calculations...")
+            result = self.data_cleaning_utils.get_complete_cleaning_data()
+            intersection_data = result['intersection_data']
+            totals = result['totals']
             
-            df = self._run_aggregation(pipeline)
-            if df.empty:
-                print("[WARNING] No data found for Data Cleaning sheet")
-                return
+            # Get year breakdown data
+            year_data = self.data_cleaning_utils.get_year_breakdown_data()
             
+            # Use the implementation method for worksheet creation and formatting
+            return self._create_data_cleaning_sheet_impl(workbook, intersection_data, totals, year_data)
+        except Exception as e:
+            # Log the error
+            print(f"[ERROR] Failed to use DataCleaningUtils: {e}")
+            print("[INFO] Falling back to original implementation")
+            import traceback
+            traceback.print_exc()
+            # Fall back to original implementation
+            return self._create_data_cleaning_sheet_impl(workbook)
+            
+    def _create_data_cleaning_sheet_impl(self, workbook, intersection_data=None, totals=None, year_data=None):
+        """
+        Implementation of the Data Cleaning sheet creation.
+        Can either calculate data internally (original behavior) or use pre-calculated data.
+        
+        Args:
+            workbook: Excel workbook to add the sheet to
+            intersection_data: Optional pre-calculated intersection data
+            totals: Optional pre-calculated totals
+            year_data: Optional pre-calculated year breakdown data
+        """
+        try:
             # Create worksheet
             ws = workbook.create_sheet("Data Cleaning")
             
             # Title
-            ws['A1'] = "AR Data Analysis - Data Quality & Cleaning Report"
+            ws['A1'] = "AR Data Analysis - Data Cleaning & Filtering Report"
             self.formatter.apply_title_style(ws, 'A1')
             
-            # Section 1: Outlier Analysis
-            ws['A3'] = "Outlier Analysis"
+            # Check if we have pre-calculated data
+            if intersection_data is None or totals is None:
+                print("[INFO] Running intersection analysis for Data Cleaning sheet...")
+                
+                # Run four separate aggregations for intersection analysis
+                # 1. Total raw data (no filters except School_Year != "N/A")
+                raw_pipeline = [
+                    {"$match": {
+                        "School_Year": {"$ne": "N/A"},
+                        "file_type": {"$in": ["JPG", "MP3"]}
+                    }},
+                    {"$group": {
+                        "_id": "$file_type",
+                        "count": {"$sum": 1}
+                    }}
+                ]
+                
+                # 2. Collection days only (is_collection_day: TRUE)
+                collection_pipeline = [
+                    {"$match": {
+                        "School_Year": {"$ne": "N/A"},
+                        "file_type": {"$in": ["JPG", "MP3"]},
+                        "is_collection_day": True
+                    }},
+                    {"$group": {
+                        "_id": "$file_type",
+                        "count": {"$sum": 1}
+                    }}
+                ]
+                
+                # 3. Non-outliers only (Outlier_Status: FALSE)
+                non_outlier_pipeline = [
+                    {"$match": {
+                        "School_Year": {"$ne": "N/A"},
+                        "file_type": {"$in": ["JPG", "MP3"]},
+                        "Outlier_Status": False
+                    }},
+                    {"$group": {
+                        "_id": "$file_type",
+                        "count": {"$sum": 1}
+                    }}
+                ]
+                
+                # 4. Both criteria (intersection: is_collection_day: TRUE AND Outlier_Status: FALSE)
+                both_pipeline = [
+                    {"$match": {
+                        "School_Year": {"$ne": "N/A"},
+                        "file_type": {"$in": ["JPG", "MP3"]},
+                        "is_collection_day": True,
+                        "Outlier_Status": False
+                    }},
+                    {"$group": {
+                        "_id": "$file_type",
+                        "count": {"$sum": 1}
+                    }}
+                ]
+                
+                # Execute all aggregations
+                raw_df = self._run_aggregation(raw_pipeline)
+                collection_df = self._run_aggregation(collection_pipeline)
+                non_outlier_df = self._run_aggregation(non_outlier_pipeline)
+                both_df = self._run_aggregation(both_pipeline)
+                
+                # Process results into dictionaries for easier lookup
+                def df_to_dict(df):
+                    if df.empty:
+                        return {}
+                    # The _run_aggregation method flattens _id dictionaries, so file_type becomes a direct column
+                    result = {}
+                    for _, row in df.iterrows():
+                        file_type = row.get('file_type', row.get('_id', 'Unknown'))
+                        count = row.get('count', 0)
+                        result[file_type] = count
+                    return result
+                
+                raw_counts = df_to_dict(raw_df)
+                collection_counts = df_to_dict(collection_df)
+                non_outlier_counts = df_to_dict(non_outlier_df)
+                both_counts = df_to_dict(both_df)
+                
+                # Calculate intersection values if not pre-calculated
+                if intersection_data is None:
+                    file_types = ['JPG', 'MP3']
+                    intersection_data = []
+                    
+                    for file_type in file_types:
+                        total_raw = raw_counts.get(file_type, 0)
+                        collection_only = collection_counts.get(file_type, 0)
+                        non_outlier_only = non_outlier_counts.get(file_type, 0)
+                        both_criteria = both_counts.get(file_type, 0)
+                        
+                        # Calculate files that meet only one criterion (exclusive)
+                        collection_only_exclusive = collection_only - both_criteria
+                        non_outlier_only_exclusive = non_outlier_only - both_criteria
+                        
+                        # Calculate files that meet neither criterion (correct Venn diagram formula)
+                        # Neither = Total - (Collection Days Total) - (Non-Outliers Total) + (Both)
+                        # This gives us files that are: NOT collection days AND ARE outliers
+                        neither = total_raw - collection_only - non_outlier_only + both_criteria
+                        
+                        # Calculate retention percentage
+                        retention_pct = (both_criteria / total_raw * 100) if total_raw > 0 else 0
+                        
+                        # Calculate total excluded files (all categories except School Normal)
+                        total_excluded = collection_only_exclusive + non_outlier_only_exclusive + neither
+                        
+                        # Calculate exclusion percentage
+                        exclusion_pct = (total_excluded / total_raw * 100) if total_raw > 0 else 0
+                        
+                        intersection_data.append({
+                            'file_type': file_type,
+                            'total_files': total_raw,
+                            'school_outliers': collection_only_exclusive,
+                            'non_school_normal': non_outlier_only_exclusive,
+                            'non_school_outliers': neither,
+                            'total_excluded': total_excluded,
+                            'school_normal': both_criteria,
+                            'exclusion_pct': exclusion_pct,
+                            'retention_pct': retention_pct
+                        })
+                    
+                    # Calculate totals if they're not provided
+                    if totals is None:
+                        totals = {
+                            'file_type': 'TOTAL',
+                            'total_files': sum(item['total_files'] for item in intersection_data),
+                            'school_outliers': sum(item['school_outliers'] for item in intersection_data),
+                            'non_school_normal': sum(item['non_school_normal'] for item in intersection_data),
+                            'non_school_outliers': sum(item['non_school_outliers'] for item in intersection_data),
+                            'total_excluded': sum(item['total_excluded'] for item in intersection_data),
+                            'school_normal': sum(item['school_normal'] for item in intersection_data)
+                        }
+                        
+                        # Calculate percentages for totals
+                        if totals['total_files'] > 0:
+                            totals['exclusion_pct'] = (totals['total_excluded'] / totals['total_files'] * 100)
+                            totals['retention_pct'] = (totals['school_normal'] / totals['total_files'] * 100)
+                    else:
+                        totals['exclusion_pct'] = 0
+                        totals['retention_pct'] = 0
+            intersection_data.append(totals)
+            
+            # Table 1: Complete Filtering Breakdown
+            ws['A3'] = "Table 1: Complete Filtering Breakdown (Intersection Analysis)"
             self.formatter.apply_section_header_style(ws, 'A3')
             
-            # Headers for outlier table
-            outlier_headers = ['File Type', 'Outlier Status', 'Count', 'Total Size (MB)', 'Avg Size (MB)']
-            for col, header in enumerate(outlier_headers, 1):
+            # Headers for 2x2 matrix table (academic terminology with before/after cleaning clarity)
+            headers = ['Media Type', 'Initial Collection Size', 'Recording Errors Filtered', 'Non-Instructional Days Filtered', 'Combined Filters Applied', 'Total Records Filtered', 'Research Dataset Size', 'Filter Application Rate (%)', 'Dataset Validity Rate (%)']
+            for col, header in enumerate(headers, 1):
                 ws.cell(row=5, column=col, value=header)
-            self.formatter.apply_header_style(ws, 'A5:E5')
+            self.formatter.apply_header_style(ws, 'A5:I5')
             
-            # Outlier data
+            # Data rows
             row = 6
-            for _, record in df.iterrows():
-                ws.cell(row=row, column=1, value=record.get('file_type', 'Unknown'))
-                ws.cell(row=row, column=2, value=record.get('outlier_status', 'Unknown'))
-                ws.cell(row=row, column=3, value=record.get('count', 0))
-                ws.cell(row=row, column=4, value=round(record.get('total_size_mb', 0), 2))
-                ws.cell(row=row, column=5, value=round(record.get('avg_size_mb', 0), 2))
+            for item in intersection_data:
+                ws.cell(row=row, column=1, value=item['file_type'])
+                ws.cell(row=row, column=2, value=item['total_files'])
+                ws.cell(row=row, column=3, value=item['school_outliers'])
+                ws.cell(row=row, column=4, value=item['non_school_normal'])
+                ws.cell(row=row, column=5, value=item['non_school_outliers'])
+                ws.cell(row=row, column=6, value=item['total_excluded'])
+                ws.cell(row=row, column=7, value=item['school_normal'])
+                
+                # Format exclusion percentage
+                exclusion_cell = ws.cell(row=row, column=8, value=item['exclusion_pct'] / 100)
+                exclusion_cell.number_format = '0.0%'
+                
+                # Format retention percentage
+                retention_cell = ws.cell(row=row, column=9, value=item['retention_pct'] / 100)
+                retention_cell.number_format = '0.0%'
+                
                 row += 1
             
-            # Apply formatting
-            self.formatter.apply_data_style(ws, f'A6:E{row-1}')
+            # Apply formatting to Table 1 (excluding the total row which will be added separately)
+            self.formatter.apply_data_style(ws, f'A6:I{row-1}')
+            self.formatter.apply_alternating_row_colors(ws, 6, row-1, 1, 9)
             
-            # Apply alternating row colors for better readability
-            self.formatter.apply_alternating_row_colors(ws, 6, row-1, 1, 5)
+            # Add formatted total row at the specific position
+            total_row_values = {
+                2: totals['total_files'],
+                3: totals['school_outliers'],
+                4: totals['non_school_normal'],
+                5: totals['school_normal'],
+                6: totals['non_school_outliers'],
+                7: totals['school_normal'],
+                8: (totals['school_outliers'] + totals['non_school_normal'] + totals['non_school_outliers']) / totals['total_files'] if totals['total_files'] > 0 else 0,
+                9: totals['school_normal'] / totals['total_files'] if totals['total_files'] > 0 else 0
+            }
             
-            # Section 2: Data Quality Metrics
-            ws[f'A{row+2}'] = "Data Quality Metrics"
-            self.formatter.apply_section_header_style(ws, f'A{row+2}')
+            # Format percentage cells
+            ws.cell(row=row-1, column=8).number_format = '0.0%'
+            ws.cell(row=row-1, column=9).number_format = '0.0%'
             
-            # Get quality metrics
-            total_records = self.db['media_records'].count_documents({"file_type": {"$in": ["JPG", "MP3"]}})
-            outlier_records = self.db['media_records'].count_documents({
-                "file_type": {"$in": ["JPG", "MP3"]},
-                "Outlier_Status": True
-            })
-            valid_records = total_records - outlier_records
+            # Add total row at the correct position
+            self.formatter.add_total_row_at_position(ws, row-1, total_row_values)
             
-            quality_metrics = [
-                ('Total Records', total_records),
-                ('Valid Records', valid_records),
-                ('Outlier Records', outlier_records),
-                ('Data Quality Rate', (valid_records/total_records) if total_records > 0 else "N/A")
+            # Table 2: Year-by-Year Breakdown
+            table2_start_row = row + 2
+            ws[f'A{table2_start_row}'] = "Table 2: Year-by-Year Breakdown"
+            self.formatter.apply_section_header_style(ws, f'A{table2_start_row}')
+            
+            # Headers for Table 2 (same academic terminology as Table 1)
+            table2_headers = ['Category', 'Initial Collection Size', 'Recording Errors Filtered', 'Non-Instructional Days Filtered', 'Combined Filters Applied', 'Total Records Filtered', 'Research Dataset Size', 'Filter Application Rate (%)', 'Dataset Validity Rate (%)']
+            table2_header_row = table2_start_row + 2
+            for col, header in enumerate(table2_headers, 1):
+                ws.cell(row=table2_header_row, column=col, value=header)
+            self.formatter.apply_header_style(ws, f'A{table2_header_row}:I{table2_header_row}')
+            
+            # Calculate year-by-year data if not provided
+            if year_data is None:
+                year_breakdown_data = []
+                years = ["2021-2022", "2022-2023"]
+                
+                # Get collection from database
+                collection = self.db['media_records']
+                
+                for year in years:
+                    for file_type in ["JPG", "MP3"]:
+                        category = f"{year} {file_type} Files"
+                        
+                        # Total files for this year/type
+                        total_files = collection.count_documents({
+                            "School_Year": year,
+                            "file_type": file_type
+                        })
+                        
+                        # Outliers: is_collection_day: TRUE AND Outlier_Status: TRUE
+                        outliers = collection.count_documents({
+                            "School_Year": year,
+                            "file_type": file_type,
+                            "is_collection_day": True,
+                            "Outlier_Status": True
+                        })
+                        
+                        # Non-School Days: is_collection_day: FALSE AND Outlier_Status: FALSE
+                        non_school_days = collection.count_documents({
+                            "School_Year": year,
+                            "file_type": file_type,
+                            "is_collection_day": False,
+                            "Outlier_Status": False
+                        })
+                        
+                        # Non-School Days and Outliers: is_collection_day: FALSE AND Outlier_Status: TRUE
+                        non_school_outliers = collection.count_documents({
+                            "School_Year": year,
+                            "file_type": file_type,
+                            "is_collection_day": False,
+                            "Outlier_Status": True
+                        })
+                        
+                        # School Days (Final Dataset): is_collection_day: TRUE AND Outlier_Status: FALSE
+                        school_days = collection.count_documents({
+                            "School_Year": year,
+                            "file_type": file_type,
+                            "is_collection_day": True,
+                            "Outlier_Status": False
+                        })
+                        
+                        # Calculate totals and percentages
+                        total_excluded = outliers + non_school_days + non_school_outliers
+                        exclusion_pct = (total_excluded / total_files * 100) if total_files > 0 else 0
+                        retention_pct = (school_days / total_files * 100) if total_files > 0 else 0
+                        
+                        year_breakdown_data.append({
+                            'category': category,
+                            'total_files': total_files,
+                            'outliers': outliers,
+                            'non_school_days': non_school_days,
+                            'non_school_outliers': non_school_outliers,
+                            'total_excluded': total_excluded,
+                            'school_days': school_days,
+                            'exclusion_pct': exclusion_pct,
+                            'retention_pct': retention_pct
+                        })
+                
+                # Calculate totals for year breakdown
+                year_totals = {
+                    'category': 'TOTAL',
+                    'total_files': sum(item['total_files'] for item in year_breakdown_data),
+                    'outliers': sum(item['outliers'] for item in year_breakdown_data),
+                    'non_school_days': sum(item['non_school_days'] for item in year_breakdown_data),
+                    'non_school_outliers': sum(item['non_school_outliers'] for item in year_breakdown_data),
+                    'total_excluded': sum(item['total_excluded'] for item in year_breakdown_data),
+                    'school_days': sum(item['school_days'] for item in year_breakdown_data),
+                    'exclusion_pct': (sum(item['total_excluded'] for item in year_breakdown_data) / 
+                                    sum(item['total_files'] for item in year_breakdown_data) * 100) if sum(item['total_files'] for item in year_breakdown_data) > 0 else 0,
+                    'retention_pct': (sum(item['school_days'] for item in year_breakdown_data) / 
+                                    sum(item['total_files'] for item in year_breakdown_data) * 100) if sum(item['total_files'] for item in year_breakdown_data) > 0 else 0
+                }
+                year_breakdown_data.append(year_totals)
+            else:
+                # Use the pre-calculated year breakdown data
+                print("[INFO] Using pre-calculated year breakdown data")
+                year_breakdown_data = year_data
+            
+            # Fill Table 2 data
+            table2_row = table2_header_row + 1
+            for item in year_breakdown_data:
+                ws.cell(row=table2_row, column=1, value=item['category'])
+                ws.cell(row=table2_row, column=2, value=item['total_files'])
+                ws.cell(row=table2_row, column=3, value=item['outliers'])
+                ws.cell(row=table2_row, column=4, value=item['non_school_days'])
+                ws.cell(row=table2_row, column=5, value=item['non_school_outliers'])
+                ws.cell(row=table2_row, column=6, value=item['total_excluded'])
+                ws.cell(row=table2_row, column=7, value=item['school_days'])
+                
+                # Format exclusion percentage
+                exclusion_cell = ws.cell(row=table2_row, column=8, value=item['exclusion_pct'] / 100)
+                exclusion_cell.number_format = '0.0%'
+                
+                # Format retention percentage
+                retention_cell = ws.cell(row=table2_row, column=9, value=item['retention_pct'] / 100)
+                retention_cell.number_format = '0.0%'
+                
+                table2_row += 1
+            
+            # Apply formatting to Table 2 (excluding the total row which will be added separately)
+            self.formatter.apply_data_style(ws, f'A{table2_header_row + 1}:I{table2_row-1}')
+            self.formatter.apply_alternating_row_colors(ws, table2_header_row + 1, table2_row-1, 1, 9)
+            
+            # Add formatted total row at the specific position
+            total_row_values = {
+                2: totals['total_files'],
+                3: totals['school_outliers'],
+                4: totals['non_school_normal'],
+                5: totals['school_normal'],
+                6: totals['non_school_outliers'],
+                7: totals['school_normal'],
+                8: (totals['school_outliers'] + totals['non_school_normal'] + totals['non_school_outliers']) / totals['total_files'] if totals['total_files'] > 0 else 0,
+                9: totals['school_normal'] / totals['total_files'] if totals['total_files'] > 0 else 0
+            }
+            
+            # Format percentage cells
+            ws.cell(row=table2_row-1, column=8).number_format = '0.0%'
+            ws.cell(row=table2_row-1, column=9).number_format = '0.0%'
+            
+            # Add total row at the correct position
+            self.formatter.add_total_row_at_position(ws, table2_row-1, total_row_values)
+            
+            # Logic Explanation Table
+            logic_table_start = table2_row + 2
+            ws[f'A{logic_table_start}'] = "Logic Explanation: Category Definitions"
+            self.formatter.apply_section_header_style(ws, f'A{logic_table_start}')
+            
+            # Headers for logic explanation table (academic terminology)
+            logic_headers = ['Category', 'Collection Period', 'Recording Quality', 'Count']
+            logic_header_row = logic_table_start + 2
+            for col, header in enumerate(logic_headers, 1):
+                ws.cell(row=logic_header_row, column=col, value=header)
+            self.formatter.apply_header_style(ws, f'A{logic_header_row}:D{logic_header_row}')
+            
+            # Logic explanation data (academic terminology)
+            logic_data = [
+                ('Recording Errors (School Days)', 'Valid Period', 'Manual Exclusion', totals['school_outliers']),
+                ('Non-Instructional Recordings', 'Invalid Period', 'Valid Recording', totals['non_school_normal']),
+                ('Combined Exclusions', 'Invalid Period', 'Manual Exclusion', totals['non_school_outliers']),
+                ('Research Dataset (Final)', 'Valid Period', 'Valid Recording', totals['school_normal'])
             ]
             
-            metrics_row = row + 4
-            for i, (metric, value) in enumerate(quality_metrics):
-                ws.cell(row=metrics_row + i, column=1, value=metric)
-                cell = ws.cell(row=metrics_row + i, column=2)
-                if metric == 'Data Quality Rate' and isinstance(value, (int, float)):
-                    # Store as numeric value and apply percentage formatting
-                    cell.value = value  # Already a decimal (0.0 to 1.0)
-                    cell.number_format = '0.0%'  # Apply Excel percentage formatting
-                else:
-                    cell.value = value
+            # Fill logic explanation data
+            logic_row = logic_header_row + 1
+            for category, collection_day, outlier_status, count in logic_data:
+                ws.cell(row=logic_row, column=1, value=category)
+                ws.cell(row=logic_row, column=2, value=collection_day)
+                ws.cell(row=logic_row, column=3, value=outlier_status)
+                ws.cell(row=logic_row, column=4, value=count)
+                logic_row += 1
             
-            # Apply formatting
-            self.formatter.apply_data_style(ws, f'A{metrics_row}:B{metrics_row + len(quality_metrics) - 1}')
+            # Add formatted total row at the specific position
+            logic_total_values = {
+                1: 'TOTAL',
+                2: '-',
+                3: '-',
+                4: totals['total_files']
+            }
+            
+            # Add total row at the correct position
+            self.formatter.add_total_row_at_position(ws, logic_row, logic_total_values)
+            
+            logic_row += 1
+            
+            # Apply formatting to logic table
+            self.formatter.apply_data_style(ws, f'A{logic_header_row + 1}:D{logic_row - 1}')
+            self.formatter.apply_alternating_row_colors(ws, logic_header_row + 1, logic_row - 1, 1, 4)
+            
+            # Create Table 3: Filter Impact Summary
+            next_row = self._create_filter_impact_summary(ws, logic_row + 3, totals)
+            
+            # Debug the next_row value
+            print(f"[DEBUG] next_row value after Table 3 creation: {next_row}")
+            
+            # Add explanatory notes
+            notes_start_row = next_row + 2
+            print(f"[DEBUG] Adding Notes section at row {notes_start_row}")
+            ws.cell(row=notes_start_row, column=1, value="Notes:")
+            self.formatter.apply_section_header_style(ws, f'A{notes_start_row}')
+            print(f"[DEBUG] Notes section header added")
+            
+            notes = [
+                "• Initial Collection Size: Complete raw dataset before quality assessment",
+                "• Recording Errors Filtered: Files manually classified as recording mistakes (too short, too long,",
+                "  recorder not stopped properly, or otherwise irrelevant for AR collection analysis)",
+                "• Non-Instructional Days: Files captured outside designated school collection periods",
+                "• Research Dataset: High-quality files meeting both technical validity and temporal criteria",
+                "• This preprocessing ensures dataset integrity for educational AR research analysis"
+            ]
+            
+            for i, note in enumerate(notes):
+                note_row = notes_start_row + 1 + i
+                ws[f'A{note_row}'] = note
+                self.formatter.apply_data_style(ws, f'A{note_row}')
+            
+            # Register totals for validation
+            totals_data = {
+                'sheet_name': 'Data Cleaning',
+                'table_name': 'Intersection Analysis',
+                'total_raw_files': totals['total_files'],
+                'final_clean_files': totals['school_normal'],
+                'retention_percentage': totals['retention_pct']
+            }
+            
+            try:
+                self.totals_manager.register_sheet_totals('Data Cleaning', totals_data)
+                print(f"[TOTALS] Registered intersection analysis totals: {totals['school_normal']} clean files ({totals['retention_pct']:.1f}% retention)")
+            except Exception as e:
+                print(f"[WARNING] Failed to register totals: {e}")
+            
+            print(f"[DEBUG] Auto-adjusting columns for Data Cleaning sheet")
             self.formatter.auto_adjust_columns(ws)
             
-            print("[SUCCESS] Data Cleaning sheet created")
+            print("[SUCCESS] Data Cleaning sheet created with 2x2 matrix showing all four mutually exclusive categories")
+            print(f"[INFO] Final clean dataset: {totals['school_normal']} files ({totals['retention_pct']:.1f}% retention)")
+            # Calculate the table3_start_row based on logic_row + 3 (same offset used when creating Table 3)
+            table3_start_row = logic_row + 3
+            print(f"[DEBUG] Table 3 should be visible at rows {table3_start_row}-{next_row}")
             
         except Exception as e:
             print(f"[ERROR] Failed to create Data Cleaning sheet: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _create_period_breakdown_table(self, ws, df, start_row):
         """
@@ -345,7 +829,7 @@ class SheetCreator(SpecializedSheetCreator, PipelineSheetCreator):
             'base_sheets': [
                 'create_summary_statistics_sheet',
                 'create_raw_data_sheet', 
-                'create_data_cleaning_sheet'
+                'create_data_cleaning_sheet'  # Inherited from BaseSheetCreator
             ],
             'pipeline_sheets': [
                 'process_pipeline_configurations'

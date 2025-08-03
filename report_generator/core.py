@@ -210,7 +210,11 @@ class ReportGenerator:
     
     def _fill_missing_collection_days(self, df, pipeline_name):
         """
-        Fill in missing collection days with zero counts for WITH_ZEROES pipelines.
+        Fill in missing collection days with zero counts for complete time series.
+        This is critical for ACF/PACF/ARIMA analysis which requires continuous time series.
+        
+        FIXED: Now includes ALL collection days from the official school year start date
+        to resolve left-aligned row issues and ensure consistent totals.
         
         Args:
             df (pandas.DataFrame): DataFrame to fill
@@ -219,19 +223,72 @@ class ReportGenerator:
         Returns:
             pandas.DataFrame: DataFrame with filled missing days
         """
-        if not pipeline_name.endswith('_WITH_ZEROES') or df.empty:
+        if not ('DAILY' in pipeline_name.upper() and 
+                ('WITH_ZEROES' in pipeline_name.upper() or 'COLLECTION_ONLY' in pipeline_name.upper())):
             return df
         
         try:
-            if pipeline_name == 'DAILY_COUNTS_ALL_WITH_ZEROES':
-                return self._zero_fill_daily_counts(df)
+            from ar_utils import get_school_calendar, get_non_collection_days, precompute_collection_days
+            import pandas as pd
             
-            # For other WITH_ZEROES pipelines, implement specific logic as needed
-            # This is a placeholder for future expansion
-            return df
+            school_calendar = get_school_calendar()
+            non_collection_days = get_non_collection_days()
+            collection_day_map = precompute_collection_days(school_calendar, non_collection_days)
+            
+            # CRITICAL FIX: Ensure ALL collection days are included in zero-fill
+            # This resolves the left-aligned row issue by including early September dates
+            all_collection_days = []
+            for date_obj, info in collection_day_map.items():
+                all_collection_days.append({'_id': date_obj.strftime('%Y-%m-%d')})
+            
+            all_days_df = pd.DataFrame(all_collection_days)
+            
+            # DEBUG: Log the date range being used
+            if all_collection_days:
+                min_date = min(day['_id'] for day in all_collection_days)
+                max_date = max(day['_id'] for day in all_collection_days)
+                print(f"[ZERO_FILL] Including all collection days from {min_date} to {max_date}")
+                print(f"[ZERO_FILL] Total collection days: {len(all_collection_days)}")
+            
+            # Merge with existing data, keeping actual data and filling missing with zeros
+            merged_df = pd.merge(all_days_df, df, on='_id', how='left').fillna(0)
+            
+            # Ensure correct data types after merge
+            for col in ['Total_Files', 'MP3_Files', 'JPG_Files']:
+                if col in merged_df.columns:
+                    merged_df[col] = merged_df[col].astype(int)
+            if 'Total_Size_MB' in merged_df.columns:
+                 merged_df['Total_Size_MB'] = merged_df['Total_Size_MB'].astype(float)
+
+            # CRITICAL FIX: Sort by date to ensure proper chronological order
+            # This ensures early September dates appear in the correct position
+            final_df = merged_df.sort_values('_id').reset_index(drop=True)
+            
+            # DEBUG: Log early September inclusion
+            early_sept_dates = [
+                "2021-09-13", "2021-09-14", "2021-09-15", "2021-09-16", "2021-09-17",
+                "2021-09-20", "2021-09-21", "2021-09-22", "2021-09-23", "2021-09-24", "2021-09-27"
+            ]
+            
+            early_sept_count = 0
+            for date_str in early_sept_dates:
+                if date_str in final_df['_id'].values:
+                    row = final_df[final_df['_id'] == date_str]
+                    if not row.empty:
+                        count = row.iloc[0]['Total_Files'] if 'Total_Files' in row.columns else 0
+                        early_sept_count += count
+            
+            if early_sept_count > 0:
+                print(f"[ZERO_FILL] Early September files included: {early_sept_count}")
+                print(f"[ZERO_FILL] This should resolve left-aligned row issues")
+            
+            total_files = final_df['Total_Files'].sum() if 'Total_Files' in final_df.columns else 0
+            print(f"[ZERO_FILL] Total files after zero-fill: {total_files}")
+            
+            return final_df
             
         except Exception as e:
-            print(f"[WARNING] Fill missing days failed for {pipeline_name}: {e}")
+            print(f"[WARNING] Zero-fill failed, returning original data: {e}")
             return df
     
     def _add_sheet(self, df, sheet_name, position=None, include_total=True):

@@ -72,6 +72,7 @@ class PipelineSheetCreator(BaseSheetCreator):
             sheet_config: Sheet configuration dictionary
             data: Optional pre-fetched data (for backward compatibility)
         """
+        print(f"[DEBUG_TRACE] _create_pipeline_sheet called for: {sheet_config['name']} with pipeline: {sheet_config['pipeline']}")
         sheet_name = sheet_config['name']
         pipeline_name = sheet_config['pipeline']
         
@@ -91,6 +92,24 @@ class PipelineSheetCreator(BaseSheetCreator):
         # The caching mechanism was storing DataFrames that had been mutated with ACF/PACF columns
         # This caused each subsequent sheet to inherit previously added columns
         print(f"[DEBUG] Using fresh (non-cached) pipeline execution to prevent column contamination")
+        # COMPREHENSIVE DEBUG LOGGING
+        print(f"[PIPELINE_EXEC_DEBUG] ========================================")
+        print(f"[PIPELINE_EXEC_DEBUG] Sheet: {sheet_config['name']}")
+        print(f"[PIPELINE_EXEC_DEBUG] Pipeline: {sheet_config['pipeline']}")
+        print(f"[PIPELINE_EXEC_DEBUG] Module: {sheet_config.get('module', 'unknown')}")
+        print(f"[PIPELINE_EXEC_DEBUG] Category: {sheet_config.get('category', 'unknown')}")
+        print(f"[PIPELINE_EXEC_DEBUG] About to call _run_aggregation_original...")
+        print(f"[PIPELINE_EXEC_DEBUG] ========================================")
+        
+        # COMPREHENSIVE DEBUG LOGGING
+        print(f"[PIPELINE_EXEC_DEBUG] ========================================")
+        print(f"[PIPELINE_EXEC_DEBUG] Sheet: {sheet_config['name']}")
+        print(f"[PIPELINE_EXEC_DEBUG] Pipeline: {sheet_config['pipeline']}")
+        print(f"[PIPELINE_EXEC_DEBUG] Module: {sheet_config.get('module', 'unknown')}")
+        print(f"[PIPELINE_EXEC_DEBUG] Category: {sheet_config.get('category', 'unknown')}")
+        print(f"[PIPELINE_EXEC_DEBUG] About to call _run_aggregation_original...")
+        print(f"[PIPELINE_EXEC_DEBUG] ========================================")
+        
         df = self._run_aggregation_original(pipeline)
         print(f"    - Fresh pipeline data: {len(df)} rows × {len(df.columns)} columns")
         
@@ -110,8 +129,14 @@ class PipelineSheetCreator(BaseSheetCreator):
             print(f"[WARNING] No data returned for pipeline '{pipeline_name}'")
             return
         
+        # Fix complex data structures before Excel processing
+        df = self._fix_complex_data_structures(df, sheet_name)
+        
         # Apply zero-fill for daily pipelines if needed
+        print(f"[DEBUG] About to call _fill_missing_collection_days for pipeline: {pipeline_name}")
+        print(f"[DEBUG] Input data shape: {df.shape}")
         df = self._fill_missing_collection_days(df, pipeline_name)
+        print(f"[DEBUG] Output data shape: {df.shape}")
         
         # Determine sheet type and apply appropriate analysis
         sheet_type = infer_sheet_type(sheet_name)
@@ -520,6 +545,259 @@ class PipelineSheetCreator(BaseSheetCreator):
                         
         except Exception as e:
             print(f"[WARNING] Could not apply ACF/PACF data formatting: {e}")
+    
+    def _get_totals_config_for_sheet(self, sheet_name, df, sheet_type):
+        """
+        Generate totals configuration based on sheet type and data characteristics.
+        Implements systematic totals for high-priority sheets identified in analysis.
+        
+        Args:
+            sheet_name: Name of the sheet
+            df: DataFrame containing the data
+            sheet_type: Type of sheet (daily, weekly, etc.)
+            
+        Returns:
+            dict: Totals configuration or None if totals not appropriate
+        """
+        try:
+            # Import TotalsIntegrationHelper for configuration generation
+            from report_generator.totals_integration_guide import TotalsIntegrationHelper
+            helper = TotalsIntegrationHelper()
+            
+            # HIGH-PRIORITY SHEETS: Implement specific totals based on systematic analysis
+            high_priority_configs = {
+                'Monthly Capture Volume': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'include_columns': ['Count'],  # Only total the Count column, not Year/Month
+                    'rationale': 'Count column needs totals, Year/Month are identifiers'
+                },
+                'File Size Stats': {
+                    'add_row_totals': True,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'row_totals_label': 'Row Total',
+                    'add_totals': True,
+                    'rationale': '4 numeric columns, statistical summary needs comprehensive totals'
+                },
+                'Time of Day': {
+                    'add_row_totals': True,
+                    'add_column_totals': False,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'row_totals_label': 'Row Total',
+                    'add_totals': True,
+                    'rationale': 'Few rows with 1 numeric column, row totals appropriate'
+                },
+                'Weekday by Period': {
+                    'add_row_totals': True,
+                    'add_column_totals': False,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'row_totals_label': 'Row Total',
+                    'add_totals': True,
+                    'rationale': 'Multiple rows with 1 numeric column, row totals appropriate'
+                },
+                # PHASE 2: HIGH-PRIORITY REMAINING SHEETS
+                'Weekly Counts': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'rationale': '5 numeric columns, weekly analysis benefits from totals'
+                },
+                'Day of Week Counts': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'rationale': '4 numeric columns, day-of-week analysis benefits from totals'
+                },
+                'Activity Counts': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'rationale': '4 numeric columns, activity analysis benefits from totals'
+                },
+                'File Size by Day': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'rationale': '3 numeric columns, daily file size analysis needs totals'
+                },
+                'SY Days': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'rationale': '4 numeric columns, school year days analysis benefits from totals'
+                },
+                'Data Quality': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'rationale': '11 numeric columns, data quality metrics need comprehensive totals'
+                },
+                # PHASE 3: MEDIUM-PRIORITY REMAINING SHEETS
+                'Collection Periods': {
+                    'add_row_totals': True,
+                    'add_column_totals': False,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'row_totals_label': 'Row Total',
+                    'add_totals': True,
+                    'rationale': '2 numeric columns, period analysis benefits from row totals'
+                },
+                'Camera Usage by Year': {
+                    'add_row_totals': False,
+                    'add_column_totals': True,
+                    'add_grand_total': True,
+                    'totals_label': 'TOTAL',
+                    'add_totals': True,
+                    'rationale': '2 numeric columns, camera usage trends benefit from totals'
+                },
+                # PHASE 3: LOW-PRIORITY REMAINING SHEETS
+                'Camera Usage Dates': {
+                    'add_row_totals': True,
+                    'add_column_totals': False,
+                    'add_grand_total': False,
+                    'totals_label': 'TOTAL',
+                    'row_totals_label': 'Row Total',
+                    'add_totals': True,
+                    'rationale': 'Multiple tables with 1 numeric column each, row totals appropriate'
+                },
+                'Camera Usage by Year Range': {
+                    'add_row_totals': True,
+                    'add_column_totals': False,
+                    'add_grand_total': False,
+                    'totals_label': 'TOTAL',
+                    'row_totals_label': 'Row Total',
+                    'add_totals': True,
+                    'rationale': 'Multiple tables with 1 numeric column each, row totals appropriate'
+                }
+            }
+            
+            # Check if this is a high-priority sheet with specific configuration
+            if sheet_name in high_priority_configs:
+                config = high_priority_configs[sheet_name].copy()
+                print(f"[HIGH-PRIORITY] Applying systematic totals to '{sheet_name}': {config['rationale']}")
+                print(f"[CONFIG] {sheet_name}: row_totals={config['add_row_totals']}, column_totals={config['add_column_totals']}, grand_total={config['add_grand_total']}")
+                return config
+            
+            # Generate recommended configuration for other sheets
+            config = helper.generate_recommended_config(df, sheet_name)
+            
+            # Override based on sheet type for pipeline sheets
+            if sheet_type in ['daily', 'weekly', 'biweekly', 'monthly', 'period']:
+                # Time series sheets typically benefit from column totals
+                config['add_column_totals'] = True
+                config['add_row_totals'] = False  # Usually not needed for time series
+                config['add_grand_total'] = True
+                
+                # Exclude statistical columns from totals
+                exclude_patterns = ['ACF_', 'PACF_', '_Forecast', '_Lower', '_Upper', '_Quality', '_Message', '_Model']
+                config['exclude_columns'] = [col for col in df.columns 
+                                            if any(pattern in str(col) for pattern in exclude_patterns)]
+                
+                print(f"[CONFIG] Generated totals config for {sheet_name}: column_totals={config['add_column_totals']}, excluding {len(config['exclude_columns'])} statistical columns")
+            
+            return config
+            
+        except Exception as e:
+            print(f"[WARNING] Could not generate totals config for {sheet_name}: {e}")
+            return None
+    
+    def _register_sheet_totals(self, sheet_name, df, sheet_type):
+        """
+        Register key totals from this sheet for cross-sheet validation.
+        
+        Args:
+            sheet_name: Name of the sheet
+            df: DataFrame containing the data
+            sheet_type: Type of sheet (daily, weekly, etc.)
+        """
+        try:
+            # Register key metrics for cross-sheet validation
+            key_columns = ['Total_Files', 'JPG_Files', 'MP3_Files']
+            
+            for col in key_columns:
+                if col in df.columns:
+                    # Calculate total for this column
+                    total_value = df[col].sum() if pd.api.types.is_numeric_dtype(df[col]) else None
+                    
+                    if total_value is not None:
+                        # Register with validation system
+                        validation_key = f"{col}_{sheet_type}"
+                        totals_data = {
+                            validation_key: {
+                                'value': total_value,
+                                'source': f"{sheet_type} aggregation",
+                                'column': col
+                            }
+                        }
+                        self.totals_manager.register_sheet_totals(sheet_name, totals_data)
+                        
+                        print(f"[VALIDATION] Registered {validation_key} = {total_value} for cross-sheet validation")
+            
+        except Exception as e:
+            print(f"[WARNING] Could not register totals for validation: {e}")
+
+    def _fix_complex_data_structures(self, df, sheet_name):
+        """
+        Fix complex data structures (like nested dictionaries) that can't be written to Excel.
+        
+        Args:
+            df: DataFrame with potentially complex data structures
+            sheet_name: Name of the sheet for logging
+            
+        Returns:
+            DataFrame with flattened/simplified data structures
+        """
+        try:
+            # Check if _id column contains complex structures
+            if '_id' in df.columns and len(df) > 0:
+                sample_id = df['_id'].iloc[0]
+                
+                if isinstance(sample_id, dict):
+                    print(f"[FIX] Flattening complex _id structures in '{sheet_name}'")
+                    print(f"      Sample _id: {sample_id}")
+                    
+                    # Flatten the _id dictionary into separate columns
+                    id_df = pd.json_normalize(df['_id'])
+                    print(f"      Flattened to columns: {list(id_df.columns)}")
+                    
+                    # Remove original _id and add flattened columns at the beginning
+                    df = df.drop(columns=['_id'])
+                    df = pd.concat([id_df, df], axis=1)
+                    
+                    print(f"      ✅ Data structure fixed for Excel compatibility")
+            
+            # Check for other complex structures in any column
+            for col in df.columns:
+                if len(df) > 0:
+                    sample_value = df[col].iloc[0]
+                    if isinstance(sample_value, (dict, list)) and col != '_id':
+                        print(f"[FIX] Converting complex values in column '{col}' to strings")
+                        df[col] = df[col].astype(str)
+            
+            return df
+            
+        except Exception as e:
+            print(f"[WARNING] Could not fix complex data structures in '{sheet_name}': {e}")
+            return df
     
     def _apply_minimal_data_formatting(self, ws, start_row, end_row, num_cols):
         """

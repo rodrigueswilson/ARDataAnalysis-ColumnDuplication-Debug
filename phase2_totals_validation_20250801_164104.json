@@ -1,0 +1,76 @@
+{
+  "validation_timestamp": "20250801_164104",
+  "report_file": "AR_Analysis_Report_20250801_163656.xlsx",
+  "total_sheets_validated": 6,
+  "successful_validations": 0,
+  "success_rate": 0.0,
+  "phase2_status": "PARTIAL",
+  "sheet_results": {
+    "Weekly Counts": {
+      "status": "FAILED",
+      "reason": "Only 0 numeric columns (expected 5)",
+      "details": {
+        "total_label_found": "Unnamed: 5",
+        "numeric_columns_count": 0,
+        "numeric_columns": [],
+        "totals_calculations": {},
+        "rows_count": 41
+      }
+    },
+    "Day of Week Counts": {
+      "status": "FAILED",
+      "reason": "Only 0 numeric columns (expected 4)",
+      "details": {
+        "total_label_found": "AR Data Analysis - Day of Week Counts",
+        "numeric_columns_count": 0,
+        "numeric_columns": [],
+        "totals_calculations": {},
+        "rows_count": 8
+      }
+    },
+    "Activity Counts": {
+      "status": "FAILED",
+      "reason": "Only 0 numeric columns (expected 4)",
+      "details": {
+        "total_label_found": "AR Data Analysis - Activity Counts",
+        "numeric_columns_count": 0,
+        "numeric_columns": [],
+        "totals_calculations": {},
+        "rows_count": 19
+      }
+    },
+    "File Size by Day": {
+      "status": "FAILED",
+      "reason": "Only 0 numeric columns (expected 3)",
+      "details": {
+        "total_label_found": "AR Data Analysis - File Size by Day",
+        "numeric_columns_count": 0,
+        "numeric_columns": [],
+        "totals_calculations": {},
+        "rows_count": 275
+      }
+    },
+    "SY Days": {
+      "status": "FAILED",
+      "reason": "Only 0 numeric columns (expected 4)",
+      "details": {
+        "total_label_found": "Unnamed: 4",
+        "numeric_columns_count": 0,
+        "numeric_columns": [],
+        "totals_calculations": {},
+        "rows_count": 275
+      }
+    },
+    "Data Quality": {
+      "status": "FAILED",
+      "reason": "Only 0 numeric columns (expected 11)",
+      "details": {
+        "total_label_found": "AR Data Analysis - Data Quality",
+        "numeric_columns_count": 0,
+        "numeric_columns": [],
+        "totals_calculations": {},
+        "rows_count": 4
+      }
+    }
+  }
+}

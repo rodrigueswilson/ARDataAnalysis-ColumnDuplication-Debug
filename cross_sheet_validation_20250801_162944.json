@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-08-01T16:29:44.022612",
+  "report_file": "AR_Analysis_Report_20250801_162549.xlsx",
+  "sheets_analyzed": 7,
+  "total_totals_found": 29,
+  "consistency_checks": [
+    [
+      "File Counts",
+      "WARNING",
+      {
+        "File Size Stats": 10241,
+        "Daily Counts (ACF_PACF)": 6395,
+        "Weekly Counts (ACF_PACF)": 7057
+      }
+    ]
+  ],
+  "detailed_totals": {
+    "Monthly Capture Volume": {
+      "AR Data Analysis - Monthly Capture Volume_total": 10241,
+      "grand_total_candidate": 10241
+    },
+    "File Size Stats": {
+      "AvgSizeMB_total": 6.815936185150281,
+      "MinSizeMB_total": 0.222,
+      "MaxSizeMB_total": 590.815,
+      "Count_total": 10241,
+      "column_5_total": 10838.85293618515,
+      "grand_total_candidate": 10838.85293618515
+    },
+    "Time of Day": {
+      "grand_total_candidate": 9607
+    },
+    "MP3 Duration Analysis": {
+      "column_1_total": 3090,
+      "column_2_total": 45.50575,
+      "Avg Duration_total": 52.78674217626387,
+      "Min Duration_total": 2.6,
+      "Max Duration_total": 1424.2,
+      "grand_total_candidate": 3090
+    },
+    "Data Cleaning": {
+      "Outlier Status_total": 10241,
+      "grand_total_candidate": 37183.35
+    },
+    "Daily Counts (ACF_PACF)": {
+      "column_1_total": 9372,
+      "MP3_Files_total": 2977,
+      "JPG_Files_total": 6395,
+      "column_16_total": 38492.824,
+      "grand_total_candidate": 38492.824
+    },
+    "Weekly Counts (ACF_PACF)": {
+      "column_1_total": 10241,
+      "MP3_Files_total": 3184,
+      "JPG_Files_total": 7057,
+      "column_16_total": 43294.15400000001,
+      "Year_total": 143567,
+      "Week_total": 1813,
+      "grand_total_candidate": 143567
+    }
+  }
+}

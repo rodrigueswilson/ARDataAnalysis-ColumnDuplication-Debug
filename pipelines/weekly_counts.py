@@ -6,12 +6,19 @@ These pipelines aggregate file counts, sizes, and metadata by week (ISO_Week).
 
 Key Pipelines:
 - WEEKLY_COUNTS: Basic weekly aggregation
-- WEEKLY_COUNTS_WITH_ZEROES: Weekly aggregation for time series analysis
+- WEEKLY_COUNTS_WITH_ZEROES: Weekly aggregation for time series analysis (CLEAN DATA ONLY)
 - WEEKLY_COUNTS_FUTURE_PROOF: Simplified version using pre-calculated fields
-- MONTHLY_COUNTS_WITH_ZEROES: Monthly aggregation for time series
-- PERIOD_COUNTS_WITH_ZEROES: Academic period aggregation
+- MONTHLY_COUNTS_WITH_ZEROES: Monthly aggregation for time series (CLEAN DATA ONLY)
+- PERIOD_COUNTS_WITH_ZEROES: Academic period aggregation (CLEAN DATA ONLY)
 - BIWEEKLY_COUNTS: Bi-weekly aggregation for intermediate analysis
+
+NOTE: All *_WITH_ZEROES pipelines now use clean data filtering:
+- is_collection_day: True (collection days only)
+- Outlier_Status: False (non-outliers only)
+This ensures consistency with the Data Cleaning sheet logic.
 """
+
+from .utils import PipelineFilterUtils, create_pipeline_with_filters
 
 # =============================================================================
 # 1. WEEKLY_COUNTS
@@ -33,17 +40,8 @@ WEEKLY_COUNTS = [
     {"$sort": {"_id": 1}}
 ]
 
-# =============================================================================
-# 2. WEEKLY_COUNTS_WITH_ZEROES (for ACF/PACF)
-# =============================================================================
-# Aggregates file counts per week, structured for time-series analysis.
-# - Extracts year and week from ISO_Date for accurate grouping.
-# - Creates a composite key (_id) of Year and Week.
-# - Generates a user-friendly 'YYYY-Www' label for charting.
-# - This pipeline is essential for ACF/PACF analysis, which requires a
-#   continuous time index. The 'WITH_ZEROES' implies that downstream
-#   processing will fill in any missing weeks with zero counts.
-WEEKLY_COUNTS_WITH_ZEROES = [
+# Define core aggregation stages for weekly counts
+WEEKLY_COUNTS_CORE_STAGES = [
     {
         "$addFields": {
             "ISO_Year": {
@@ -97,6 +95,21 @@ WEEKLY_COUNTS_WITH_ZEROES = [
     },
     {"$sort": {"Year": 1, "Week": 1}}
 ]
+
+# =============================================================================
+# 2. WEEKLY_COUNTS_WITH_ZEROES (for ACF/PACF) - NOW WITH CLEAN DATA FILTERING
+# =============================================================================
+# Aggregates file counts per week, structured for time-series analysis.
+# - APPLIES CLEAN DATA FILTERING: is_collection_day=True & Outlier_Status=False
+# - Extracts year and week from ISO_Date for accurate grouping.
+# - Creates a composite key (_id) of Year and Week.
+# - Generates a user-friendly 'YYYY-Www' label for charting.
+# - This pipeline is essential for ACF/PACF analysis, which requires a
+#   continuous time index with CLEAN DATA ONLY.
+WEEKLY_COUNTS_WITH_ZEROES = create_pipeline_with_filters(
+    WEEKLY_COUNTS_CORE_STAGES,
+    [PipelineFilterUtils.get_both_filters()]
+)
 
 # =============================================================================
 # 3. WEEKLY_COUNTS_FUTURE_PROOF (Simplified using ISO_YearWeek)

@@ -1,0 +1,207 @@
+{
+  "validation_timestamp": "20250801_165218",
+  "report_file": "AR_Analysis_Report_20250801_165010.xlsx",
+  "total_sheets_validated": 14,
+  "successful_validations": 13,
+  "overall_success_rate": 92.85714285714286,
+  "phase_results": {
+    "1": {
+      "total": 4,
+      "passed": 3
+    },
+    "2": {
+      "total": 6,
+      "passed": 6
+    },
+    "3": {
+      "total": 4,
+      "passed": 4
+    }
+  },
+  "implementation_status": "PARTIAL",
+  "sheet_results": {
+    "Monthly Capture Volume": {
+      "phase": 1,
+      "status": "FAILED",
+      "reason": "No totals found",
+      "details": {
+        "numeric_columns_count": 3,
+        "has_column_totals": false,
+        "has_row_totals": false,
+        "sheet_shape": [
+          20,
+          3
+        ]
+      }
+    },
+    "File Size Stats": {
+      "phase": 1,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 5,
+        "has_column_totals": true,
+        "has_row_totals": true,
+        "sheet_shape": [
+          3,
+          6
+        ]
+      }
+    },
+    "Time of Day": {
+      "phase": 1,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 2,
+        "has_column_totals": false,
+        "has_row_totals": true,
+        "sheet_shape": [
+          2,
+          3
+        ]
+      }
+    },
+    "Weekday by Period": {
+      "phase": 1,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 2,
+        "has_column_totals": false,
+        "has_row_totals": true,
+        "sheet_shape": [
+          30,
+          4
+        ]
+      }
+    },
+    "Weekly Counts": {
+      "phase": 2,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 5,
+        "has_column_totals": true,
+        "has_row_totals": false,
+        "sheet_shape": [
+          39,
+          6
+        ]
+      }
+    },
+    "Day of Week Counts": {
+      "phase": 2,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 4,
+        "has_column_totals": true,
+        "has_row_totals": true,
+        "sheet_shape": [
+          6,
+          5
+        ]
+      }
+    },
+    "Activity Counts": {
+      "phase": 2,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 4,
+        "has_column_totals": true,
+        "has_row_totals": true,
+        "sheet_shape": [
+          17,
+          5
+        ]
+      }
+    },
+    "File Size by Day": {
+      "phase": 2,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 3,
+        "has_column_totals": true,
+        "has_row_totals": false,
+        "sheet_shape": [
+          273,
+          4
+        ]
+      }
+    },
+    "SY Days": {
+      "phase": 2,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 4,
+        "has_column_totals": true,
+        "has_row_totals": false,
+        "sheet_shape": [
+          273,
+          6
+        ]
+      }
+    },
+    "Data Quality": {
+      "phase": 2,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 11,
+        "has_column_totals": true,
+        "has_row_totals": false,
+        "sheet_shape": [
+          2,
+          14
+        ]
+      }
+    },
+    "Collection Periods": {
+      "phase": 3,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 3,
+        "has_column_totals": false,
+        "has_row_totals": true,
+        "sheet_shape": [
+          6,
+          4
+        ]
+      }
+    },
+    "Camera Usage by Year": {
+      "phase": 3,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 2,
+        "has_column_totals": true,
+        "has_row_totals": false,
+        "sheet_shape": [
+          8,
+          6
+        ]
+      }
+    },
+    "Camera Usage Dates": {
+      "phase": 3,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 2,
+        "has_column_totals": false,
+        "has_row_totals": true,
+        "sheet_shape": [
+          4,
+          5
+        ]
+      }
+    },
+    "Camera Usage by Year Range": {
+      "phase": 3,
+      "status": "PASSED",
+      "details": {
+        "numeric_columns_count": 2,
+        "has_column_totals": false,
+        "has_row_totals": true,
+        "sheet_shape": [
+          7,
+          6
+        ]
+      }
+    }
+  }
+}

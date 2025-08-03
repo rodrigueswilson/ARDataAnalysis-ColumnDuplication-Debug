@@ -82,6 +82,13 @@
                 "MP3_DURATION_BY_MONTH"
             ]
         },
+        "data_cleaning": {
+            "enabled": true,
+            "description": "Data cleaning and filtering analysis pipelines",
+            "pipelines": [
+                "DASHBOARD_DATA_CLEANING"
+            ]
+        },
         "time_series": {
             "enabled": true,
             "description": "Time series analysis pipelines",
@@ -117,12 +124,12 @@
     "sheets": [
         {
             "name": "Daily Counts (ACF_PACF)",
-            "pipeline": "DAILY_COUNTS_COLLECTION_ONLY",
+            "pipeline": "DAILY_COUNTS_ALL_WITH_ZEROES",
             "sheet_name": "Daily Counts (ACF_PACF)",
             "category": "time_series",
             "enabled": true,
             "order": 1,
-            "description": "Daily file counts for ACF/PACF analysis",
+            "description": "Daily file counts for ACF/PACF analysis with zero-fill",
             "module": "daily_counts",
             "charts": {
                 "acf_pacf": true,
@@ -334,6 +341,16 @@
             "description": "School year day counts",
             "module": "activity_analysis",
             "name": "SY Days"
+        },
+        {
+            "pipeline": "DASHBOARD_DATA_CLEANING",
+            "sheet_name": "Data Cleaning",
+            "category": "quality",
+            "enabled": true,
+            "order": 29,
+            "description": "Data cleaning and filtering analysis",
+            "module": "dashboard_data",
+            "name": "Data Cleaning"
         },
         {
             "pipeline": "DATA_QUALITY_CHECK",

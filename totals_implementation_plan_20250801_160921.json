@@ -1,0 +1,343 @@
+{
+  "categories": {
+    "high_priority_full_totals": [
+      {
+        "sheet_name": "Monthly Capture Volume",
+        "tables": 1,
+        "recommendations": [
+          {
+            "table_id": 1,
+            "strategy": "full_totals",
+            "rationale": "Table has 3 numeric columns"
+          }
+        ]
+      },
+      {
+        "sheet_name": "File Size Stats",
+        "tables": 1,
+        "recommendations": [
+          {
+            "table_id": 1,
+            "strategy": "full_totals",
+            "rationale": "Table has 4 numeric columns"
+          }
+        ]
+      }
+    ],
+    "medium_priority_column_totals": [],
+    "low_priority_row_totals": [
+      {
+        "sheet_name": "Time of Day",
+        "tables": 1,
+        "recommendations": [
+          {
+            "table_id": 1,
+            "strategy": "row_totals",
+            "rationale": "Few rows with numeric data"
+          }
+        ]
+      },
+      {
+        "sheet_name": "Weekday by Period",
+        "tables": 1,
+        "recommendations": [
+          {
+            "table_id": 1,
+            "strategy": "row_totals",
+            "rationale": "Few rows with numeric data"
+          }
+        ]
+      }
+    ],
+    "no_totals_needed": [
+      {
+        "sheet_name": "Dashboard",
+        "reason": "Dashboard/metadata sheet - totals not appropriate"
+      },
+      {
+        "sheet_name": "Raw Data",
+        "reason": "Dashboard/metadata sheet - totals not appropriate"
+      },
+      {
+        "sheet_name": "ACF_PACF_Dashboard",
+        "reason": "Dashboard/metadata sheet - totals not appropriate"
+      }
+    ],
+    "already_implemented": [
+      {
+        "sheet_name": "Data Cleaning",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "MP3 Duration Analysis",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Daily Counts (ACF_PACF)",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Weekly Counts (ACF_PACF)",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Biweekly Counts (ACF_PACF)",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Monthly Counts (ACF_PACF)",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Period Counts (ACF_PACF)",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Weekly Counts",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Day of Week Counts",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Activity Counts",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Camera Usage by Year",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Camera Usage Dates",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Camera Usage by Year Range",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "File Size by Day",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Collection Periods",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "SY Days",
+        "status": "partial_implementation",
+        "needs_review": true
+      },
+      {
+        "sheet_name": "Data Quality",
+        "status": "partial_implementation",
+        "needs_review": true
+      }
+    ]
+  },
+  "implementation_plan": {
+    "timestamp": "2025-08-01T16:09:21.173158",
+    "total_sheets_to_process": 4,
+    "phases": [
+      {
+        "phase": 1,
+        "name": "High Priority - Full Totals Implementation",
+        "description": "Implement comprehensive totals (row + column + grand) for sheets with significant numeric data",
+        "sheets": [
+          {
+            "sheet_name": "Monthly Capture Volume",
+            "tables": 1,
+            "recommendations": [
+              {
+                "table_id": 1,
+                "strategy": "full_totals",
+                "rationale": "Table has 3 numeric columns"
+              }
+            ]
+          },
+          {
+            "sheet_name": "File Size Stats",
+            "tables": 1,
+            "recommendations": [
+              {
+                "table_id": 1,
+                "strategy": "full_totals",
+                "rationale": "Table has 4 numeric columns"
+              }
+            ]
+          }
+        ],
+        "implementation_strategy": "full_totals",
+        "estimated_impact": "high"
+      },
+      {
+        "phase": 3,
+        "name": "Low Priority - Row Totals Implementation",
+        "description": "Add row totals for categorical breakdown sheets",
+        "sheets": [
+          {
+            "sheet_name": "Time of Day",
+            "tables": 1,
+            "recommendations": [
+              {
+                "table_id": 1,
+                "strategy": "row_totals",
+                "rationale": "Few rows with numeric data"
+              }
+            ]
+          },
+          {
+            "sheet_name": "Weekday by Period",
+            "tables": 1,
+            "recommendations": [
+              {
+                "table_id": 1,
+                "strategy": "row_totals",
+                "rationale": "Few rows with numeric data"
+              }
+            ]
+          }
+        ],
+        "implementation_strategy": "row_totals",
+        "estimated_impact": "low"
+      },
+      {
+        "phase": 4,
+        "name": "Review and Enhancement",
+        "description": "Review existing totals implementations and enhance where needed",
+        "sheets": [
+          {
+            "sheet_name": "Data Cleaning",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "MP3 Duration Analysis",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Daily Counts (ACF_PACF)",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Weekly Counts (ACF_PACF)",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Biweekly Counts (ACF_PACF)",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Monthly Counts (ACF_PACF)",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Period Counts (ACF_PACF)",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Weekly Counts",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Day of Week Counts",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Activity Counts",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Camera Usage by Year",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Camera Usage Dates",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Camera Usage by Year Range",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "File Size by Day",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Collection Periods",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "SY Days",
+            "status": "partial_implementation",
+            "needs_review": true
+          },
+          {
+            "sheet_name": "Data Quality",
+            "status": "partial_implementation",
+            "needs_review": true
+          }
+        ],
+        "implementation_strategy": "review_and_enhance",
+        "estimated_impact": "maintenance"
+      }
+    ]
+  },
+  "target_sheets": {
+    "Monthly Capture Volume": {
+      "current_status": "no_totals_detected",
+      "recommended_action": "full_totals",
+      "rationale": "3 numeric columns, perfect for column totals",
+      "implementation": "add_column_totals_to_pipeline"
+    },
+    "File Size Stats": {
+      "current_status": "no_totals_detected",
+      "recommended_action": "full_totals",
+      "rationale": "4 numeric columns, statistical summary needs totals",
+      "implementation": "add_comprehensive_totals"
+    },
+    "Time of Day": {
+      "current_status": "no_totals_detected",
+      "recommended_action": "row_totals",
+      "rationale": "Few rows with 1 numeric column",
+      "implementation": "add_row_totals_to_pipeline"
+    },
+    "Weekday by Period": {
+      "current_status": "no_totals_detected",
+      "recommended_action": "row_totals",
+      "rationale": "Multiple rows with 1 numeric column",
+      "implementation": "add_row_totals_to_pipeline"
+    }
+  },
+  "generated_at": "2025-08-01T16:09:21.176169"
+}

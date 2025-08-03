@@ -26,6 +26,9 @@ try:
 except ImportError:
     get_db_connection = None
 
+# Import data cleaning utilities
+from utils.data_cleaning import DataCleaningUtils
+
 
 class BaseSheetCreator:
     """
@@ -51,6 +54,9 @@ class BaseSheetCreator:
         Fills in missing collection days with zero counts for complete time series.
         This is critical for ACF/PACF/ARIMA analysis which requires continuous time series.
         
+        FIXED: Now includes ALL collection days from the official school year start date
+        to resolve left-aligned row issues and ensure consistent totals.
+        
         Args:
             df (pandas.DataFrame): DataFrame from daily aggregation
             pipeline_name (str): Name of the pipeline to determine if zero-fill is needed
@@ -67,11 +73,20 @@ class BaseSheetCreator:
             non_collection_days = get_non_collection_days()
             collection_day_map = precompute_collection_days(school_calendar, non_collection_days)
             
+            # CRITICAL FIX: Ensure ALL collection days are included in zero-fill
+            # This resolves the left-aligned row issue by including early September dates
             all_collection_days = []
             for date_obj, info in collection_day_map.items():
                 all_collection_days.append({'_id': date_obj.strftime('%Y-%m-%d')})
             
             all_days_df = pd.DataFrame(all_collection_days)
+            
+            # DEBUG: Log the date range being used
+            if all_collection_days:
+                min_date = min(day['_id'] for day in all_collection_days)
+                max_date = max(day['_id'] for day in all_collection_days)
+                print(f"[ZERO_FILL] Including all collection days from {min_date} to {max_date}")
+                print(f"[ZERO_FILL] Total collection days: {len(all_collection_days)}")
             
             # Merge with existing data, keeping actual data and filling missing with zeros
             merged_df = pd.merge(all_days_df, df, on='_id', how='left').fillna(0)
@@ -83,12 +98,37 @@ class BaseSheetCreator:
             if 'Total_Size_MB' in merged_df.columns:
                  merged_df['Total_Size_MB'] = merged_df['Total_Size_MB'].astype(float)
 
-            return merged_df.sort_values('_id').reset_index(drop=True)
+            # CRITICAL FIX: Sort by date to ensure proper chronological order
+            # This ensures early September dates appear in the correct position
+            final_df = merged_df.sort_values('_id').reset_index(drop=True)
+            
+            # DEBUG: Log early September inclusion
+            early_sept_dates = [
+                "2021-09-13", "2021-09-14", "2021-09-15", "2021-09-16", "2021-09-17",
+                "2021-09-20", "2021-09-21", "2021-09-22", "2021-09-23", "2021-09-24", "2021-09-27"
+            ]
+            
+            early_sept_count = 0
+            for date_str in early_sept_dates:
+                if date_str in final_df['_id'].values:
+                    row = final_df[final_df['_id'] == date_str]
+                    if not row.empty:
+                        count = row.iloc[0]['Total_Files'] if 'Total_Files' in row.columns else 0
+                        early_sept_count += count
+            
+            if early_sept_count > 0:
+                print(f"[ZERO_FILL] Early September files included: {early_sept_count}")
+                print(f"[ZERO_FILL] This should resolve left-aligned row issues")
+            
+            total_files = final_df['Total_Files'].sum() if 'Total_Files' in final_df.columns else 0
+            print(f"[ZERO_FILL] Total files after zero-fill: {total_files}")
+            
+            return final_df
             
         except Exception as e:
             print(f"[WARNING] Zero-fill failed, returning original data: {e}")
             return df
-    
+            
     def _run_aggregation_cached(self, cache_key, pipeline, use_base_filter=True, collection_name='media_records'):
         """
         Runs a MongoDB aggregation pipeline with caching to prevent duplicate executions.
@@ -100,9 +140,55 @@ class BaseSheetCreator:
         
         # Execute pipeline and cache result
         print(f"[CACHE MISS] BaseSheetCreator: Executing and caching {cache_key}")
+        # COMPREHENSIVE DEBUG LOGGING FOR AGGREGATION
+        print(f"[AGGREGATION_DEBUG] ========================================")
+        print(f"[AGGREGATION_DEBUG] Cache key: {cache_key}")
+        print(f"[AGGREGATION_DEBUG] Pipeline type: {type(pipeline)}")
+        print(f"[AGGREGATION_DEBUG] Pipeline preview: {str(pipeline)[:200]}...")
+        print(f"[AGGREGATION_DEBUG] Use base filter: {use_base_filter}")
+        print(f"[AGGREGATION_DEBUG] Collection: {collection_name}")
+        print(f"[AGGREGATION_DEBUG] About to execute pipeline...")
+        print(f"[AGGREGATION_DEBUG] ========================================")
+        
         result = self._run_aggregation_original(pipeline, use_base_filter, collection_name)
+        
+        # CRITICAL FIX: Apply zero-fill logic for ACF/PACF sheets
+        # This ensures all ACF/PACF sheets get the complete time series data
+        if self._should_apply_zero_fill(cache_key):
+            print(f"[ZERO_FILL_PATCH] Applying zero-fill to {cache_key}")
+            result = self._fill_missing_collection_days(result, cache_key)
+        
         self._pipeline_cache[cache_key] = result.copy(deep=True)
         return result
+    
+    def _should_apply_zero_fill(self, cache_key):
+        """
+        Determine if zero-fill logic should be applied based on the cache key (pipeline name).
+        
+        Args:
+            cache_key (str): The cache key, typically the pipeline name
+            
+        Returns:
+            bool: True if zero-fill should be applied, False otherwise
+        """
+        print(f"[ZERO_FILL_DEBUG] Checking cache_key: {cache_key}")
+        
+        # Apply zero-fill to daily pipelines with specific patterns
+        if 'DAILY' in cache_key.upper() and (
+            'WITH_ZEROES' in cache_key.upper() or 
+            'COLLECTION_ONLY' in cache_key.upper() or
+            'ALL_WITH_ZEROES' in cache_key.upper()  # NEW: Handle DAILY_COUNTS_ALL_WITH_ZEROES
+        ):
+            print(f"[ZERO_FILL_DEBUG] ✅ Daily pipeline match: {cache_key}")
+            return True
+        
+        # Also apply to weekly pipelines with WITH_ZEROES
+        if 'WEEKLY' in cache_key.upper() and 'WITH_ZEROES' in cache_key.upper():
+            print(f"[ZERO_FILL_DEBUG] ✅ Weekly pipeline match: {cache_key}")
+            return True
+        
+        print(f"[ZERO_FILL_DEBUG] ❌ No match for: {cache_key}")
+        return False
     
     def _run_aggregation_original(self, pipeline, use_base_filter=True, collection_name='media_records'):
         """
@@ -112,7 +198,10 @@ class BaseSheetCreator:
             collection = self.db[collection_name]
             full_pipeline = pipeline
             if use_base_filter:
-                base_filter = {"$match": {"file_type": {"$in": ["JPG", "MP3"]}}}
+                base_filter = {"$match": {
+                    "School_Year": {"$ne": "N/A"},
+                    "file_type": {"$in": ["JPG", "MP3"]}
+                }}
                 full_pipeline = [base_filter] + pipeline
             
             cursor = collection.aggregate(full_pipeline, allowDiskUse=True)
@@ -372,7 +461,83 @@ class BaseSheetCreator:
     def _add_day_analysis_tables(self, ws, start_row):
         """
         Add comprehensive day analysis tables to the Summary Statistics sheet.
-        Only includes cleaned data (is_collection_day=TRUE, Is_outlier=FALSE).
+        Only includes cleaned data (is_collection_day=TRUE, Outlier_Status=FALSE).
+        Uses DataCleaningUtils for consistent filtering across the system.
+        """
+        try:
+            # Initialize DataCleaningUtils if not already done
+            if not hasattr(self, 'data_cleaning_utils'):
+                try:
+                    # Use existing database connection or create a new one
+                    if hasattr(self, 'db'):
+                        db = self.db
+                    elif get_db_connection is not None:
+                        db = get_db_connection()
+                    else:
+                        from pymongo import MongoClient
+                        client = MongoClient('localhost', 27017)
+                        db = client.ARDataAnalysis
+                    
+                    self.data_cleaning_utils = DataCleaningUtils(db)
+                except Exception as e:
+                    print(f"[WARNING] Failed to initialize DataCleaningUtils: {e}")
+                    # Fallback to original implementation if initialization fails
+                    return self._add_day_analysis_tables_legacy(ws, start_row)
+            
+            # Get both pipeline (is_collection_day=TRUE, Outlier_Status=FALSE) from DataCleaningUtils
+            base_pipeline = self.data_cleaning_utils.get_both_pipeline()
+            
+            # Add our grouping and sorting stages to the base pipeline
+            day_analysis_pipeline = base_pipeline + [
+                {"$group": {
+                    "_id": {
+                        "date": "$ISO_Date",
+                        "school_year": "$School_Year",
+                        "period": "$Collection_Period",
+                        "month": {"$dateToString": {"format": "%Y-%m", "date": {"$dateFromString": {"dateString": "$ISO_Date"}}}}
+                    },
+                    "Total_Files": {"$sum": 1},
+                    "MP3_Files": {"$sum": {"$cond": [{"$eq": ["$file_type", "MP3"]}, 1, 0]}},
+                    "JPG_Files": {"$sum": {"$cond": [{"$eq": ["$file_type", "JPG"]}, 1, 0]}}
+                }},
+                {"$sort": {"_id.date": 1}}
+            ]
+            
+            # Run the aggregation using the modular pipeline
+            cleaned_df = self._run_aggregation(day_analysis_pipeline)
+            if cleaned_df.empty:
+                print("[WARNING] No cleaned data found for day analysis")
+                return start_row
+            
+            # Process the cleaned data
+            cleaned_df['Date'] = pd.to_datetime(cleaned_df['date'])
+            cleaned_df['School_Year'] = cleaned_df['school_year']
+            cleaned_df['Period'] = cleaned_df['period']
+            cleaned_df['Month'] = cleaned_df['month']
+            
+            current_row = start_row
+            
+            # Table 1: School Year Summary
+            current_row = self._create_school_year_summary_table(ws, cleaned_df, current_row)
+            current_row += 3  # Add spacing
+            
+            # Table 2: Period Breakdown
+            current_row = self._create_period_breakdown_table(ws, cleaned_df, current_row)
+            current_row += 3  # Add spacing
+            
+            # Table 3: Monthly Breakdown
+            current_row = self._create_monthly_breakdown_table(ws, cleaned_df, current_row)
+            
+            return current_row
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to create day analysis tables: {e}")
+            return start_row
+    
+    def _add_day_analysis_tables_legacy(self, ws, start_row):
+        """
+        Legacy implementation of day analysis tables.
+        Used as a fallback if DataCleaningUtils initialization fails.
         """
         try:
             # Get cleaned data with proper filtering
@@ -423,7 +588,7 @@ class BaseSheetCreator:
             return current_row
             
         except Exception as e:
-            print(f"[ERROR] Failed to create day analysis tables: {e}")
+            print(f"[ERROR] Failed to create day analysis tables (legacy): {e}")
             return start_row
     
     def _create_school_year_summary_table(self, ws, df, start_row):
@@ -552,40 +717,62 @@ class BaseSheetCreator:
         
         return end_row + 1
 
-def _create_period_breakdown_table(self, ws, df, start_row):
-    """
-    Create the period breakdown table for day analysis.
-    """
-    # Section title
-    ws.cell(row=start_row, column=1, value="Day Analysis - Period Breakdown (Collection Days Only, Non-Outliers)")
-    self.formatter.apply_title_style(ws, f'A{start_row}')
-    start_row += 2
-    
-    # Headers
-    headers = ['Period', 'Collection Days', 'Days with Data', 'Zero Days', 'Coverage %', 'Avg Files/Day', 'Max Consec. Data', 'Max Consec. Zero']
-    for col, header in enumerate(headers, 1):
-        ws.cell(row=start_row, column=col, value=header)
-    self.formatter.apply_header_style(ws, f'A{start_row}:H{start_row}')
-    start_row += 1
-    
-    # Get all periods
-    from utils.calendar import get_all_periods
-    periods = get_all_periods()
-    
-    # Sort periods logically
-    period_order = ['SY 21-22 P1', 'SY 21-22 P2', 'SY 21-22 P3', 'SY 22-23 P1', 'SY 22-23 P2', 'SY 22-23 P3']
-    periods = [p for p in period_order if p in periods]
-    
-    for row_offset, period in enumerate(periods):
-        row = start_row + row_offset
-        period_df = df[df['Period'] == period].copy()
+    def _create_period_breakdown_table(self, ws, df, start_row):
+        """
+        Create the period breakdown table for day analysis.
+        """
+        # Section title
+        ws.cell(row=start_row, column=1, value="Day Analysis - Period Breakdown (Collection Days Only, Non-Outliers)")
+        self.formatter.apply_title_style(ws, f'A{start_row}')
+        start_row += 2
         
-        # Calculate period metrics
-        from utils.calendar import calculate_collection_days_for_period
-        collection_days = calculate_collection_days_for_period(period)
+        # Headers
+        headers = ['Period', 'Collection Days', 'Days with Data', 'Zero Days', 'Coverage %', 'Avg Files/Day', 'Max Consec. Data', 'Max Consec. Zero']
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=start_row, column=col, value=header)
+        self.formatter.apply_header_style(ws, f'A{start_row}:H{start_row}')
+        start_row += 1
         
-        if not period_df.empty:
-            unique_dates = period_df['Date'].dt.date.unique()
+        # Get all periods
+        from utils.calendar import get_all_periods
+        periods = get_all_periods()
+        
+        # Sort periods logically
+        period_order = ['SY 21-22 P1', 'SY 21-22 P2', 'SY 21-22 P3', 'SY 22-23 P1', 'SY 22-23 P2', 'SY 22-23 P3']
+        periods = [p for p in period_order if p in periods]
+        
+        # Define helper function for calculating year metrics
+        def calc_year_metrics(df, school_year=None):
+            if school_year:
+                year_df = df[df['School_Year'] == school_year].copy()
+            else:
+                year_df = df.copy()
+            
+            if year_df.empty:
+                return {
+                    'collection_days': 0,
+                    'days_with_data': 0,
+                    'days_with_zero': 0,
+                    'coverage_pct': 0,
+                    'avg_files_per_collection_day': 0,
+                    'avg_files_per_data_day': 0,
+                    'avg_files_including_zeros': 0,
+                    'max_consecutive_data': 0,
+                    'max_consecutive_zero': 0
+                }
+            
+            # Calculate metrics for the year
+            from utils.calendar import calculate_collection_days_for_period
+            if school_year:
+                # Calculate total collection days for the school year
+                periods = year_df['Period'].unique()
+                collection_days = sum(calculate_collection_days_for_period(p) for p in periods)
+            else:
+                # Calculate for all periods
+                periods = df['Period'].unique()
+                collection_days = sum(calculate_collection_days_for_period(p) for p in periods)
+            
+            unique_dates = year_df['Date'].dt.date.unique()
             days_with_data = len(unique_dates)
             days_with_zero = collection_days - days_with_data
             coverage_pct = (days_with_data / collection_days * 100) if collection_days > 0 else 0
@@ -654,15 +841,6 @@ def _create_period_breakdown_table(self, ws, df, start_row):
         self.formatter.apply_alternating_row_colors(ws, start_row, end_row, 1, 4)
         
         return end_row + 1
-    
-    def _create_period_breakdown_table(self, ws, df, start_row):
-        """
-        Create the period breakdown table for day analysis.
-        """
-        # Section title
-        ws.cell(row=start_row, column=1, value="Day Analysis - Period Breakdown (Collection Days Only, Non-Outliers)")
-        self.formatter.apply_title_style(ws, f'A{start_row}')
-        start_row += 2
         
         # Headers
         headers = ['Period', 'Collection Days', 'Days with Data', 'Zero Days', 'Coverage %', 'Avg Files/Day', 'Max Consec. Data', 'Max Consec. Zero']
@@ -888,100 +1066,236 @@ def _create_period_breakdown_table(self, ws, df, start_row):
         except Exception as e:
             print(f"[ERROR] Failed to create Raw Data sheet: {e}")
 
-
     def create_data_cleaning_sheet(self, workbook):
         """
-        Creates the Data Cleaning sheet.
+        Creates the Data Cleaning sheet with intersection analysis of both filtering criteria.
+        Shows Venn diagram breakdown of is_collection_day: TRUE and Outlier_Status: FALSE.
         """
+        print("[SHEET] Creating Data Cleaning sheet with intersection analysis...")
         try:
-            # Get outlier data
-            pipeline = [
-                {"$match": {"file_type": {"$in": ["JPG", "MP3"]}}},
-                {"$group": {
-                    "_id": {
-                        "outlier_status": "$Outlier_Status",
-                        "file_type": "$file_type"
-                    },
-                    "count": {"$sum": 1},
-                    "total_size_mb": {"$sum": "$File_Size_MB"},
-                    "avg_size_mb": {"$avg": "$File_Size_MB"}
-                }},
-                {"$sort": {"_id.file_type": 1, "_id.outlier_status": 1}}
-            ]
-            
-            df = self._run_aggregation(pipeline)
-            if df.empty:
-                print("[WARNING] No data found for Data Cleaning sheet")
-                return
-            
-            # Create worksheet
-            ws = workbook.create_sheet("Data Cleaning")
-            
-            # Title
-            ws['A1'] = "AR Data Analysis - Data Quality & Cleaning Report"
+            ws = workbook.create_sheet(title="Data Cleaning")
+
+            # 1. Title and Introduction
+            ws.cell(row=1, column=1, value="Data Cleaning Analysis - Filtering Criteria Intersection")
+            ws.cell(row=2, column=1, value="This sheet shows the complete breakdown of how both filtering criteria (Collection Days + Non-Outliers) affect the dataset.")
             self.formatter.apply_title_style(ws, 'A1')
+
+            # 2. Run four separate aggregations to get intersection data
+            print("[DEBUG] Running intersection analysis with 4 aggregations...")
             
-            # Section 1: Outlier Analysis
-            ws['A3'] = "Outlier Analysis"
-            self.formatter.apply_section_header_style(ws, 'A3')
-            
-            # Headers for outlier table
-            outlier_headers = ['File Type', 'Outlier Status', 'Count', 'Total Size (MB)', 'Avg Size (MB)']
-            for col, header in enumerate(outlier_headers, 1):
-                ws.cell(row=5, column=col, value=header)
-            self.formatter.apply_header_style(ws, 'A5:E5')
-            
-            # Outlier data
-            row = 6
-            for _, record in df.iterrows():
-                ws.cell(row=row, column=1, value=record.get('file_type', 'Unknown'))
-                ws.cell(row=row, column=2, value=record.get('outlier_status', 'Unknown'))
-                ws.cell(row=row, column=3, value=record.get('count', 0))
-                ws.cell(row=row, column=4, value=round(record.get('total_size_mb', 0), 2))
-                ws.cell(row=row, column=5, value=round(record.get('avg_size_mb', 0), 2))
-                row += 1
-            
-            # Apply formatting
-            self.formatter.apply_data_style(ws, f'A6:E{row-1}')
-            
-            # Apply alternating row colors for better readability
-            self.formatter.apply_alternating_row_colors(ws, 6, row-1, 1, 5)
-            
-            # Section 2: Data Quality Metrics
-            ws[f'A{row+2}'] = "Data Quality Metrics"
-            self.formatter.apply_section_header_style(ws, f'A{row+2}')
-            
-            # Get quality metrics
-            total_records = self.db['media_records'].count_documents({"file_type": {"$in": ["JPG", "MP3"]}})
-            outlier_records = self.db['media_records'].count_documents({
-                "file_type": {"$in": ["JPG", "MP3"]},
-                "Outlier_Status": True
-            })
-            valid_records = total_records - outlier_records
-            
-            quality_metrics = [
-                ('Total Records', total_records),
-                ('Valid Records', valid_records),
-                ('Outlier Records', outlier_records),
-                ('Data Quality Rate', (valid_records/total_records) if total_records > 0 else "N/A")
+            # Aggregation 1: Raw data (only exclude N/A school years)
+            raw_pipeline = [
+                {"$match": {"School_Year": {"$ne": "N/A"}}},
+                {
+                    "$group": {
+                        "_id": {"school_year": "$School_Year", "file_type": "$file_type"},
+                        "count": {"$sum": 1}
+                    }
+                },
+                {"$sort": {"_id.school_year": 1, "_id.file_type": 1}}
             ]
             
-            metrics_row = row + 4
-            for i, (metric, value) in enumerate(quality_metrics):
-                ws.cell(row=metrics_row + i, column=1, value=metric)
-                cell = ws.cell(row=metrics_row + i, column=2)
-                if metric == 'Data Quality Rate' and isinstance(value, (int, float)):
-                    # Store as numeric value and apply percentage formatting
-                    cell.value = value  # Already a decimal (0.0 to 1.0)
-                    cell.number_format = '0.0%'  # Apply Excel percentage formatting
-                else:
-                    cell.value = value
+            # Aggregation 2: Collection days only (include outliers)
+            collection_only_pipeline = [
+                {
+                    "$match": {
+                        "School_Year": {"$ne": "N/A"},
+                        "is_collection_day": True
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {"school_year": "$School_Year", "file_type": "$file_type"},
+                        "count": {"$sum": 1}
+                    }
+                },
+                {"$sort": {"_id.school_year": 1, "_id.file_type": 1}}
+            ]
             
-            # Apply formatting
-            self.formatter.apply_data_style(ws, f'A{metrics_row}:B{metrics_row + len(quality_metrics) - 1}')
+            # Aggregation 3: Non-outliers only (include non-collection days)
+            non_outliers_pipeline = [
+                {
+                    "$match": {
+                        "School_Year": {"$ne": "N/A"},
+                        "Outlier_Status": False
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {"school_year": "$School_Year", "file_type": "$file_type"},
+                        "count": {"$sum": 1}
+                    }
+                },
+                {"$sort": {"_id.school_year": 1, "_id.file_type": 1}}
+            ]
+            
+            # Aggregation 4: Both criteria (final clean dataset)
+            both_criteria_pipeline = [
+                {
+                    "$match": {
+                        "School_Year": {"$ne": "N/A"},
+                        "is_collection_day": True,
+                        "Outlier_Status": False
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {"school_year": "$School_Year", "file_type": "$file_type"},
+                        "count": {"$sum": 1}
+                    }
+                },
+                {"$sort": {"_id.school_year": 1, "_id.file_type": 1}}
+            ]
+            
+            # Execute all aggregations
+            raw_results = list(self.db.media_records.aggregate(raw_pipeline))
+            collection_results = list(self.db.media_records.aggregate(collection_only_pipeline))
+            non_outlier_results = list(self.db.media_records.aggregate(non_outliers_pipeline))
+            both_results = list(self.db.media_records.aggregate(both_criteria_pipeline))
+            
+            print(f"[DEBUG] Raw: {len(raw_results)}, Collection: {len(collection_results)}, Non-outliers: {len(non_outlier_results)}, Both: {len(both_results)}")
+            
+            # 3. Process results into dictionaries for easy lookup
+            def results_to_dict(results):
+                return {f"{r['_id']['school_year']}_{r['_id']['file_type']}": r['count'] for r in results}
+            
+            raw_dict = results_to_dict(raw_results)
+            collection_dict = results_to_dict(collection_results)
+            non_outlier_dict = results_to_dict(non_outlier_results)
+            both_dict = results_to_dict(both_results)
+            
+            # 4. Create comprehensive analysis table
+            categories = []
+            for result in raw_results:
+                sy = result['_id']['school_year']
+                ft = result['_id']['file_type']
+                key = f"{sy}_{ft}"
+                category_name = f"{sy} {ft} Files"
+                
+                raw_count = raw_dict.get(key, 0)
+                collection_count = collection_dict.get(key, 0)
+                non_outlier_count = non_outlier_dict.get(key, 0)
+                both_count = both_dict.get(key, 0)
+                
+                # Calculate intersection breakdown
+                collection_only = collection_count - both_count  # Files that pass collection day filter but are outliers
+                non_outlier_only = non_outlier_count - both_count  # Files that are non-outliers but on non-collection days
+                neither = raw_count - collection_only - non_outlier_only - both_count  # Files that fail both criteria
+                
+                categories.append({
+                    'Category': category_name,
+                    'Total_Raw': raw_count,
+                    'Collection_Only': collection_only,
+                    'Non_Outlier_Only': non_outlier_only,
+                    'Both_Criteria': both_count,
+                    'Neither': neither,
+                    'Final_Clean': both_count,
+                    'Retention_Pct': (both_count / raw_count * 100) if raw_count > 0 else 0
+                })
+            
+            # 5. Calculate totals
+            totals = {
+                'Category': 'TOTAL',
+                'Total_Raw': sum(c['Total_Raw'] for c in categories),
+                'Collection_Only': sum(c['Collection_Only'] for c in categories),
+                'Non_Outlier_Only': sum(c['Non_Outlier_Only'] for c in categories),
+                'Both_Criteria': sum(c['Both_Criteria'] for c in categories),
+                'Neither': sum(c['Neither'] for c in categories),
+                'Final_Clean': sum(c['Final_Clean'] for c in categories),
+                'Retention_Pct': 0
+            }
+            totals['Retention_Pct'] = (totals['Final_Clean'] / totals['Total_Raw'] * 100) if totals['Total_Raw'] > 0 else 0
+            categories.append(totals)
+            
+            # 6. Write Table 1: Complete Filtering Breakdown
+            current_row = 4
+            ws.cell(row=current_row, column=1, value="Table 1: Complete Filtering Breakdown (Intersection Analysis)")
+            self.formatter.apply_section_header_style(ws, f'A{current_row}')
+            current_row += 2
+            
+            # Headers for Table 1
+            headers1 = ['Category', 'Total Raw', 'Collection Day Only', 'Non-Outlier Only', 'Both Criteria', 'Neither', 'Final Clean', '% Retained']
+            for col_idx, header in enumerate(headers1, start=1):
+                ws.cell(row=current_row, column=col_idx, value=header)
+            self.formatter.apply_header_style(ws, f'A{current_row}:H{current_row}')
+            current_row += 1
+            
+            # Data rows for Table 1
+            for category in categories:
+                ws.cell(row=current_row, column=1, value=category['Category'])
+                ws.cell(row=current_row, column=2, value=category['Total_Raw'])
+                ws.cell(row=current_row, column=3, value=category['Collection_Only'])
+                ws.cell(row=current_row, column=4, value=category['Non_Outlier_Only'])
+                ws.cell(row=current_row, column=5, value=category['Both_Criteria'])
+                ws.cell(row=current_row, column=6, value=category['Neither'])
+                ws.cell(row=current_row, column=7, value=category['Final_Clean'])
+                
+                # Percentage with proper formatting
+                percent_cell = ws.cell(row=current_row, column=8, value=category['Retention_Pct']/100)
+                percent_cell.number_format = '0.0%'
+                
+                current_row += 1
+            
+            # Apply data formatting to Table 1
+            table1_end_row = current_row - 1
+            self.formatter.apply_data_style(ws, f'A{current_row-len(categories)}:H{table1_end_row}')
+            self.formatter.apply_alternating_row_colors(ws, current_row-len(categories), table1_end_row, 1, 8)
+            
+            # 7. Write Table 2: Filter Impact Summary
+            current_row += 2
+            ws.cell(row=current_row, column=1, value="Table 2: Filter Impact Summary")
+            self.formatter.apply_section_header_style(ws, f'A{current_row}')
+            current_row += 2
+            
+            # Headers for Table 2
+            headers2 = ['Category', 'Files Lost to Non-Collection Days', 'Files Lost to Outliers', 'Files Lost to Both', 'Final Retention %']
+            for col_idx, header in enumerate(headers2, start=1):
+                ws.cell(row=current_row, column=col_idx, value=header)
+            self.formatter.apply_header_style(ws, f'A{current_row}:E{current_row}')
+            current_row += 1
+            
+            # Data rows for Table 2
+            table2_start_row = current_row
+            for category in categories[:-1]:  # Exclude totals for this table
+                lost_to_non_collection = category['Collection_Only'] + category['Neither']
+                lost_to_outliers = category['Non_Outlier_Only'] + category['Neither']
+                lost_to_both = category['Neither']
+                
+                ws.cell(row=current_row, column=1, value=category['Category'])
+                ws.cell(row=current_row, column=2, value=lost_to_non_collection)
+                ws.cell(row=current_row, column=3, value=lost_to_outliers)
+                ws.cell(row=current_row, column=4, value=lost_to_both)
+                
+                percent_cell = ws.cell(row=current_row, column=5, value=category['Retention_Pct']/100)
+                percent_cell.number_format = '0.0%'
+                
+                current_row += 1
+            
+            # Apply data formatting to Table 2
+            table2_end_row = current_row - 1
+            self.formatter.apply_data_style(ws, f'A{table2_start_row}:E{table2_end_row}')
+            self.formatter.apply_alternating_row_colors(ws, table2_start_row, table2_end_row, 1, 5)
+            
+            # 8. Write explanation
+            current_row += 2
+            ws.cell(row=current_row, column=1, value="Filtering Criteria Explanation:")
+            self.formatter.apply_section_header_style(ws, f'A{current_row}')
+            current_row += 1
+            ws.cell(row=current_row, column=1, value="• Collection Day Only: Files from collection days that are outliers")
+            current_row += 1
+            ws.cell(row=current_row, column=1, value="• Non-Outlier Only: Non-outlier files from non-collection days")
+            current_row += 1
+            ws.cell(row=current_row, column=1, value="• Both Criteria: Files that pass both filters (final clean dataset)")
+            current_row += 1
+            ws.cell(row=current_row, column=1, value="• Neither: Outlier files from non-collection days")
+            
+            # 9. Auto-adjust columns and final formatting
             self.formatter.auto_adjust_columns(ws)
             
-            print("[SUCCESS] Data Cleaning sheet created")
-            
+            print("[SUCCESS] Data Cleaning sheet with intersection analysis created.")
+            print(f"[DEBUG] Final clean dataset: {totals['Final_Clean']} files ({totals['Retention_Pct']:.1f}% retention)")
+
         except Exception as e:
             print(f"[ERROR] Failed to create Data Cleaning sheet: {e}")
+            import traceback
+            traceback.print_exc()

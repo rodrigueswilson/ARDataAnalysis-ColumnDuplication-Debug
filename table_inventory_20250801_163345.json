@@ -1,0 +1,2764 @@
+{
+  "report_path": "AR_Analysis_Report_20250801_162549.xlsx",
+  "analysis_date": "2025-08-01T16:33:43.569368",
+  "total_sheets": 24,
+  "sheets": {
+    "Dashboard": {
+      "sheet_name": "Dashboard",
+      "max_row": 21,
+      "max_column": 2,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 1,
+          "end_row": 3,
+          "header_row": 1,
+          "columns": [
+            "0",
+            "1"
+          ],
+          "data_types": {
+            "0": "text",
+            "1": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 4,
+          "end_row": 4,
+          "header_row": 4,
+          "columns": [
+            "Time Series Analysis",
+            "Status"
+          ],
+          "data_types": {
+            "Time Series Analysis": "text",
+            "Status": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 5,
+          "end_row": 5,
+          "header_row": 5,
+          "columns": [
+            "ACF (Autocorrelation Function)",
+            "Available in 5 time scales"
+          ],
+          "data_types": {
+            "ACF (Autocorrelation Function)": "text",
+            "Available in 5 time scales": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 6,
+          "end_row": 6,
+          "header_row": 6,
+          "columns": [
+            "PACF (Partial Autocorrelation)",
+            "Available in 5 time scales"
+          ],
+          "data_types": {
+            "PACF (Partial Autocorrelation)": "text",
+            "Available in 5 time scales": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 5,
+          "start_row": 7,
+          "end_row": 8,
+          "header_row": 7,
+          "columns": [
+            "ARIMA Forecasting",
+            "Enabled for Daily & Weekly"
+          ],
+          "data_types": {
+            "ARIMA Forecasting": "text",
+            "Enabled for Daily & Weekly": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 6,
+          "start_row": 9,
+          "end_row": 9,
+          "header_row": 9,
+          "columns": [
+            "Analysis Coverage",
+            "Details"
+          ],
+          "data_types": {
+            "Analysis Coverage": "text",
+            "Details": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 7,
+          "start_row": 10,
+          "end_row": 10,
+          "header_row": 10,
+          "columns": [
+            "Daily Counts (ACF_PACF)",
+            "ACF/PACF + ARIMA Forecasts"
+          ],
+          "data_types": {
+            "Daily Counts (ACF_PACF)": "text",
+            "ACF/PACF + ARIMA Forecasts": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 8,
+          "start_row": 11,
+          "end_row": 11,
+          "header_row": 11,
+          "columns": [
+            "Weekly Counts (ACF_PACF)",
+            "ACF/PACF + ARIMA Forecasts"
+          ],
+          "data_types": {
+            "Weekly Counts (ACF_PACF)": "text",
+            "ACF/PACF + ARIMA Forecasts": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 9,
+          "start_row": 12,
+          "end_row": 12,
+          "header_row": 12,
+          "columns": [
+            "Biweekly Counts (ACF_PACF)",
+            "ACF/PACF Analysis"
+          ],
+          "data_types": {
+            "Biweekly Counts (ACF_PACF)": "text",
+            "ACF/PACF Analysis": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 10,
+          "start_row": 13,
+          "end_row": 13,
+          "header_row": 13,
+          "columns": [
+            "Monthly Counts (ACF_PACF)",
+            "ACF/PACF Analysis"
+          ],
+          "data_types": {
+            "Monthly Counts (ACF_PACF)": "text",
+            "ACF/PACF Analysis": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 11,
+          "start_row": 14,
+          "end_row": 15,
+          "header_row": 14,
+          "columns": [
+            "Period Counts (ACF_PACF)",
+            "ACF/PACF Analysis"
+          ],
+          "data_types": {
+            "Period Counts (ACF_PACF)": "text",
+            "ACF/PACF Analysis": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 12,
+          "start_row": 16,
+          "end_row": 16,
+          "header_row": 16,
+          "columns": [
+            "Forecast Configuration",
+            "Settings"
+          ],
+          "data_types": {
+            "Forecast Configuration": "text",
+            "Settings": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 13,
+          "start_row": 17,
+          "end_row": 17,
+          "header_row": 17,
+          "columns": [
+            "Forecast Metrics",
+            "Total_Files"
+          ],
+          "data_types": {
+            "Forecast Metrics": "text",
+            "Total_Files": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 14,
+          "start_row": 18,
+          "end_row": 18,
+          "header_row": 18,
+          "columns": [
+            "Forecast Time Scales",
+            "Daily (7 days), Weekly (6 weeks)"
+          ],
+          "data_types": {
+            "Forecast Time Scales": "text",
+            "Daily (7 days), Weekly (6 weeks)": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 15,
+          "start_row": 19,
+          "end_row": 19,
+          "header_row": 19,
+          "columns": [
+            "Confidence Intervals",
+            "95% CI bands included"
+          ],
+          "data_types": {
+            "Confidence Intervals": "text",
+            "95% CI bands included": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 16,
+          "start_row": 20,
+          "end_row": 21,
+          "header_row": 20,
+          "columns": [
+            "Fallback Methods",
+            "Moving average, Mean-based"
+          ],
+          "data_types": {
+            "Fallback Methods": "unknown",
+            "Moving average, Mean-based": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 2,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 3,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 4,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 5,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 6,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 7,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 8,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 9,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 10,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 11,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 12,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 13,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 14,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 15,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 16,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        }
+      ]
+    },
+    "Raw Data": {
+      "sheet_name": "Raw Data",
+      "max_row": 10242,
+      "max_column": 25,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 1,
+          "end_row": 10242,
+          "header_row": 1,
+          "columns": [
+            "file_name",
+            "ISO_Date",
+            "ISO_Time",
+            "ISO_Week",
+            "ISO_Year",
+            "ISO_YearWeek",
+            "ISO_Month",
+            "Day_of_Week",
+            "Time_of_Day",
+            "is_collection_day",
+            "Outlier_Status",
+            "School_Year",
+            "Collection_Period",
+            "Day_Number_in_Period",
+            "Day_Number_in_SYCollection",
+            "Day_Type",
+            "Day_Event",
+            "Scheduled_Activity",
+            "file_path",
+            "file_type",
+            "_creation_timestamp",
+            "Camera_Make",
+            "Camera_Model",
+            "Image_Dimensions",
+            "File_Size_MB"
+          ],
+          "data_types": {
+            "file_name": "text",
+            "ISO_Date": "text",
+            "ISO_Time": "text",
+            "ISO_Week": "numeric",
+            "ISO_Year": "numeric",
+            "ISO_YearWeek": "text",
+            "ISO_Month": "numeric",
+            "Day_of_Week": "text",
+            "Time_of_Day": "text",
+            "is_collection_day": "numeric",
+            "Outlier_Status": "numeric",
+            "School_Year": "text",
+            "Collection_Period": "text",
+            "Day_Number_in_Period": "numeric",
+            "Day_Number_in_SYCollection": "numeric",
+            "Day_Type": "text",
+            "Day_Event": "text",
+            "Scheduled_Activity": "text",
+            "file_path": "text",
+            "file_type": "text",
+            "_creation_timestamp": "text",
+            "Camera_Make": "text",
+            "Camera_Model": "text",
+            "Image_Dimensions": "text",
+            "File_Size_MB": "numeric"
+          },
+          "estimated_numeric_columns": 8,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "no_totals_detected",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 8 numeric columns"
+        }
+      ]
+    },
+    "Data Cleaning": {
+      "sheet_name": "Data Cleaning",
+      "max_row": 17,
+      "max_column": 5,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 5,
+          "end_row": 17,
+          "header_row": 5,
+          "columns": [
+            "File Type",
+            "Outlier Status",
+            "Count",
+            "Total Size (MB)",
+            "Avg Size (MB)"
+          ],
+          "data_types": {
+            "File Type": "text",
+            "Outlier Status": "numeric",
+            "Count": "numeric",
+            "Total Size (MB)": "numeric",
+            "Avg Size (MB)": "numeric"
+          },
+          "estimated_numeric_columns": 4,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 4 numeric columns"
+        }
+      ]
+    },
+    "MP3 Duration Analysis": {
+      "sheet_name": "MP3 Duration Analysis",
+      "max_row": 34,
+      "max_column": 8,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 5,
+          "end_row": 5,
+          "header_row": 5,
+          "columns": [
+            "School Year",
+            "Total Files",
+            "Total Hours",
+            "Avg Duration",
+            "Min Duration",
+            "Max Duration"
+          ],
+          "data_types": {
+            "School Year": "text",
+            "Total Files": "numeric",
+            "Total Hours": "mixed",
+            "Avg Duration": "mixed",
+            "Min Duration": "mixed",
+            "Max Duration": "mixed"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 6,
+          "end_row": 12,
+          "header_row": 6,
+          "columns": [
+            "Unknown",
+            "1714",
+            "26:07:55",
+            "00:00:54",
+            "00:00:03",
+            "00:20:54"
+          ],
+          "data_types": {
+            "Unknown": "text",
+            "1714": "numeric",
+            "26:07:55": "numeric",
+            "00:00:54": "numeric",
+            "00:00:03": "numeric",
+            "00:20:54": "numeric"
+          },
+          "estimated_numeric_columns": 5,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 13,
+          "end_row": 24,
+          "header_row": 13,
+          "columns": [
+            "Period",
+            "School Year",
+            "Files",
+            "Total Hours",
+            "Avg Duration",
+            "Days with MP3",
+            "Avg Files/Day",
+            "Efficiency"
+          ],
+          "data_types": {
+            "Period": "text",
+            "School Year": "text",
+            "Files": "numeric",
+            "Total Hours": "text",
+            "Avg Duration": "text",
+            "Days with MP3": "numeric",
+            "Avg Files/Day": "numeric",
+            "Efficiency": "numeric"
+          },
+          "estimated_numeric_columns": 4,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 25,
+          "end_row": 34,
+          "header_row": 25,
+          "columns": [
+            "Month",
+            "2021-22 Files",
+            "2021-22 Hours",
+            "2022-23 Files",
+            "2022-23 Hours",
+            "Total Files",
+            "Total Hours",
+            "Avg Duration"
+          ],
+          "data_types": {
+            "Month": "text",
+            "2021-22 Files": "numeric",
+            "2021-22 Hours": "text",
+            "2022-23 Files": "numeric",
+            "2022-23 Hours": "text",
+            "Total Files": "numeric",
+            "Total Hours": "text",
+            "Avg Duration": "text"
+          },
+          "estimated_numeric_columns": 3,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "column_totals",
+          "rationale": "Multiple rows with numeric data"
+        },
+        {
+          "table_id": 2,
+          "strategy": "full_totals",
+          "rationale": "Table has 5 numeric columns"
+        },
+        {
+          "table_id": 3,
+          "strategy": "full_totals",
+          "rationale": "Table has 4 numeric columns"
+        },
+        {
+          "table_id": 4,
+          "strategy": "full_totals",
+          "rationale": "Table has 3 numeric columns"
+        }
+      ]
+    },
+    "Daily Counts (ACF_PACF)": {
+      "sheet_name": "Daily Counts (ACF_PACF)",
+      "max_row": 337,
+      "max_column": 24,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 337,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "Total_Files_ACF_Lag_1",
+            "Total_Files_ACF_Lag_14",
+            "Total_Files_ACF_Lag_14_Significant",
+            "Total_Files_ACF_Lag_1_Significant",
+            "Total_Files_ACF_Lag_7",
+            "Total_Files_ACF_Lag_7_Significant",
+            "Total_Files_PACF_Lag_1",
+            "Total_Files_PACF_Lag_14",
+            "Total_Files_PACF_Lag_14_Significant",
+            "Total_Files_PACF_Lag_1_Significant",
+            "Total_Files_PACF_Lag_7",
+            "Total_Files_PACF_Lag_7_Significant",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB",
+            "has_files",
+            "Forecast_Quality",
+            "Forecast_Message",
+            "Forecast_Model",
+            "Total_Files_Forecast",
+            "Total_Files_Forecast_Lower",
+            "Total_Files_Forecast_Upper"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Total_Files": "numeric",
+            "Total_Files_ACF_Lag_1": "numeric",
+            "Total_Files_ACF_Lag_14": "unknown",
+            "Total_Files_ACF_Lag_14_Significant": "unknown",
+            "Total_Files_ACF_Lag_1_Significant": "numeric",
+            "Total_Files_ACF_Lag_7": "unknown",
+            "Total_Files_ACF_Lag_7_Significant": "unknown",
+            "Total_Files_PACF_Lag_1": "numeric",
+            "Total_Files_PACF_Lag_14": "unknown",
+            "Total_Files_PACF_Lag_14_Significant": "unknown",
+            "Total_Files_PACF_Lag_1_Significant": "numeric",
+            "Total_Files_PACF_Lag_7": "unknown",
+            "Total_Files_PACF_Lag_7_Significant": "unknown",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "has_files": "numeric",
+            "Forecast_Quality": "text",
+            "Forecast_Message": "unknown",
+            "Forecast_Model": "text",
+            "Total_Files_Forecast": "numeric",
+            "Total_Files_Forecast_Lower": "numeric",
+            "Total_Files_Forecast_Upper": "numeric"
+          },
+          "estimated_numeric_columns": 12,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 12 numeric columns"
+        }
+      ]
+    },
+    "Weekly Counts (ACF_PACF)": {
+      "sheet_name": "Weekly Counts (ACF_PACF)",
+      "max_row": 86,
+      "max_column": 28,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 74,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "Total_Files_ACF_Lag_1",
+            "Total_Files_ACF_Lag_1_Significant",
+            "Total_Files_ACF_Lag_4",
+            "Total_Files_ACF_Lag_4_Significant",
+            "Total_Files_ACF_Lag_8",
+            "Total_Files_ACF_Lag_8_Significant",
+            "Total_Files_PACF_Lag_1",
+            "Total_Files_PACF_Lag_1_Significant",
+            "Total_Files_PACF_Lag_4",
+            "Total_Files_PACF_Lag_4_Significant",
+            "Total_Files_PACF_Lag_8",
+            "Total_Files_PACF_Lag_8_Significant",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB",
+            "School_Year",
+            "First_Date",
+            "Last_Date",
+            "Year",
+            "Week",
+            "Forecast_Quality",
+            "Forecast_Message",
+            "Forecast_Model",
+            "Total_Files_Forecast",
+            "Total_Files_Forecast_Lower",
+            "Total_Files_Forecast_Upper"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Total_Files": "numeric",
+            "Total_Files_ACF_Lag_1": "numeric",
+            "Total_Files_ACF_Lag_1_Significant": "numeric",
+            "Total_Files_ACF_Lag_4": "unknown",
+            "Total_Files_ACF_Lag_4_Significant": "unknown",
+            "Total_Files_ACF_Lag_8": "unknown",
+            "Total_Files_ACF_Lag_8_Significant": "unknown",
+            "Total_Files_PACF_Lag_1": "numeric",
+            "Total_Files_PACF_Lag_1_Significant": "numeric",
+            "Total_Files_PACF_Lag_4": "unknown",
+            "Total_Files_PACF_Lag_4_Significant": "unknown",
+            "Total_Files_PACF_Lag_8": "unknown",
+            "Total_Files_PACF_Lag_8_Significant": "unknown",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "School_Year": "text",
+            "First_Date": "text",
+            "Last_Date": "text",
+            "Year": "numeric",
+            "Week": "numeric",
+            "Forecast_Quality": "text",
+            "Forecast_Message": "unknown",
+            "Forecast_Model": "text",
+            "Total_Files_Forecast": "numeric",
+            "Total_Files_Forecast_Lower": "numeric",
+            "Total_Files_Forecast_Upper": "numeric"
+          },
+          "estimated_numeric_columns": 13,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 75,
+          "end_row": 77,
+          "header_row": 75,
+          "columns": [
+            "TOTALS",
+            "10241",
+            "3184",
+            "7057",
+            "43294.15400000001",
+            "143567",
+            "1813"
+          ],
+          "data_types": {
+            "TOTALS": "mixed",
+            "10241": "mixed",
+            "3184": "mixed",
+            "7057": "mixed",
+            "43294.15400000001": "mixed",
+            "143567": "unknown",
+            "1813": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 78,
+          "end_row": 82,
+          "header_row": 78,
+          "columns": [
+            "Lag",
+            "ACF",
+            "PACF",
+            "Upper_CI",
+            "Lower_CI"
+          ],
+          "data_types": {
+            "Lag": "mixed",
+            "ACF": "mixed",
+            "PACF": "numeric",
+            "Upper_CI": "numeric",
+            "Lower_CI": "numeric"
+          },
+          "estimated_numeric_columns": 3,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 83,
+          "end_row": 83,
+          "header_row": 83,
+          "columns": [
+            "Lag Range Used:",
+            "0 of 0 requested"
+          ],
+          "data_types": {
+            "Lag Range Used:": "text",
+            "0 of 0 requested": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 5,
+          "start_row": 84,
+          "end_row": 84,
+          "header_row": 84,
+          "columns": [
+            "Computed on Column:",
+            "Total_Files"
+          ],
+          "data_types": {
+            "Computed on Column:": "text",
+            "Total_Files": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 6,
+          "start_row": 85,
+          "end_row": 85,
+          "header_row": 85,
+          "columns": [
+            "Analysis Type:",
+            "Weekly Time Series"
+          ],
+          "data_types": {
+            "Analysis Type:": "text",
+            "Weekly Time Series": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 7,
+          "start_row": 86,
+          "end_row": 86,
+          "header_row": 86,
+          "columns": [
+            "Status:",
+            "[EMOJI] Limited Data"
+          ],
+          "data_types": {
+            "Status:": "unknown",
+            "[EMOJI] Limited Data": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 13 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 3,
+          "strategy": "full_totals",
+          "rationale": "Table has 3 numeric columns"
+        },
+        {
+          "table_id": 4,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 5,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 6,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 7,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Biweekly Counts (ACF_PACF)": {
+      "sheet_name": "Biweekly Counts (ACF_PACF)",
+      "max_row": 53,
+      "max_column": 23,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 41,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "Total_Files_ACF_Lag_1",
+            "Total_Files_ACF_Lag_1_Significant",
+            "Total_Files_ACF_Lag_2",
+            "Total_Files_ACF_Lag_2_Significant",
+            "Total_Files_ACF_Lag_4",
+            "Total_Files_ACF_Lag_4_Significant",
+            "Total_Files_PACF_Lag_1",
+            "Total_Files_PACF_Lag_1_Significant",
+            "Total_Files_PACF_Lag_2",
+            "Total_Files_PACF_Lag_2_Significant",
+            "Total_Files_PACF_Lag_4",
+            "Total_Files_PACF_Lag_4_Significant",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB",
+            "First_Date",
+            "Last_Date",
+            "School_Year",
+            "Days_With_Data",
+            "Year",
+            "Biweek_Number"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Total_Files": "numeric",
+            "Total_Files_ACF_Lag_1": "numeric",
+            "Total_Files_ACF_Lag_1_Significant": "numeric",
+            "Total_Files_ACF_Lag_2": "unknown",
+            "Total_Files_ACF_Lag_2_Significant": "unknown",
+            "Total_Files_ACF_Lag_4": "unknown",
+            "Total_Files_ACF_Lag_4_Significant": "unknown",
+            "Total_Files_PACF_Lag_1": "numeric",
+            "Total_Files_PACF_Lag_1_Significant": "numeric",
+            "Total_Files_PACF_Lag_2": "unknown",
+            "Total_Files_PACF_Lag_2_Significant": "unknown",
+            "Total_Files_PACF_Lag_4": "unknown",
+            "Total_Files_PACF_Lag_4_Significant": "unknown",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "First_Date": "text",
+            "Last_Date": "text",
+            "School_Year": "text",
+            "Days_With_Data": "numeric",
+            "Year": "numeric",
+            "Biweek_Number": "numeric"
+          },
+          "estimated_numeric_columns": 11,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 42,
+          "end_row": 44,
+          "header_row": 42,
+          "columns": [
+            "TOTALS",
+            "10241",
+            "3184",
+            "7057",
+            "43294.15399999999",
+            "272",
+            "76838",
+            "463"
+          ],
+          "data_types": {
+            "TOTALS": "mixed",
+            "10241": "mixed",
+            "3184": "mixed",
+            "7057": "mixed",
+            "43294.15399999999": "mixed",
+            "272": "unknown",
+            "76838": "unknown",
+            "463": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 45,
+          "end_row": 49,
+          "header_row": 45,
+          "columns": [
+            "Lag",
+            "ACF",
+            "PACF",
+            "Upper_CI",
+            "Lower_CI"
+          ],
+          "data_types": {
+            "Lag": "mixed",
+            "ACF": "mixed",
+            "PACF": "numeric",
+            "Upper_CI": "numeric",
+            "Lower_CI": "numeric"
+          },
+          "estimated_numeric_columns": 3,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 50,
+          "end_row": 50,
+          "header_row": 50,
+          "columns": [
+            "Lag Range Used:",
+            "0 of 0 requested"
+          ],
+          "data_types": {
+            "Lag Range Used:": "text",
+            "0 of 0 requested": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 5,
+          "start_row": 51,
+          "end_row": 51,
+          "header_row": 51,
+          "columns": [
+            "Computed on Column:",
+            "Total_Files"
+          ],
+          "data_types": {
+            "Computed on Column:": "text",
+            "Total_Files": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 6,
+          "start_row": 52,
+          "end_row": 52,
+          "header_row": 52,
+          "columns": [
+            "Analysis Type:",
+            "Biweekly Time Series"
+          ],
+          "data_types": {
+            "Analysis Type:": "text",
+            "Biweekly Time Series": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 7,
+          "start_row": 53,
+          "end_row": 53,
+          "header_row": 53,
+          "columns": [
+            "Status:",
+            "[EMOJI] Limited Data"
+          ],
+          "data_types": {
+            "Status:": "unknown",
+            "[EMOJI] Limited Data": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 11 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 3,
+          "strategy": "full_totals",
+          "rationale": "Table has 3 numeric columns"
+        },
+        {
+          "table_id": 4,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 5,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 6,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 7,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Monthly Counts (ACF_PACF)": {
+      "sheet_name": "Monthly Counts (ACF_PACF)",
+      "max_row": 34,
+      "max_column": 21,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 22,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "Total_Files_ACF_Lag_1",
+            "Total_Files_ACF_Lag_1_Significant",
+            "Total_Files_ACF_Lag_3",
+            "Total_Files_ACF_Lag_3_Significant",
+            "Total_Files_ACF_Lag_6",
+            "Total_Files_ACF_Lag_6_Significant",
+            "Total_Files_PACF_Lag_1",
+            "Total_Files_PACF_Lag_1_Significant",
+            "Total_Files_PACF_Lag_3",
+            "Total_Files_PACF_Lag_3_Significant",
+            "Total_Files_PACF_Lag_6",
+            "Total_Files_PACF_Lag_6_Significant",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB",
+            "First_Date",
+            "Last_Date",
+            "Days_With_Data",
+            "Avg_Files_Per_Day"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Total_Files": "numeric",
+            "Total_Files_ACF_Lag_1": "numeric",
+            "Total_Files_ACF_Lag_1_Significant": "numeric",
+            "Total_Files_ACF_Lag_3": "unknown",
+            "Total_Files_ACF_Lag_3_Significant": "unknown",
+            "Total_Files_ACF_Lag_6": "unknown",
+            "Total_Files_ACF_Lag_6_Significant": "unknown",
+            "Total_Files_PACF_Lag_1": "numeric",
+            "Total_Files_PACF_Lag_1_Significant": "numeric",
+            "Total_Files_PACF_Lag_3": "unknown",
+            "Total_Files_PACF_Lag_3_Significant": "unknown",
+            "Total_Files_PACF_Lag_6": "unknown",
+            "Total_Files_PACF_Lag_6_Significant": "unknown",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "First_Date": "text",
+            "Last_Date": "text",
+            "Days_With_Data": "numeric",
+            "Avg_Files_Per_Day": "numeric"
+          },
+          "estimated_numeric_columns": 10,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 23,
+          "end_row": 25,
+          "header_row": 23,
+          "columns": [
+            "TOTALS",
+            "10241",
+            "3184",
+            "7057",
+            "43294.15399999999",
+            "272",
+            "667.36"
+          ],
+          "data_types": {
+            "TOTALS": "mixed",
+            "10241": "mixed",
+            "3184": "mixed",
+            "7057": "mixed",
+            "43294.15399999999": "mixed",
+            "272": "unknown",
+            "667.36": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 26,
+          "end_row": 30,
+          "header_row": 26,
+          "columns": [
+            "Lag",
+            "ACF",
+            "PACF",
+            "Upper_CI",
+            "Lower_CI"
+          ],
+          "data_types": {
+            "Lag": "mixed",
+            "ACF": "mixed",
+            "PACF": "numeric",
+            "Upper_CI": "numeric",
+            "Lower_CI": "numeric"
+          },
+          "estimated_numeric_columns": 3,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 31,
+          "end_row": 31,
+          "header_row": 31,
+          "columns": [
+            "Lag Range Used:",
+            "0 of 0 requested"
+          ],
+          "data_types": {
+            "Lag Range Used:": "text",
+            "0 of 0 requested": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 5,
+          "start_row": 32,
+          "end_row": 32,
+          "header_row": 32,
+          "columns": [
+            "Computed on Column:",
+            "Total_Files"
+          ],
+          "data_types": {
+            "Computed on Column:": "text",
+            "Total_Files": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 6,
+          "start_row": 33,
+          "end_row": 33,
+          "header_row": 33,
+          "columns": [
+            "Analysis Type:",
+            "Monthly Time Series"
+          ],
+          "data_types": {
+            "Analysis Type:": "text",
+            "Monthly Time Series": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 7,
+          "start_row": 34,
+          "end_row": 34,
+          "header_row": 34,
+          "columns": [
+            "Status:",
+            "[EMOJI] Limited Data"
+          ],
+          "data_types": {
+            "Status:": "unknown",
+            "[EMOJI] Limited Data": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 10 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 3,
+          "strategy": "full_totals",
+          "rationale": "Table has 3 numeric columns"
+        },
+        {
+          "table_id": 4,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 5,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 6,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 7,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Period Counts (ACF_PACF)": {
+      "sheet_name": "Period Counts (ACF_PACF)",
+      "max_row": 21,
+      "max_column": 18,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 9,
+          "header_row": 3,
+          "columns": [
+            "Total_Files",
+            "Total_Files_ACF_Lag_1",
+            "Total_Files_ACF_Lag_1_Significant",
+            "Total_Files_ACF_Lag_2",
+            "Total_Files_ACF_Lag_2_Significant",
+            "Total_Files_PACF_Lag_1",
+            "Total_Files_PACF_Lag_1_Significant",
+            "Total_Files_PACF_Lag_2",
+            "Total_Files_PACF_Lag_2_Significant",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB",
+            "Days_With_Data",
+            "Avg_Files_Per_Day",
+            "School_Year",
+            "Period",
+            "First_Date",
+            "Last_Date"
+          ],
+          "data_types": {
+            "Total_Files": "numeric",
+            "Total_Files_ACF_Lag_1": "numeric",
+            "Total_Files_ACF_Lag_1_Significant": "numeric",
+            "Total_Files_ACF_Lag_2": "unknown",
+            "Total_Files_ACF_Lag_2_Significant": "unknown",
+            "Total_Files_PACF_Lag_1": "numeric",
+            "Total_Files_PACF_Lag_1_Significant": "numeric",
+            "Total_Files_PACF_Lag_2": "unknown",
+            "Total_Files_PACF_Lag_2_Significant": "unknown",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "Days_With_Data": "numeric",
+            "Avg_Files_Per_Day": "numeric",
+            "School_Year": "text",
+            "Period": "text",
+            "First_Date": "text",
+            "Last_Date": "text"
+          },
+          "estimated_numeric_columns": 10,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 10,
+          "end_row": 12,
+          "header_row": 10,
+          "columns": [
+            "9906",
+            "TOTALS",
+            "3142",
+            "6764",
+            "41081.47200000001",
+            "266",
+            "221.02"
+          ],
+          "data_types": {
+            "9906": "mixed",
+            "TOTALS": "mixed",
+            "3142": "mixed",
+            "6764": "mixed",
+            "41081.47200000001": "mixed",
+            "266": "unknown",
+            "221.02": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 13,
+          "end_row": 17,
+          "header_row": 13,
+          "columns": [
+            "Lag",
+            "ACF",
+            "PACF",
+            "Upper_CI",
+            "Lower_CI"
+          ],
+          "data_types": {
+            "Lag": "mixed",
+            "ACF": "mixed",
+            "PACF": "numeric",
+            "Upper_CI": "numeric",
+            "Lower_CI": "numeric"
+          },
+          "estimated_numeric_columns": 3,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 18,
+          "end_row": 18,
+          "header_row": 18,
+          "columns": [
+            "Lag Range Used:",
+            "0 of 0 requested"
+          ],
+          "data_types": {
+            "Lag Range Used:": "text",
+            "0 of 0 requested": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 5,
+          "start_row": 19,
+          "end_row": 19,
+          "header_row": 19,
+          "columns": [
+            "Computed on Column:",
+            "Total_Files"
+          ],
+          "data_types": {
+            "Computed on Column:": "text",
+            "Total_Files": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 6,
+          "start_row": 20,
+          "end_row": 20,
+          "header_row": 20,
+          "columns": [
+            "Analysis Type:",
+            "Period Time Series"
+          ],
+          "data_types": {
+            "Analysis Type:": "text",
+            "Period Time Series": "text"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 7,
+          "start_row": 21,
+          "end_row": 21,
+          "header_row": 21,
+          "columns": [
+            "Status:",
+            "[EMOJI] Limited Data"
+          ],
+          "data_types": {
+            "Status:": "unknown",
+            "[EMOJI] Limited Data": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 10 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 3,
+          "strategy": "full_totals",
+          "rationale": "Table has 3 numeric columns"
+        },
+        {
+          "table_id": 4,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 5,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 6,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        },
+        {
+          "table_id": 7,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "ACF_PACF_Dashboard": {
+      "sheet_name": "ACF_PACF_Dashboard",
+      "max_row": 51,
+      "max_column": 8,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 5,
+          "end_row": 49,
+          "header_row": 5,
+          "columns": [
+            "Time Scale",
+            "Data Points",
+            "ACF Lags",
+            "PACF Lags",
+            "Max |ACF|",
+            "Max |PACF|",
+            "Confidence Level",
+            "Sheet Link"
+          ],
+          "data_types": {
+            "Time Scale": "text",
+            "Data Points": "numeric",
+            "ACF Lags": "numeric",
+            "PACF Lags": "numeric",
+            "Max |ACF|": "numeric",
+            "Max |PACF|": "numeric",
+            "Confidence Level": "text",
+            "Sheet Link": "text"
+          },
+          "estimated_numeric_columns": 5,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 50,
+          "end_row": 51,
+          "header_row": 50,
+          "columns": [
+            "→ Daily Counts (ACF_PACF)",
+            "→ Weekly Counts (ACF_PACF)",
+            "→ Biweekly Counts (ACF_PACF)",
+            "→ Monthly Counts (ACF_PACF)"
+          ],
+          "data_types": {
+            "→ Daily Counts (ACF_PACF)": "text",
+            "→ Weekly Counts (ACF_PACF)": "unknown",
+            "→ Biweekly Counts (ACF_PACF)": "unknown",
+            "→ Monthly Counts (ACF_PACF)": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        },
+        {
+          "table_id": 2,
+          "strategy": "minimal_or_none",
+          "rationale": "Dashboard sheets typically don't need totals"
+        }
+      ]
+    },
+    "Weekly Counts": {
+      "sheet_name": "Weekly Counts",
+      "max_row": 42,
+      "max_column": 6,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 41,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB"
+          ],
+          "data_types": {
+            "_id": "numeric",
+            "Total_Files": "numeric",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric"
+          },
+          "estimated_numeric_columns": 5,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 42,
+          "end_row": 42,
+          "header_row": 42,
+          "columns": [
+            "949",
+            "10241",
+            "3184",
+            "7057",
+            "43294.154",
+            "TOTALS"
+          ],
+          "data_types": {
+            "949": "unknown",
+            "10241": "unknown",
+            "3184": "unknown",
+            "7057": "unknown",
+            "43294.154": "unknown",
+            "TOTALS": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 5 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Day of Week Counts": {
+      "sheet_name": "Day of Week Counts",
+      "max_row": 9,
+      "max_column": 5,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 8,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Total_Files": "numeric",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric"
+          },
+          "estimated_numeric_columns": 4,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 9,
+          "end_row": 9,
+          "header_row": 9,
+          "columns": [
+            "TOTALS",
+            "10241",
+            "3184",
+            "7057",
+            "43294.15399999999"
+          ],
+          "data_types": {
+            "TOTALS": "unknown",
+            "10241": "unknown",
+            "3184": "unknown",
+            "7057": "unknown",
+            "43294.15399999999": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 4 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Activity Counts": {
+      "sheet_name": "Activity Counts",
+      "max_row": 20,
+      "max_column": 5,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 19,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Total_Files": "numeric",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric"
+          },
+          "estimated_numeric_columns": 4,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 20,
+          "end_row": 20,
+          "header_row": 20,
+          "columns": [
+            "TOTALS",
+            "10241",
+            "3184",
+            "7057",
+            "43294.154"
+          ],
+          "data_types": {
+            "TOTALS": "unknown",
+            "10241": "unknown",
+            "3184": "unknown",
+            "7057": "unknown",
+            "43294.154": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 4 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Camera Usage by Year": {
+      "sheet_name": "Camera Usage by Year",
+      "max_row": 11,
+      "max_column": 6,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 10,
+          "header_row": 3,
+          "columns": [
+            "Total_Files",
+            "Total_Size_MB",
+            "First_Date",
+            "Last_Date",
+            "Camera_Model",
+            "School_Year"
+          ],
+          "data_types": {
+            "Total_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "First_Date": "text",
+            "Last_Date": "text",
+            "Camera_Model": "text",
+            "School_Year": "text"
+          },
+          "estimated_numeric_columns": 2,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 11,
+          "end_row": 11,
+          "header_row": 11,
+          "columns": [
+            "7057",
+            "39343.209",
+            "TOTALS"
+          ],
+          "data_types": {
+            "7057": "unknown",
+            "39343.209": "unknown",
+            "TOTALS": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "column_totals",
+          "rationale": "Multiple rows with numeric data"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Camera Usage Dates": {
+      "sheet_name": "Camera Usage Dates",
+      "max_row": 8,
+      "max_column": 4,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 3,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "First_Date",
+            "Last_Date",
+            "Total_Files"
+          ],
+          "data_types": {
+            "_id": "text",
+            "First_Date": "text",
+            "Last_Date": "text",
+            "Total_Files": "numeric"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 4,
+          "end_row": 4,
+          "header_row": 4,
+          "columns": [
+            "DSC-W800",
+            "2021-09-09",
+            "2022-05-26",
+            "1037"
+          ],
+          "data_types": {
+            "DSC-W800": "text",
+            "2021-09-09": "text",
+            "2022-05-26": "text",
+            "1037": "numeric"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 5,
+          "end_row": 5,
+          "header_row": 5,
+          "columns": [
+            "ZV-1",
+            "2021-09-20",
+            "2023-03-22",
+            "2245"
+          ],
+          "data_types": {
+            "ZV-1": "text",
+            "2021-09-20": "text",
+            "2023-03-22": "text",
+            "2245": "numeric"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 6,
+          "end_row": 6,
+          "header_row": 6,
+          "columns": [
+            "ZV-E10",
+            "2022-09-07",
+            "2023-05-15",
+            "1848"
+          ],
+          "data_types": {
+            "ZV-E10": "text",
+            "2022-09-07": "text",
+            "2023-05-15": "text",
+            "1848": "numeric"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 5,
+          "start_row": 7,
+          "end_row": 7,
+          "header_row": 7,
+          "columns": [
+            "MC211",
+            "2022-09-09",
+            "2023-05-30",
+            "1927"
+          ],
+          "data_types": {
+            "MC211": "text",
+            "2022-09-09": "unknown",
+            "2023-05-30": "unknown",
+            "1927": "numeric"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 6,
+          "start_row": 8,
+          "end_row": 8,
+          "header_row": 8,
+          "columns": [
+            "TOTALS",
+            "7057"
+          ],
+          "data_types": {
+            "TOTALS": "unknown",
+            "7057": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 2,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 3,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 4,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 5,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 6,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Camera Usage by Year Range": {
+      "sheet_name": "Camera Usage by Year Range",
+      "max_row": 11,
+      "max_column": 5,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 3,
+          "header_row": 3,
+          "columns": [
+            "First_Date",
+            "Last_Date",
+            "Total_Files",
+            "Camera_Model",
+            "School_Year"
+          ],
+          "data_types": {
+            "First_Date": "text",
+            "Last_Date": "text",
+            "Total_Files": "numeric",
+            "Camera_Model": "text",
+            "School_Year": "text"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 4,
+          "end_row": 4,
+          "header_row": 4,
+          "columns": [
+            "2021-09-13",
+            "2022-05-26",
+            "950",
+            "DSC-W800",
+            "2021-2022"
+          ],
+          "data_types": {
+            "2021-09-13": "text",
+            "2022-05-26": "text",
+            "950": "numeric",
+            "DSC-W800": "text",
+            "2021-2022": "text"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 3,
+          "start_row": 5,
+          "end_row": 5,
+          "header_row": 5,
+          "columns": [
+            "2021-09-09",
+            "2021-09-10",
+            "87",
+            "DSC-W800",
+            "N/A"
+          ],
+          "data_types": {
+            "2021-09-09": "text",
+            "2021-09-10": "text",
+            "87": "numeric",
+            "DSC-W800": "text",
+            "N/A": "text"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 4,
+          "start_row": 6,
+          "end_row": 6,
+          "header_row": 6,
+          "columns": [
+            "2022-09-09",
+            "2023-05-30",
+            "1927",
+            "MC211",
+            "2022-2023"
+          ],
+          "data_types": {
+            "2022-09-09": "text",
+            "2023-05-30": "text",
+            "1927": "numeric",
+            "MC211": "text",
+            "2022-2023": "text"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 5,
+          "start_row": 7,
+          "end_row": 7,
+          "header_row": 7,
+          "columns": [
+            "2021-09-20",
+            "2022-05-26",
+            "2097",
+            "ZV-1",
+            "2021-2022"
+          ],
+          "data_types": {
+            "2021-09-20": "text",
+            "2022-05-26": "text",
+            "2097": "numeric",
+            "ZV-1": "text",
+            "2021-2022": "text"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 6,
+          "start_row": 8,
+          "end_row": 8,
+          "header_row": 8,
+          "columns": [
+            "2022-09-08",
+            "2023-03-22",
+            "148",
+            "ZV-1",
+            "2022-2023"
+          ],
+          "data_types": {
+            "2022-09-08": "text",
+            "2023-03-22": "text",
+            "148": "numeric",
+            "ZV-1": "text",
+            "2022-2023": "text"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 7,
+          "start_row": 9,
+          "end_row": 9,
+          "header_row": 9,
+          "columns": [
+            "2022-09-12",
+            "2023-05-15",
+            "1815",
+            "ZV-E10",
+            "2022-2023"
+          ],
+          "data_types": {
+            "2022-09-12": "text",
+            "2023-05-15": "text",
+            "1815": "numeric",
+            "ZV-E10": "text",
+            "2022-2023": "text"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 8,
+          "start_row": 10,
+          "end_row": 10,
+          "header_row": 10,
+          "columns": [
+            "2022-09-07",
+            "2022-09-07",
+            "33",
+            "ZV-E10",
+            "N/A"
+          ],
+          "data_types": {
+            "2022-09-07": "unknown",
+            "33": "numeric",
+            "ZV-E10": "unknown",
+            "N/A": "unknown"
+          },
+          "estimated_numeric_columns": 1,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 9,
+          "start_row": 11,
+          "end_row": 11,
+          "header_row": 11,
+          "columns": [
+            "TOTALS",
+            "7057"
+          ],
+          "data_types": {
+            "TOTALS": "unknown",
+            "7057": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 2,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 3,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 4,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 5,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 6,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 7,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 8,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 9,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "File Size by Day": {
+      "sheet_name": "File Size by Day",
+      "max_row": 276,
+      "max_column": 4,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 276,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Total_Files",
+            "Total_Size_MB",
+            "Avg_Size_MB"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Total_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "Avg_Size_MB": "numeric"
+          },
+          "estimated_numeric_columns": 3,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 3 numeric columns"
+        }
+      ]
+    },
+    "Monthly Capture Volume": {
+      "sheet_name": "Monthly Capture Volume",
+      "max_row": 23,
+      "max_column": 3,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 22,
+          "header_row": 3,
+          "columns": [
+            "Count",
+            "Year",
+            "Month"
+          ],
+          "data_types": {
+            "Count": "numeric",
+            "Year": "numeric",
+            "Month": "numeric"
+          },
+          "estimated_numeric_columns": 3,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 23,
+          "end_row": 23,
+          "header_row": 23,
+          "columns": [
+            "10241",
+            "TOTAL"
+          ],
+          "data_types": {
+            "10241": "unknown",
+            "TOTAL": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 3 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Time of Day": {
+      "sheet_name": "Time of Day",
+      "max_row": 5,
+      "max_column": 3,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 5,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "Count",
+            "Row Total"
+          ],
+          "data_types": {
+            "_id": "text",
+            "Count": "numeric",
+            "Row Total": "numeric"
+          },
+          "estimated_numeric_columns": 2,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        }
+      ]
+    },
+    "File Size Stats": {
+      "sheet_name": "File Size Stats",
+      "max_row": 6,
+      "max_column": 6,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 5,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "AvgSizeMB",
+            "MinSizeMB",
+            "MaxSizeMB",
+            "Count",
+            "Row Total"
+          ],
+          "data_types": {
+            "_id": "text",
+            "AvgSizeMB": "numeric",
+            "MinSizeMB": "numeric",
+            "MaxSizeMB": "numeric",
+            "Count": "numeric",
+            "Row Total": "numeric"
+          },
+          "estimated_numeric_columns": 5,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 6,
+          "end_row": 6,
+          "header_row": 6,
+          "columns": [
+            "TOTAL",
+            "6.815936185150281",
+            "0.222",
+            "590.815",
+            "10241",
+            "10838.85293618515"
+          ],
+          "data_types": {
+            "TOTAL": "unknown",
+            "6.815936185150281": "unknown",
+            "0.222": "unknown",
+            "590.815": "unknown",
+            "10241": "unknown",
+            "10838.85293618515": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 5 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Collection Periods": {
+      "sheet_name": "Collection Periods",
+      "max_row": 10,
+      "max_column": 3,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 9,
+          "header_row": 3,
+          "columns": [
+            "Count",
+            "Period",
+            "Total Size (MB)"
+          ],
+          "data_types": {
+            "Count": "numeric",
+            "Period": "text",
+            "Total Size (MB)": "numeric"
+          },
+          "estimated_numeric_columns": 2,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 10,
+          "end_row": 10,
+          "header_row": 10,
+          "columns": [
+            "9906",
+            "TOTALS",
+            "41081.47"
+          ],
+          "data_types": {
+            "9906": "unknown",
+            "TOTALS": "unknown",
+            "41081.47": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    },
+    "Weekday by Period": {
+      "sheet_name": "Weekday by Period",
+      "max_row": 33,
+      "max_column": 4,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 33,
+          "header_row": 3,
+          "columns": [
+            "Count",
+            "Period",
+            "Day_of_Week",
+            "Row Total"
+          ],
+          "data_types": {
+            "Count": "numeric",
+            "Period": "text",
+            "Day_of_Week": "text",
+            "Row Total": "numeric"
+          },
+          "estimated_numeric_columns": 2,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "row_totals",
+          "rationale": "Few rows with numeric data"
+        }
+      ]
+    },
+    "SY Days": {
+      "sheet_name": "SY Days",
+      "max_row": 276,
+      "max_column": 6,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 276,
+          "header_row": 3,
+          "columns": [
+            "Total_Files",
+            "MP3_Files",
+            "JPG_Files",
+            "Total_Size_MB",
+            "School_Year",
+            "ISO_Date"
+          ],
+          "data_types": {
+            "Total_Files": "numeric",
+            "MP3_Files": "numeric",
+            "JPG_Files": "numeric",
+            "Total_Size_MB": "numeric",
+            "School_Year": "text",
+            "ISO_Date": "text"
+          },
+          "estimated_numeric_columns": 4,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 4 numeric columns"
+        }
+      ]
+    },
+    "Data Quality": {
+      "sheet_name": "Data Quality",
+      "max_row": 5,
+      "max_column": 14,
+      "tables": [
+        {
+          "table_id": 1,
+          "start_row": 3,
+          "end_row": 4,
+          "header_row": 3,
+          "columns": [
+            "_id",
+            "total_files",
+            "jpg_files",
+            "mp3_files",
+            "outliers",
+            "collection_day_files",
+            "total_size_mb",
+            "avg_file_size_mb",
+            "unique_dates",
+            "unique_school_years",
+            "outlier_percentage",
+            "collection_day_percentage",
+            "unique_date_count",
+            "school_year_count"
+          ],
+          "data_types": {
+            "_id": "text",
+            "total_files": "numeric",
+            "jpg_files": "numeric",
+            "mp3_files": "numeric",
+            "outliers": "numeric",
+            "collection_day_files": "numeric",
+            "total_size_mb": "numeric",
+            "avg_file_size_mb": "numeric",
+            "unique_dates": "text",
+            "unique_school_years": "text",
+            "outlier_percentage": "numeric",
+            "collection_day_percentage": "numeric",
+            "unique_date_count": "numeric",
+            "school_year_count": "numeric"
+          },
+          "estimated_numeric_columns": 11,
+          "has_totals_row": false,
+          "has_totals_column": false
+        },
+        {
+          "table_id": 2,
+          "start_row": 5,
+          "end_row": 5,
+          "header_row": 5,
+          "columns": [
+            "TOTALS",
+            "10241",
+            "7057",
+            "3184",
+            "343",
+            "9742",
+            "43294.154",
+            "4.227531881652182",
+            "3.349282296650718",
+            "95.12742896201543",
+            "272",
+            "3"
+          ],
+          "data_types": {
+            "TOTALS": "unknown",
+            "10241": "unknown",
+            "7057": "unknown",
+            "3184": "unknown",
+            "343": "unknown",
+            "9742": "unknown",
+            "43294.154": "unknown",
+            "4.227531881652182": "unknown",
+            "3.349282296650718": "unknown",
+            "95.12742896201543": "unknown",
+            "272": "unknown",
+            "3": "unknown"
+          },
+          "estimated_numeric_columns": 0,
+          "has_totals_row": false,
+          "has_totals_column": false
+        }
+      ],
+      "current_totals_status": "has_some_totals",
+      "recommended_totals": [
+        {
+          "table_id": 1,
+          "strategy": "full_totals",
+          "rationale": "Table has 11 numeric columns"
+        },
+        {
+          "table_id": 2,
+          "strategy": "none",
+          "rationale": "No significant numeric data detected"
+        }
+      ]
+    }
+  }
+}

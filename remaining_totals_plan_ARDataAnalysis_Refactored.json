@@ -1,0 +1,45 @@
+{
+  "phase": "remaining_totals_implementation",
+  "date": "2025-08-01",
+  "status": "ready_for_implementation",
+  "approach": "systematic_configuration_update",
+  "steps": [
+    {
+      "step": 1,
+      "action": "Update PipelineSheetCreator high-priority configurations",
+      "target_sheets": [
+        "Weekly Counts",
+        "Day of Week Counts",
+        "Activity Counts",
+        "File Size by Day",
+        "SY Days",
+        "Data Quality"
+      ],
+      "expected_impact": "Major improvement in analytical value"
+    },
+    {
+      "step": 2,
+      "action": "Update PipelineSheetCreator medium-priority configurations",
+      "target_sheets": [
+        "Collection Periods",
+        "Camera Usage by Year"
+      ],
+      "expected_impact": "Moderate improvement in analytical value"
+    },
+    {
+      "step": 3,
+      "action": "Update PipelineSheetCreator low-priority configurations",
+      "target_sheets": [
+        "Camera Usage Dates",
+        "Camera Usage by Year Range"
+      ],
+      "expected_impact": "Minor improvement, completeness"
+    },
+    {
+      "step": 4,
+      "action": "Generate new report and validate all totals",
+      "target_sheets": "all",
+      "expected_impact": "Comprehensive totals coverage validation"
+    }
+  ]
+}

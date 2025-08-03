@@ -325,17 +325,20 @@ class TotalsManager:
         try:
             if dataframe.empty:
                 print("[WARNING] Empty DataFrame provided for totals calculation")
-                return
+                return None
             
-            # Extract configuration
-            add_row_totals = config.get('add_row_totals', False)
-            add_column_totals = config.get('add_column_totals', False)
-            add_grand_total = config.get('add_grand_total', False)
-            totals_label = config.get('totals_label', 'TOTALS')
+            # Extract configuration with proper key mapping
+            add_row_totals = config.get('include_row_totals', config.get('add_row_totals', False))
+            add_column_totals = config.get('include_column_totals', config.get('add_column_totals', False))
+            add_grand_total = config.get('include_grand_total', config.get('add_grand_total', False))
+            totals_label = config.get('totals_row_label', config.get('totals_label', 'TOTAL'))
             row_totals_label = config.get('row_totals_label', 'Row Total')
             
             # Determine which columns to include in totals
-            if 'include_columns' in config:
+            if 'numeric_columns' in config:
+                # Use explicitly specified numeric columns
+                numeric_columns = [col for col in config['numeric_columns'] if col in dataframe.columns]
+            elif 'include_columns' in config:
                 numeric_columns = [col for col in config['include_columns'] if col in dataframe.columns]
             else:
                 # Auto-detect numeric columns
@@ -347,15 +350,30 @@ class TotalsManager:
             
             if not numeric_columns:
                 print("[INFO] No numeric columns found for totals calculation")
-                return
+                return None
             
             # Calculate totals
             if add_column_totals:
                 # Add column totals row
                 totals_row = start_row + len(dataframe)
                 
+                # Determine where to place the totals label
+                # If the first column is numeric and included in totals, find a non-numeric column for the label
+                label_col = start_col
+                first_col = dataframe.columns[0] if len(dataframe.columns) > 0 else None
+                
+                if first_col and first_col in numeric_columns:
+                    # First column is numeric - look for a non-numeric column for the label
+                    non_numeric_cols = [col for col in dataframe.columns if col not in numeric_columns]
+                    if non_numeric_cols:
+                        # Place label in first non-numeric column
+                        label_col = start_col + list(dataframe.columns).index(non_numeric_cols[0])
+                    else:
+                        # All columns are numeric - place label in a new column after the data
+                        label_col = start_col + len(dataframe.columns)
+                
                 # Add totals label
-                worksheet.cell(row=totals_row, column=start_col, value=totals_label)
+                worksheet.cell(row=totals_row, column=label_col, value=totals_label)
                 
                 # Calculate and add column totals
                 for i, col in enumerate(dataframe.columns):
@@ -368,11 +386,12 @@ class TotalsManager:
                         cell = worksheet.cell(row=totals_row, column=col_idx)
                         self._apply_totals_style(cell, is_grand_total=False)
                     else:
-                        # Empty cell for non-numeric columns
-                        worksheet.cell(row=totals_row, column=col_idx, value="")
+                        # Empty cell for non-numeric columns (unless it's the label column)
+                        if col_idx != label_col:
+                            worksheet.cell(row=totals_row, column=col_idx, value="")
                 
                 # Apply styling to totals label
-                label_cell = worksheet.cell(row=totals_row, column=start_col)
+                label_cell = worksheet.cell(row=totals_row, column=label_col)
                 self._apply_totals_style(label_cell, is_grand_total=False)
             
             if add_row_totals:
@@ -401,6 +420,18 @@ class TotalsManager:
                 self._apply_totals_style(cell, is_grand_total=True)
             
             print(f"[SUCCESS] Added totals to worksheet: {len(numeric_columns)} numeric columns processed")
+            
+            # Return positions dictionary
+            positions = {}
+            if add_column_totals:
+                positions['totals_row'] = start_row + len(dataframe)
+            if add_row_totals:
+                positions['totals_col'] = start_col + len(dataframe.columns)
+            if add_grand_total and add_row_totals and add_column_totals:
+                positions['grand_total_row'] = start_row + len(dataframe)
+                positions['grand_total_col'] = start_col + len(dataframe.columns)
+            
+            return positions
             
         except Exception as e:
             print(f"[ERROR] Failed to add totals to worksheet: {e}")

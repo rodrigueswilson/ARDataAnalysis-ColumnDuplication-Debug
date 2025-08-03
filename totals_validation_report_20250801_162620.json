@@ -1,0 +1,676 @@
+{
+  "validation_date": "2025-08-01T16:26:20.866307",
+  "high_priority_sheets": {
+    "Monthly Capture Volume": {
+      "sheet_name": "Monthly Capture Volume",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "B23",
+          "value": "TOTAL",
+          "type": "total"
+        }
+      ],
+      "data_rows": 23,
+      "data_columns": 3,
+      "validation_status": "success",
+      "implementation_status": "success"
+    },
+    "File Size Stats": {
+      "sheet_name": "File Size Stats",
+      "has_totals": true,
+      "totals_type": "comprehensive",
+      "totals_found": [
+        {
+          "cell": "F3",
+          "value": "Row Total",
+          "type": "total"
+        },
+        {
+          "cell": "F3",
+          "value": "Row Total",
+          "type": "row total"
+        },
+        {
+          "cell": "A6",
+          "value": "TOTAL",
+          "type": "total"
+        }
+      ],
+      "data_rows": 6,
+      "data_columns": 6,
+      "validation_status": "success",
+      "implementation_status": "success"
+    },
+    "Time of Day": {
+      "sheet_name": "Time of Day",
+      "has_totals": true,
+      "totals_type": "comprehensive",
+      "totals_found": [
+        {
+          "cell": "C3",
+          "value": "Row Total",
+          "type": "total"
+        },
+        {
+          "cell": "C3",
+          "value": "Row Total",
+          "type": "row total"
+        }
+      ],
+      "data_rows": 5,
+      "data_columns": 3,
+      "validation_status": "success",
+      "implementation_status": "success"
+    },
+    "Weekday by Period": {
+      "sheet_name": "Weekday by Period",
+      "has_totals": true,
+      "totals_type": "comprehensive",
+      "totals_found": [
+        {
+          "cell": "D3",
+          "value": "Row Total",
+          "type": "total"
+        },
+        {
+          "cell": "D3",
+          "value": "Row Total",
+          "type": "row total"
+        }
+      ],
+      "data_rows": 33,
+      "data_columns": 4,
+      "validation_status": "success",
+      "implementation_status": "success"
+    }
+  },
+  "existing_totals_sheets": {
+    "MP3 Duration Analysis": {
+      "sheet_name": "MP3 Duration Analysis",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "A3",
+          "value": "School Year MP3 Duration Summary",
+          "type": "sum"
+        },
+        {
+          "cell": "B5",
+          "value": "Total Files",
+          "type": "total"
+        },
+        {
+          "cell": "C5",
+          "value": "Total Hours",
+          "type": "total"
+        },
+        {
+          "cell": "A7",
+          "value": "Total School Year Summary",
+          "type": "total"
+        },
+        {
+          "cell": "A7",
+          "value": "Total School Year Summary",
+          "type": "sum"
+        },
+        {
+          "cell": "D13",
+          "value": "Total Hours",
+          "type": "total"
+        },
+        {
+          "cell": "F25",
+          "value": "Total Files",
+          "type": "total"
+        },
+        {
+          "cell": "G25",
+          "value": "Total Hours",
+          "type": "total"
+        }
+      ],
+      "data_rows": 34,
+      "data_columns": 8,
+      "validation_status": "success"
+    },
+    "Data Cleaning": {
+      "sheet_name": "Data Cleaning",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "D5",
+          "value": "Total Size (MB)",
+          "type": "total"
+        },
+        {
+          "cell": "A14",
+          "value": "Total Records",
+          "type": "total"
+        }
+      ],
+      "data_rows": 17,
+      "data_columns": 5,
+      "validation_status": "success"
+    },
+    "Daily Counts (ACF_PACF)": {
+      "sheet_name": "Daily Counts (ACF_PACF)",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "B3",
+          "value": "Total_Files",
+          "type": "total"
+        },
+        {
+          "cell": "C3",
+          "value": "Total_Files_ACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "D3",
+          "value": "Total_Files_ACF_Lag_14",
+          "type": "total"
+        },
+        {
+          "cell": "E3",
+          "value": "Total_Files_ACF_Lag_14_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "F3",
+          "value": "Total_Files_ACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "G3",
+          "value": "Total_Files_ACF_Lag_7",
+          "type": "total"
+        },
+        {
+          "cell": "H3",
+          "value": "Total_Files_ACF_Lag_7_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "I3",
+          "value": "Total_Files_PACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "J3",
+          "value": "Total_Files_PACF_Lag_14",
+          "type": "total"
+        },
+        {
+          "cell": "K3",
+          "value": "Total_Files_PACF_Lag_14_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "L3",
+          "value": "Total_Files_PACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "M3",
+          "value": "Total_Files_PACF_Lag_7",
+          "type": "total"
+        },
+        {
+          "cell": "N3",
+          "value": "Total_Files_PACF_Lag_7_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "Q3",
+          "value": "Total_Size_MB",
+          "type": "total"
+        },
+        {
+          "cell": "V3",
+          "value": "Total_Files_Forecast",
+          "type": "total"
+        },
+        {
+          "cell": "W3",
+          "value": "Total_Files_Forecast_Lower",
+          "type": "total"
+        },
+        {
+          "cell": "X3",
+          "value": "Total_Files_Forecast_Upper",
+          "type": "total"
+        },
+        {
+          "cell": "A326",
+          "value": "TOTALS",
+          "type": "total"
+        },
+        {
+          "cell": "A326",
+          "value": "TOTALS",
+          "type": "totals"
+        },
+        {
+          "cell": "A333",
+          "value": "[CHART] ACF/PACF Analysis Summary",
+          "type": "sum"
+        },
+        {
+          "cell": "B335",
+          "value": "Total_Files",
+          "type": "total"
+        }
+      ],
+      "data_rows": 337,
+      "data_columns": 24,
+      "validation_status": "success"
+    },
+    "Weekly Counts (ACF_PACF)": {
+      "sheet_name": "Weekly Counts (ACF_PACF)",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "B3",
+          "value": "Total_Files",
+          "type": "total"
+        },
+        {
+          "cell": "C3",
+          "value": "Total_Files_ACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "D3",
+          "value": "Total_Files_ACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "E3",
+          "value": "Total_Files_ACF_Lag_4",
+          "type": "total"
+        },
+        {
+          "cell": "F3",
+          "value": "Total_Files_ACF_Lag_4_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "G3",
+          "value": "Total_Files_ACF_Lag_8",
+          "type": "total"
+        },
+        {
+          "cell": "H3",
+          "value": "Total_Files_ACF_Lag_8_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "I3",
+          "value": "Total_Files_PACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "J3",
+          "value": "Total_Files_PACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "K3",
+          "value": "Total_Files_PACF_Lag_4",
+          "type": "total"
+        },
+        {
+          "cell": "L3",
+          "value": "Total_Files_PACF_Lag_4_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "M3",
+          "value": "Total_Files_PACF_Lag_8",
+          "type": "total"
+        },
+        {
+          "cell": "N3",
+          "value": "Total_Files_PACF_Lag_8_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "Q3",
+          "value": "Total_Size_MB",
+          "type": "total"
+        },
+        {
+          "cell": "Z3",
+          "value": "Total_Files_Forecast",
+          "type": "total"
+        },
+        {
+          "cell": "AA3",
+          "value": "Total_Files_Forecast_Lower",
+          "type": "total"
+        },
+        {
+          "cell": "AB3",
+          "value": "Total_Files_Forecast_Upper",
+          "type": "total"
+        },
+        {
+          "cell": "A75",
+          "value": "TOTALS",
+          "type": "total"
+        },
+        {
+          "cell": "A75",
+          "value": "TOTALS",
+          "type": "totals"
+        },
+        {
+          "cell": "A82",
+          "value": "[CHART] ACF/PACF Analysis Summary",
+          "type": "sum"
+        },
+        {
+          "cell": "B84",
+          "value": "Total_Files",
+          "type": "total"
+        }
+      ],
+      "data_rows": 86,
+      "data_columns": 28,
+      "validation_status": "success"
+    },
+    "Biweekly Counts (ACF_PACF)": {
+      "sheet_name": "Biweekly Counts (ACF_PACF)",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "B3",
+          "value": "Total_Files",
+          "type": "total"
+        },
+        {
+          "cell": "C3",
+          "value": "Total_Files_ACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "D3",
+          "value": "Total_Files_ACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "E3",
+          "value": "Total_Files_ACF_Lag_2",
+          "type": "total"
+        },
+        {
+          "cell": "F3",
+          "value": "Total_Files_ACF_Lag_2_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "G3",
+          "value": "Total_Files_ACF_Lag_4",
+          "type": "total"
+        },
+        {
+          "cell": "H3",
+          "value": "Total_Files_ACF_Lag_4_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "I3",
+          "value": "Total_Files_PACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "J3",
+          "value": "Total_Files_PACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "K3",
+          "value": "Total_Files_PACF_Lag_2",
+          "type": "total"
+        },
+        {
+          "cell": "L3",
+          "value": "Total_Files_PACF_Lag_2_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "M3",
+          "value": "Total_Files_PACF_Lag_4",
+          "type": "total"
+        },
+        {
+          "cell": "N3",
+          "value": "Total_Files_PACF_Lag_4_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "Q3",
+          "value": "Total_Size_MB",
+          "type": "total"
+        },
+        {
+          "cell": "A42",
+          "value": "TOTALS",
+          "type": "total"
+        },
+        {
+          "cell": "A42",
+          "value": "TOTALS",
+          "type": "totals"
+        },
+        {
+          "cell": "A49",
+          "value": "[CHART] ACF/PACF Analysis Summary",
+          "type": "sum"
+        },
+        {
+          "cell": "B51",
+          "value": "Total_Files",
+          "type": "total"
+        }
+      ],
+      "data_rows": 53,
+      "data_columns": 23,
+      "validation_status": "success"
+    },
+    "Monthly Counts (ACF_PACF)": {
+      "sheet_name": "Monthly Counts (ACF_PACF)",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "B3",
+          "value": "Total_Files",
+          "type": "total"
+        },
+        {
+          "cell": "C3",
+          "value": "Total_Files_ACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "D3",
+          "value": "Total_Files_ACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "E3",
+          "value": "Total_Files_ACF_Lag_3",
+          "type": "total"
+        },
+        {
+          "cell": "F3",
+          "value": "Total_Files_ACF_Lag_3_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "G3",
+          "value": "Total_Files_ACF_Lag_6",
+          "type": "total"
+        },
+        {
+          "cell": "H3",
+          "value": "Total_Files_ACF_Lag_6_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "I3",
+          "value": "Total_Files_PACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "J3",
+          "value": "Total_Files_PACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "K3",
+          "value": "Total_Files_PACF_Lag_3",
+          "type": "total"
+        },
+        {
+          "cell": "L3",
+          "value": "Total_Files_PACF_Lag_3_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "M3",
+          "value": "Total_Files_PACF_Lag_6",
+          "type": "total"
+        },
+        {
+          "cell": "N3",
+          "value": "Total_Files_PACF_Lag_6_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "Q3",
+          "value": "Total_Size_MB",
+          "type": "total"
+        },
+        {
+          "cell": "A23",
+          "value": "TOTALS",
+          "type": "total"
+        },
+        {
+          "cell": "A23",
+          "value": "TOTALS",
+          "type": "totals"
+        },
+        {
+          "cell": "A30",
+          "value": "[CHART] ACF/PACF Analysis Summary",
+          "type": "sum"
+        },
+        {
+          "cell": "B32",
+          "value": "Total_Files",
+          "type": "total"
+        }
+      ],
+      "data_rows": 34,
+      "data_columns": 21,
+      "validation_status": "success"
+    },
+    "Period Counts (ACF_PACF)": {
+      "sheet_name": "Period Counts (ACF_PACF)",
+      "has_totals": true,
+      "totals_type": "column_totals",
+      "totals_found": [
+        {
+          "cell": "A3",
+          "value": "Total_Files",
+          "type": "total"
+        },
+        {
+          "cell": "B3",
+          "value": "Total_Files_ACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "C3",
+          "value": "Total_Files_ACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "D3",
+          "value": "Total_Files_ACF_Lag_2",
+          "type": "total"
+        },
+        {
+          "cell": "E3",
+          "value": "Total_Files_ACF_Lag_2_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "F3",
+          "value": "Total_Files_PACF_Lag_1",
+          "type": "total"
+        },
+        {
+          "cell": "G3",
+          "value": "Total_Files_PACF_Lag_1_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "H3",
+          "value": "Total_Files_PACF_Lag_2",
+          "type": "total"
+        },
+        {
+          "cell": "I3",
+          "value": "Total_Files_PACF_Lag_2_Significant",
+          "type": "total"
+        },
+        {
+          "cell": "L3",
+          "value": "Total_Size_MB",
+          "type": "total"
+        },
+        {
+          "cell": "B10",
+          "value": "TOTALS",
+          "type": "total"
+        },
+        {
+          "cell": "B10",
+          "value": "TOTALS",
+          "type": "totals"
+        },
+        {
+          "cell": "A17",
+          "value": "[CHART] ACF/PACF Analysis Summary",
+          "type": "sum"
+        },
+        {
+          "cell": "B19",
+          "value": "Total_Files",
+          "type": "total"
+        }
+      ],
+      "data_rows": 21,
+      "data_columns": 18,
+      "validation_status": "success"
+    }
+  },
+  "summary": {
+    "high_priority_success_rate": 1.0,
+    "existing_totals_preserved_rate": 1.0,
+    "total_sheets_validated": 11
+  }
+}

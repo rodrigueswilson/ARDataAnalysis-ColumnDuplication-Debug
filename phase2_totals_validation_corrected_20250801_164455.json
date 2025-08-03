@@ -1,0 +1,299 @@
+{
+  "validation_timestamp": "20250801_164455",
+  "report_file": "AR_Analysis_Report_20250801_163656.xlsx",
+  "total_sheets_validated": 6,
+  "successful_validations": 6,
+  "success_rate": 100.0,
+  "phase2_status": "COMPLETE",
+  "sheet_results": {
+    "Weekly Counts": {
+      "status": "PASSED",
+      "details": {
+        "total_label_found": "Col_5",
+        "numeric_columns_count": 5,
+        "numeric_columns": [
+          "_id",
+          "Total_Files",
+          "MP3_Files",
+          "JPG_Files",
+          "Total_Size_MB"
+        ],
+        "totals_calculations": {
+          "_id": {
+            "expected": "949",
+            "actual": "949",
+            "difference": "0",
+            "correct": "True"
+          },
+          "Total_Files": {
+            "expected": "10241",
+            "actual": "10241",
+            "difference": "0",
+            "correct": "True"
+          },
+          "MP3_Files": {
+            "expected": "3184",
+            "actual": "3184",
+            "difference": "0",
+            "correct": "True"
+          },
+          "JPG_Files": {
+            "expected": "7057",
+            "actual": "7057",
+            "difference": "0",
+            "correct": "True"
+          },
+          "Total_Size_MB": {
+            "expected": 43294.154,
+            "actual": 43294.154,
+            "difference": 0.0,
+            "correct": "True"
+          }
+        },
+        "rows_count": 39
+      }
+    },
+    "Day of Week Counts": {
+      "status": "PASSED",
+      "details": {
+        "total_label_found": "_id",
+        "numeric_columns_count": 4,
+        "numeric_columns": [
+          "Total_Files",
+          "MP3_Files",
+          "JPG_Files",
+          "Total_Size_MB"
+        ],
+        "totals_calculations": {
+          "Total_Files": {
+            "expected": "10241",
+            "actual": "10241",
+            "difference": "0",
+            "correct": "True"
+          },
+          "MP3_Files": {
+            "expected": "3184",
+            "actual": "3184",
+            "difference": "0",
+            "correct": "True"
+          },
+          "JPG_Files": {
+            "expected": "7057",
+            "actual": "7057",
+            "difference": "0",
+            "correct": "True"
+          },
+          "Total_Size_MB": {
+            "expected": 43294.153999999995,
+            "actual": 43294.15399999999,
+            "difference": 7.275957614183426e-12,
+            "correct": "True"
+          }
+        },
+        "rows_count": 6
+      }
+    },
+    "Activity Counts": {
+      "status": "PASSED",
+      "details": {
+        "total_label_found": "_id",
+        "numeric_columns_count": 4,
+        "numeric_columns": [
+          "Total_Files",
+          "MP3_Files",
+          "JPG_Files",
+          "Total_Size_MB"
+        ],
+        "totals_calculations": {
+          "Total_Files": {
+            "expected": "10241",
+            "actual": "10241",
+            "difference": "0",
+            "correct": "True"
+          },
+          "MP3_Files": {
+            "expected": "3184",
+            "actual": "3184",
+            "difference": "0",
+            "correct": "True"
+          },
+          "JPG_Files": {
+            "expected": "7057",
+            "actual": "7057",
+            "difference": "0",
+            "correct": "True"
+          },
+          "Total_Size_MB": {
+            "expected": 43294.154,
+            "actual": 43294.154,
+            "difference": 0.0,
+            "correct": "True"
+          }
+        },
+        "rows_count": 17
+      }
+    },
+    "File Size by Day": {
+      "status": "PASSED",
+      "details": {
+        "total_label_found": "_id",
+        "numeric_columns_count": 3,
+        "numeric_columns": [
+          "Total_Files",
+          "Total_Size_MB",
+          "Avg_Size_MB"
+        ],
+        "totals_calculations": {
+          "Total_Files": {
+            "expected": "10241",
+            "actual": "10241",
+            "difference": "0",
+            "correct": "True"
+          },
+          "Total_Size_MB": {
+            "expected": 43294.153999999995,
+            "actual": 43294.15399999999,
+            "difference": 7.275957614183426e-12,
+            "correct": "True"
+          },
+          "Avg_Size_MB": {
+            "expected": 1022.2980851167649,
+            "actual": 1022.298085116765,
+            "difference": 1.1368683772161603e-13,
+            "correct": "True"
+          }
+        },
+        "rows_count": 273
+      }
+    },
+    "SY Days": {
+      "status": "PASSED",
+      "details": {
+        "total_label_found": "School_Year",
+        "numeric_columns_count": 4,
+        "numeric_columns": [
+          "Total_Files",
+          "MP3_Files",
+          "JPG_Files",
+          "Total_Size_MB"
+        ],
+        "totals_calculations": {
+          "Total_Files": {
+            "expected": "10241",
+            "actual": "10241",
+            "difference": "0",
+            "correct": "True"
+          },
+          "MP3_Files": {
+            "expected": "3184",
+            "actual": "3184",
+            "difference": "0",
+            "correct": "True"
+          },
+          "JPG_Files": {
+            "expected": "7057",
+            "actual": "7057",
+            "difference": "0",
+            "correct": "True"
+          },
+          "Total_Size_MB": {
+            "expected": 43294.154,
+            "actual": 43294.15399999999,
+            "difference": 1.4551915228366852e-11,
+            "correct": "True"
+          }
+        },
+        "rows_count": 273
+      }
+    },
+    "Data Quality": {
+      "status": "PASSED",
+      "details": {
+        "total_label_found": "_id",
+        "numeric_columns_count": 11,
+        "numeric_columns": [
+          "total_files",
+          "jpg_files",
+          "mp3_files",
+          "outliers",
+          "collection_day_files",
+          "total_size_mb",
+          "avg_file_size_mb",
+          "outlier_percentage",
+          "collection_day_percentage",
+          "unique_date_count",
+          "school_year_count"
+        ],
+        "totals_calculations": {
+          "total_files": {
+            "expected": "10241",
+            "actual": "10241",
+            "difference": "0",
+            "correct": "True"
+          },
+          "jpg_files": {
+            "expected": "7057",
+            "actual": "7057",
+            "difference": "0",
+            "correct": "True"
+          },
+          "mp3_files": {
+            "expected": "3184",
+            "actual": "3184",
+            "difference": "0",
+            "correct": "True"
+          },
+          "outliers": {
+            "expected": "343",
+            "actual": "343",
+            "difference": "0",
+            "correct": "True"
+          },
+          "collection_day_files": {
+            "expected": "9742",
+            "actual": "9742",
+            "difference": "0",
+            "correct": "True"
+          },
+          "total_size_mb": {
+            "expected": 43294.154,
+            "actual": 43294.154,
+            "difference": 0.0,
+            "correct": "True"
+          },
+          "avg_file_size_mb": {
+            "expected": 4.227531881652182,
+            "actual": 4.227531881652182,
+            "difference": 0.0,
+            "correct": "True"
+          },
+          "outlier_percentage": {
+            "expected": 3.349282296650718,
+            "actual": 3.349282296650718,
+            "difference": 0.0,
+            "correct": "True"
+          },
+          "collection_day_percentage": {
+            "expected": 95.12742896201543,
+            "actual": 95.12742896201543,
+            "difference": 0.0,
+            "correct": "True"
+          },
+          "unique_date_count": {
+            "expected": "272",
+            "actual": "272",
+            "difference": "0",
+            "correct": "True"
+          },
+          "school_year_count": {
+            "expected": "3",
+            "actual": "3",
+            "difference": "0",
+            "correct": "True"
+          }
+        },
+        "rows_count": 2
+      }
+    }
+  }
+}

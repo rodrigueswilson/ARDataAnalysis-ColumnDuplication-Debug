@@ -84,6 +84,41 @@ def main():
         reporter = ReportGenerator(db, root_dir, output_dir)
         
         print("[GENERATOR] Starting report generation...")
+        
+        # CRITICAL DEBUG: Monkey patch the SheetCreator to trace ACF/PACF creation
+        from report_generator.sheet_creators import SheetCreator
+        original_run_aggregation = SheetCreator._run_aggregation_cached
+        
+        def debug_run_aggregation(self, pipeline, use_base_filter=True, collection_name='media_records'):
+            cache_key = str(pipeline)[:100] + "..." if len(str(pipeline)) > 100 else str(pipeline)
+            print(f"[CRITICAL_DEBUG] _run_aggregation_cached called with cache_key: {cache_key}")
+            
+            # Check for ACF/PACF related pipelines
+            pipeline_str = str(pipeline).upper()
+            if 'DAILY_COUNTS_COLLECTION_ONLY' in pipeline_str:
+                print("[CRITICAL_DEBUG] 🎯 DAILY_COUNTS_COLLECTION_ONLY DETECTED!")
+            if 'WEEKLY' in pipeline_str and 'WITH_ZEROES' in pipeline_str:
+                print("[CRITICAL_DEBUG] 🎯 WEEKLY_WITH_ZEROES DETECTED!")
+            
+            # Call original method
+            result = original_run_aggregation(self, pipeline, use_base_filter, collection_name)
+            
+            # Apply zero-fill if needed
+            if ('DAILY' in pipeline_str and ('WITH_ZEROES' in pipeline_str or 'COLLECTION_ONLY' in pipeline_str)) or \
+               ('WEEKLY' in pipeline_str and 'WITH_ZEROES' in pipeline_str):
+                print(f"[CRITICAL_DEBUG] 🔧 APPLYING ZERO-FILL to {cache_key}")
+                try:
+                    result = self._fill_missing_collection_days(result, cache_key)
+                    print(f"[CRITICAL_DEBUG] ✅ Zero-fill applied successfully, new shape: {result.shape}")
+                except Exception as e:
+                    print(f"[CRITICAL_DEBUG] ❌ Zero-fill failed: {e}")
+            
+            return result
+        
+        # Apply the monkey patch
+        SheetCreator._run_aggregation_cached = debug_run_aggregation
+        print("[CRITICAL_DEBUG] Monkey patch applied to _run_aggregation_cached")
+        
         reporter.generate_report()
         
         print("[SUCCESS] Report generation completed successfully!")

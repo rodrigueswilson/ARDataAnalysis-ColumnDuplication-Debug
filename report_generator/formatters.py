@@ -79,7 +79,7 @@ class ExcelFormatter:
     
     def add_total_row(self, ws, df):
         """
-        Adds a formatted total row to the worksheet.
+        Adds a formatted total row to the worksheet at the end.
         
         Args:
             ws: openpyxl worksheet object
@@ -120,6 +120,33 @@ class ExcelFormatter:
             except Exception as e:
                 # Fallback for any unexpected data type issues
                 cell.value = ""
+                
+    def add_total_row_at_position(self, ws, row_num, values_dict):
+        """
+        Adds a formatted total row to the worksheet at a specific position.
+        
+        Args:
+            ws: openpyxl worksheet object
+            row_num: Row number to add the total row at
+            values_dict: Dictionary of column index -> value pairs for the total row
+        """
+        # Total row formatting
+        total_font = Font(bold=True, color=self.color_scheme['total_row_font'])
+        total_fill = PatternFill(start_color=self.color_scheme['total_row_bg'], 
+                                end_color=self.color_scheme['total_row_bg'], 
+                                fill_type='solid')
+        
+        # Add "TOTAL" label in first column
+        ws.cell(row=row_num, column=1, value="TOTAL")
+        ws.cell(row=row_num, column=1).font = total_font
+        ws.cell(row=row_num, column=1).fill = total_fill
+        
+        # Add values from the dictionary
+        for col_idx, value in values_dict.items():
+            cell = ws.cell(row=row_num, column=col_idx)
+            cell.font = total_font
+            cell.fill = total_fill
+            cell.value = value
     
     def add_audio_characteristics_total_row(self, ws, df):
         """

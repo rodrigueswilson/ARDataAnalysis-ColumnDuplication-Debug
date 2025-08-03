@@ -16,7 +16,9 @@ The documentation is organized into the following categories:
 
 | Document | Category | Description |
 |----------|----------|-------------|
-| [ARIMA/SARIMAX Warnings](./troubleshooting/arima_warnings_solutions.md) | Troubleshooting | Analysis of non-invertible/non-stationary warnings and solutions |
+| [Documentation Framework Architecture](./architecture\documentation_framework.md) | Architecture | ## Overview |
+| [Data Cleaning Terminology and Filter Logic](./technical\data_cleaning_terminology.md) | Technical Guides | ## Overview |
+| [ARIMA/SARIMAX Non-invertible/Non-stationary Warnings](./troubleshooting\arima_warnings_solutions.md) | Troubleshooting | ## Problem Description |
 
 ## Using This Documentation
 

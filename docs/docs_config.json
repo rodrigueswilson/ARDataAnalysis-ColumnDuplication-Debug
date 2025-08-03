@@ -31,12 +31,30 @@
   ],
   "documents": [
     {
-      "title": "ARIMA/SARIMAX Warnings",
-      "path": "troubleshooting/arima_warnings_solutions.md",
+      "title": "Data Cleaning Terminology and Filter Logic",
+      "path": "technical\\data_cleaning_terminology.md",
+      "category": "Technical Guides",
+      "tags": [],
+      "created": "2025-08-02",
+      "last_updated": "2025-08-02",
+      "related_docs": []
+    },
+    {
+      "title": "ARIMA/SARIMAX Non-invertible/Non-stationary Warnings",
+      "path": "troubleshooting\\arima_warnings_solutions.md",
       "category": "Troubleshooting",
-      "tags": ["ARIMA", "SARIMAX", "warnings", "time-series", "forecasting"],
-      "created": "2025-07-31",
-      "last_updated": "2025-07-31",
+      "tags": [],
+      "created": "2025-08-02",
+      "last_updated": "2025-08-02",
+      "related_docs": []
+    },
+    {
+      "title": "Documentation Framework Architecture",
+      "path": "architecture\\documentation_framework.md",
+      "category": "Architecture",
+      "tags": [],
+      "created": "2025-08-02",
+      "last_updated": "2025-08-02",
       "related_docs": []
     }
   ],
@@ -49,7 +67,12 @@
     "MongoDB",
     "Excel",
     "dashboard",
-    "report"
+    "report",
+    "data cleaning",
+    "filtering",
+    "academic terminology",
+    "mutually exclusive categories",
+    "2x2 matrix"
   ],
   "search_config": {
     "enabled": true,
