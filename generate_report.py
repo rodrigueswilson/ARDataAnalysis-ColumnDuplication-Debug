@@ -68,20 +68,36 @@ def main():
     # Perform automatic backup
     print("[BACKUP] Creating automatic backup...")
     backup_py_and_md_files()
+    print("\n" + "💾"*60)
+    print("💾 EXECUTION TRACE: Backup completed, about to connect to database")
+    print("💾"*60)
     
     # Get database connection
     print("[DATABASE] Connecting to MongoDB...")
-    db = get_db_connection()
+    try:
+        db = get_db_connection()
+        print(f"💾 EXECUTION TRACE: Database connection result: {db is not None}")
+    except Exception as db_error:
+        print(f"🚨 EXECUTION TRACE: Database connection failed: {db_error}")
+        import traceback
+        traceback.print_exc()
+        return 1
     if db is None:
         print("[ERROR] Failed to connect to database")
         return 1
 
     try:
         # Create and run the modular report generator
+        print("\n" + "🔍"*60)
+        print("🔍 EXECUTION TRACE: Entry point - generate_report.py")
+        print("🔍 About to initialize ReportGenerator")
+        print("🔍"*60)
         print("[GENERATOR] Initializing modular report generator...")
         # Use current directory as root_dir, not the db_path
         root_dir = os.path.dirname(os.path.abspath(__file__))
         reporter = ReportGenerator(db, root_dir, output_dir)
+        print(f"🔍 EXECUTION TRACE: ReportGenerator type: {type(reporter)}")
+        print(f"🔍 EXECUTION TRACE: ReportGenerator module: {reporter.__class__.__module__}")
         
         print("[GENERATOR] Starting report generation...")
         
@@ -119,7 +135,15 @@ def main():
         SheetCreator._run_aggregation_cached = debug_run_aggregation
         print("[CRITICAL_DEBUG] Monkey patch applied to _run_aggregation_cached")
         
+        print("\n" + "🚀"*60)
+        print("🚀 EXECUTION TRACE: About to call reporter.generate_report()")
+        print(f"🚀 EXECUTION TRACE: Method exists: {hasattr(reporter, 'generate_report')}")
+        print(f"🚀 EXECUTION TRACE: Method type: {type(getattr(reporter, 'generate_report', None))}")
+        print("🚀"*60)
         reporter.generate_report()
+        print("\n" + "✅"*60)
+        print("✅ EXECUTION TRACE: reporter.generate_report() completed")
+        print("✅"*60)
         
         print("[SUCCESS] Report generation completed successfully!")
         return 0

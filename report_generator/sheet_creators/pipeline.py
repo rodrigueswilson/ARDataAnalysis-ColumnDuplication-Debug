@@ -30,38 +30,146 @@ class PipelineSheetCreator(BaseSheetCreator):
     
     def process_pipeline_configurations(self, workbook):
         """
-        Processes all pipeline configurations from report_config.json and creates sheets.
-        Each sheet fetches its own fresh pipeline data to prevent column duplication.
-        
-        Args:
-            workbook: openpyxl workbook object
+        Process all pipeline configurations from report_config.json.
+        Creates sheets based on enabled pipeline configurations.
         """
+        print("\n" + "="*80)
+        print(" CRITICAL DEBUG: process_pipeline_configurations method called!")
+        print(" This confirms the execution path is correct")
+        print("="*80)
         try:
             # Load report configuration
             config_path = Path(__file__).parent.parent.parent / "report_config.json"
             with open(config_path, 'r') as f:
                 config = json.load(f)
             
-            # Process each sheet configuration
-            for sheet_config in config.get('sheets', []):
-                if not sheet_config.get('enabled', True):
-                    print(f"[SKIP] Sheet '{sheet_config['name']}' is disabled")
-                    continue
-                
-                try:
-                    # CRITICAL FIX: Clear pipeline cache before each sheet to prevent shared state contamination
-                    print(f"[DEBUG] Clearing pipeline cache before creating sheet: {sheet_config['name']}")
-                    self._pipeline_cache.clear()
-                    
-                    # Each sheet gets its own fresh pipeline data to prevent column accumulation
-                    self._create_pipeline_sheet(workbook, sheet_config)
-                except Exception as e:
-                    print(f"[ERROR] Failed to create sheet '{sheet_config['name']}': {e}")
+            # Get enabled sheets and sort by order
+            enabled_sheets = [s for s in config.get('sheets', []) if s.get('enabled', True)]
+            enabled_sheets.sort(key=lambda x: x.get('order', 999))
             
-            print(f"[SUCCESS] Processed {len([s for s in config.get('sheets', []) if s.get('enabled', True)])} pipeline sheets")
+            print(f"[DEBUG] Found {len(enabled_sheets)} enabled sheets")
+            for sheet in enabled_sheets:
+                sheet_name = sheet.get('name', sheet.get('sheet_name', 'Unknown'))
+                is_specialized = sheet.get('specialized', False)
+                order = sheet.get('order', 999)
+                print(f"[DEBUG] Sheet: {sheet_name}, Order: {order}, Specialized: {is_specialized}")
+            
+            # Process each sheet configuration in order
+            for sheet_config in enabled_sheets:
+                # Clear pipeline cache before each sheet to prevent contamination
+                self._pipeline_cache.clear()
+                
+                sheet_name = sheet_config.get('name', sheet_config.get('sheet_name', 'Unknown'))
+                is_specialized = sheet_config.get('specialized', False)
+                print(f"[DEBUG] Processing sheet '{sheet_name}': specialized={is_specialized}")
+                
+                if is_specialized:
+                    print(f"[DEBUG] Creating specialized sheet: {sheet_name}")
+                    self._create_specialized_sheet(workbook, sheet_config)
+                else:
+                    print(f"[DEBUG] Creating pipeline sheet: {sheet_name}")
+                    self._create_pipeline_sheet(workbook, sheet_config)
+            
+            print(f"[SUCCESS] Processed {len(enabled_sheets)} sheets (including specialized sheets)")
             
         except Exception as e:
             print(f"[ERROR] Failed to process pipeline configurations: {e}")
+    
+    def _create_specialized_sheet(self, workbook, sheet_config):
+        """
+        Creates a specialized sheet that requires custom creation logic.
+        
+        Args:
+            workbook: openpyxl workbook object
+            sheet_config: Sheet configuration dictionary with specialized=True
+        """
+        sheet_name = sheet_config['name']
+        pipeline_name = sheet_config['pipeline']
+        
+        print(f"[INFO] Creating specialized sheet: {sheet_name}")
+        print(f"    - Pipeline identifier: {pipeline_name}")
+        
+        try:
+            # Handle different types of specialized sheets
+            if pipeline_name == "MP3_DURATION_ANALYSIS":
+                print(f"    - Creating {sheet_name} sheet (specialized)")
+                from .specialized import SpecializedSheetCreator
+                specialized_creator = SpecializedSheetCreator(self.db, self.formatter)
+                
+                # Create the sheet
+                specialized_creator.create_mp3_duration_analysis_sheet(workbook)
+                
+                # Move the sheet to the correct position based on order
+                sheet_order = sheet_config.get('order', 999)
+                print("\n" + "*"*100)
+                print("*** MP3 POSITIONING LOGIC EXECUTED! ***")
+                print("*"*100)
+                self._position_sheet_by_order(workbook, sheet_name, sheet_order)
+                
+                print(f"[SUCCESS] {sheet_name} created and positioned successfully")
+            else:
+                print(f"[ERROR] Unknown specialized sheet type: {pipeline_name}")
+                
+        except Exception as e:
+            print(f"[ERROR] Failed to create specialized sheet '{sheet_name}': {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def _position_sheet_by_order(self, workbook, sheet_name, target_order):
+        """
+        Moves a sheet to the correct position in the workbook based on its configured order.
+        
+        Args:
+            workbook: openpyxl workbook object
+            sheet_name: Name of the sheet to position
+            target_order: Target order number for the sheet
+        """
+        try:
+            if sheet_name not in workbook.sheetnames:
+                print(f"[WARNING] Sheet '{sheet_name}' not found for positioning")
+                return
+            
+            # Get the sheet to move
+            sheet_to_move = workbook[sheet_name]
+            
+            # Find the correct position based on order
+            target_index = 0
+            
+            # Load configuration to get other sheet orders
+            import json
+            from pathlib import Path
+            config_path = Path(__file__).parent.parent.parent / "report_config.json"
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            
+            # Create a mapping of sheet names to their orders
+            sheet_orders = {}
+            for sheet_config in config.get('sheets', []):
+                if sheet_config.get('enabled', True):
+                    name = sheet_config.get('sheet_name', sheet_config.get('name', ''))
+                    order = sheet_config.get('order', 999)
+                    sheet_orders[name] = order
+            
+            # Count how many sheets should come before this one
+            print(f"[DEBUG] Positioning '{sheet_name}' with target order {target_order}")
+            print(f"[DEBUG] Current workbook sheets: {workbook.sheetnames}")
+            print(f"[DEBUG] Sheet orders from config: {sheet_orders}")
+            
+            for existing_sheet_name in workbook.sheetnames:
+                if existing_sheet_name == sheet_name:
+                    continue
+                existing_order = sheet_orders.get(existing_sheet_name, 999)
+                print(f"[DEBUG] Sheet '{existing_sheet_name}' has order {existing_order}")
+                if existing_order < target_order:
+                    target_index += 1
+                    print(f"[DEBUG] '{existing_sheet_name}' comes before target, target_index now {target_index}")
+            
+            # Move the sheet to the correct position
+            workbook.move_sheet(sheet_to_move, target_index)
+            print(f"[SUCCESS] Positioned '{sheet_name}' at index {target_index} (order {target_order})")
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to position sheet '{sheet_name}': {e}")
     
     def _create_pipeline_sheet(self, workbook, sheet_config, data=None):
         """

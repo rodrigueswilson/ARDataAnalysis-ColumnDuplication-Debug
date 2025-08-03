@@ -83,7 +83,15 @@ MP3_DURATION_BY_PERIOD = [
         "$match": CORE_MATCH
     },
     {
-        "$match": {"Collection_Period": {"$ne": "N/A"}}
+        "$match": {
+            "Collection_Period": {
+                "$exists": True,
+                "$ne": None,
+                "$ne": "N/A",
+                "$ne": "",
+                "$nin": ["Unknown", "unknown", "UNKNOWN"]
+            }
+        }
     },
     {
         "$group": {

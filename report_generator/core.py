@@ -348,6 +348,10 @@ class ReportGenerator:
         report generation including data processing, sheet creation, formatting,
         and chart generation.
         """
+        print("\n" + "🚨"*80)
+        print("🚨 CRITICAL: THIS IS CORE.PY GENERATE_REPORT METHOD")
+        print("🚨 IF YOU SEE THIS, THE EXECUTION IS IN CORE.PY")
+        print("🚨"*80)
         print("=" * 60)
         print("AR DATA ANALYSIS - REPORT GENERATION")
         print("=" * 60)
@@ -362,10 +366,24 @@ class ReportGenerator:
         
         try:
             # Create comprehensive dashboard first
+            print("\n" + "📊"*50)
+            print("📊 EXECUTION TRACE: About to create comprehensive dashboard")
+            print("📊"*50)
             print("[INFO] Creating comprehensive dashboard...")
-            self.dashboard_creator.create_comprehensive_dashboard(self.workbook)
+            try:
+                self.dashboard_creator.create_comprehensive_dashboard(self.workbook)
+                print("📊 EXECUTION TRACE: Dashboard creation completed successfully")
+            except Exception as dashboard_error:
+                print(f"🚨 EXECUTION TRACE: Dashboard creation failed: {dashboard_error}")
+                import traceback
+                traceback.print_exc()
+                # Continue execution even if dashboard fails
+                pass
             
             # Create all non-pipeline sheets using unified sheet creator
+            print("\n" + "🔥"*50)
+            print("🚀 CRITICAL: STARTING BASIC SHEET CREATION SECTION")
+            print("🔥"*50)
             print("[INFO] Creating non-pipeline sheets using unified architecture...")
             from .sheet_creators import SheetCreator
             unified_sheet_creator = SheetCreator(self.db, self.formatter)
@@ -379,13 +397,31 @@ class ReportGenerator:
             unified_sheet_creator.create_data_cleaning_sheet(self.workbook)
             
             # Create MP3 Duration Analysis sheet
-            print("[INFO] Creating MP3 Duration Analysis sheet...")
-            unified_sheet_creator.create_mp3_duration_analysis_sheet(self.workbook)
+            # NOTE: MP3 Duration Analysis sheet creation is now handled by the configuration-based system
+            # in sheet_creators/pipeline.py. This old hardcoded call has been disabled to prevent
+            # duplicate creation and positioning conflicts.
+            # 
+            # print("\n" + "="*80)
+            # print("🎯 CRITICAL DEBUG: ABOUT TO CREATE MP3 DURATION ANALYSIS SHEET")
+            # print("="*80)
+            # print("[INFO] Creating MP3 Duration Analysis sheet...")
+            # try:
+            #     print("[DEBUG] About to call create_mp3_duration_analysis_sheet method")
+            #     unified_sheet_creator.create_mp3_duration_analysis_sheet(self.workbook)
+            #     print("[DEBUG] MP3 Duration Analysis sheet creation completed successfully")
+            # except Exception as e:
+            #     print(f"[ERROR] Failed to create MP3 Duration Analysis sheet: {e}")
+            #     import traceback
+            #     traceback.print_exc()
+            print("[INFO] MP3 Duration sheet creation delegated to configuration-based system")
             
             # Process all configured pipelines from report_config.json using unified architecture
             print("[INFO] Processing pipeline configurations...")
+            print("[DEBUG] About to call unified_sheet_creator.process_pipeline_configurations")
+            print(f"[DEBUG] unified_sheet_creator type: {type(unified_sheet_creator)}")
             # Each sheet will fetch its own fresh pipeline data to prevent column duplication
             unified_sheet_creator.process_pipeline_configurations(self.workbook)
+            print("[DEBUG] Completed unified_sheet_creator.process_pipeline_configurations")
             
             # Create Raw Data sheet (critical for peer reviewers)
             with open("MARKER_1_RAW_DATA.txt", "w") as f: f.write("Reached Raw Data section")
@@ -439,6 +475,9 @@ class ReportGenerator:
                 import traceback
                 traceback.print_exc()
             
+            # Post-process: Ensure MP3 Duration sheet is positioned correctly
+            self._reorder_mp3_duration_sheet()
+            
             # Save the final workbook
             with open("MARKER_5_SAVE.txt", "w") as f: f.write("Reached Save section")
             print("[SAVE] Saving final workbook...")
@@ -452,3 +491,35 @@ class ReportGenerator:
             import traceback
             traceback.print_exc()
             raise
+    
+    def _reorder_mp3_duration_sheet(self):
+        """
+        Post-processing method to ensure MP3 Duration sheet is positioned correctly.
+        Moves the MP3 Duration sheet to position 3 (immediately after Data Cleaning).
+        """
+        try:
+            # Check if MP3 Duration sheet exists
+            if "MP3 Duration" not in self.workbook.sheetnames:
+                print("[INFO] MP3 Duration sheet not found, skipping reordering")
+                return
+            
+            # Find current position of MP3 Duration sheet
+            current_sheets = self.workbook.sheetnames
+            mp3_current_index = current_sheets.index("MP3 Duration")
+            
+            # Target position: after Data Cleaning (position 3, 0-indexed = 2)
+            target_index = 2
+            if "Data Cleaning" in current_sheets:
+                target_index = current_sheets.index("Data Cleaning") + 1
+            
+            print(f"[INFO] Moving MP3 Duration sheet from position {mp3_current_index + 1} to position {target_index + 1}")
+            
+            # Move the sheet to the correct position
+            mp3_sheet = self.workbook["MP3 Duration"]
+            self.workbook.move_sheet(mp3_sheet, target_index - mp3_current_index)
+            
+            print(f"[SUCCESS] MP3 Duration sheet repositioned successfully")
+            
+        except Exception as e:
+            print(f"[WARNING] Failed to reorder MP3 Duration sheet: {e}")
+            # Don't raise the exception as this is post-processing

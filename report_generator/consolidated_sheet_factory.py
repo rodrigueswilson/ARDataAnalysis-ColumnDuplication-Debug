@@ -98,7 +98,8 @@ class ConsolidatedSheetFactory:
         # Phase 2: Specialized analysis sheets
         print("\n[PHASE 2] Creating specialized analysis sheets...")
         results.update({
-            "MP3 Duration Analysis": self.create_mp3_duration_analysis_sheet(workbook),
+            # NOTE: MP3 Duration Analysis sheet creation moved to configuration-based system (Phase 3)
+            # "MP3 Duration Analysis": self.create_mp3_duration_analysis_sheet(workbook),
             "Audio Efficiency Details": self.create_audio_efficiency_details_sheet(workbook)
         })
         
@@ -142,7 +143,7 @@ class ConsolidatedSheetFactory:
             # Use registry to prevent duplicates
             if not self.registry.create_sheet(
                 workbook, "Dashboard", SheetType.DASHBOARD,
-                "consolidated_sheet_factory", "create_dashboard_sheet", position=0
+                "consolidated_sheet_factory", "create_dashboard_sheet"
             ):
                 return False
             
@@ -205,7 +206,7 @@ class ConsolidatedSheetFactory:
         try:
             if not self.registry.create_sheet(
                 workbook, "Raw Data", SheetType.RAW_DATA,
-                "consolidated_sheet_factory", "create_raw_data_sheet", position=1
+                "consolidated_sheet_factory", "create_raw_data_sheet"
             ):
                 return False
             

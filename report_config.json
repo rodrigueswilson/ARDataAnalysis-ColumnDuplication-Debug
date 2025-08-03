@@ -361,6 +361,17 @@
             "description": "Data quality validation metrics",
             "module": "dashboard_data",
             "name": "Data Quality"
+        },
+        {
+            "pipeline": "MP3_DURATION_ANALYSIS",
+            "sheet_name": "MP3 Duration",
+            "category": "detailed",
+            "enabled": true,
+            "order": 29.5,
+            "description": "Comprehensive MP3 duration analysis by school year, period, and month",
+            "module": "mp3_analysis",
+            "name": "MP3 Duration",
+            "specialized": true
         }
     ],
     "forecast_options": {

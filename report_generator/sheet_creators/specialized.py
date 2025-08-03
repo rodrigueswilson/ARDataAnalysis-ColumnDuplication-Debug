@@ -278,6 +278,7 @@ class SpecializedSheetCreator(BaseSheetCreator):
         Args:
             workbook: openpyxl workbook object
         """
+        print("[DEBUG] MP3 Duration Analysis sheet creation method called!")
         try:
             # Initialize DataCleaningUtils if not already done
             if not hasattr(self, 'data_cleaning_utils'):
@@ -303,18 +304,21 @@ class SpecializedSheetCreator(BaseSheetCreator):
                 
                 print("[DEBUG] Using refactored MP3 analysis pipelines")
                 
-                # Use our properly structured pipelines
-                school_year_pipeline = MP3_PIPELINES["MP3_DURATION_BY_SCHOOL_YEAR"]
-                period_pipeline = MP3_PIPELINES["MP3_DURATION_BY_PERIOD"]
-                monthly_pipeline = MP3_PIPELINES["MP3_DURATION_BY_MONTH"]
+                # Get MP3 duration data using the pipelines
+                school_year_pipeline = self.data_cleaning_utils.get_pipeline('MP3_DURATION_BY_SCHOOL_YEAR')
+                period_pipeline = self.data_cleaning_utils.get_pipeline('MP3_DURATION_BY_PERIOD')
+                monthly_pipeline = self.data_cleaning_utils.get_pipeline('MP3_DURATION_BY_MONTH')
                 
-                # Execute pipelines with debug information
-                print("[DEBUG] Executing MP3 duration pipelines...")
                 school_year_df = self._run_aggregation(school_year_pipeline)
                 print(f"[DEBUG] School year pipeline returned {len(school_year_df)} rows")
                 
                 period_df = self._run_aggregation(period_pipeline)
                 print(f"[DEBUG] Period pipeline returned {len(period_df)} rows")
+                if not period_df.empty:
+                    print(f"[DEBUG] Period pipeline columns: {list(period_df.columns)}")
+                    print(f"[DEBUG] First few period records:")
+                    for i, (_, row) in enumerate(period_df.head(3).iterrows()):
+                        print(f"[DEBUG]   Row {i}: Period='{row.get('Period', 'MISSING')}', School_Year='{row.get('School_Year', 'MISSING')}'")
                 
                 monthly_df = self._run_aggregation(monthly_pipeline)
                 print(f"[DEBUG] Monthly pipeline returned {len(monthly_df)} rows")
@@ -325,10 +329,10 @@ class SpecializedSheetCreator(BaseSheetCreator):
                     return self._create_mp3_duration_analysis_sheet_legacy(workbook)
                 
                 # Create worksheet
-                ws = workbook.create_sheet("MP3 Duration Analysis")
+                ws = workbook.create_sheet("MP3 Duration")
                 
                 # Title
-                ws['A1'] = "AR Data Analysis - MP3 Duration Analysis"
+                ws['A1'] = "AR Data Analysis - MP3 Duration"
                 self.formatter.apply_title_style(ws, 'A1')
                 
                 # Helper function to convert seconds to HH:MM:SS format
@@ -476,14 +480,14 @@ class SpecializedSheetCreator(BaseSheetCreator):
             monthly_df = self._run_aggregation(monthly_pipeline)
             
             if school_year_df.empty and period_df.empty and monthly_df.empty:
-                print("[WARNING] No data found for MP3 Duration Analysis (legacy)")
+                print("[WARNING] No data found for MP3 Duration (legacy)")
                 return
             
             # Create worksheet
-            ws = workbook.create_sheet("MP3 Duration Analysis")
+            ws = workbook.create_sheet("MP3 Duration")
             
             # Title
-            ws['A1'] = "AR Data Analysis - MP3 Duration Analysis (Legacy)"
+            ws['A1'] = "AR Data Analysis - MP3 Duration"
             self.formatter.apply_title_style(ws, 'A1')
             
             # Helper function to convert seconds to HH:MM:SS format
@@ -524,10 +528,10 @@ class SpecializedSheetCreator(BaseSheetCreator):
             # Apply formatting and auto-adjust columns
             self.formatter.auto_adjust_columns(ws)
             
-            print("[SUCCESS] MP3 Duration Analysis sheet created (legacy)")
+            print("[SUCCESS] MP3 Duration sheet created (legacy)")
             
         except Exception as e:
-            print(f"[ERROR] Failed to create MP3 Duration Analysis sheet (legacy): {e}")
+            print(f"[ERROR] Failed to create MP3 Duration sheet (legacy): {e}")
 
     def _add_duration_summary_table(self, ws, df, start_row, seconds_to_hms, hours_to_hms):
         """
@@ -633,7 +637,7 @@ class SpecializedSheetCreator(BaseSheetCreator):
         Adds the Collection Period Duration table.
         """
         # Table title
-        ws.cell(row=start_row, column=1, value="Collection Period MP3 Duration Analysis")
+        ws.cell(row=start_row, column=1, value="Collection Period MP3 Duration")
         current_row = start_row + 2
         
         # Headers

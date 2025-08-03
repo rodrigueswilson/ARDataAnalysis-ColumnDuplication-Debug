@@ -348,7 +348,7 @@ def create_acf_pacf_dashboard_sheet(workbook, acf_pacf_sheets, target_position=N
     
     # Create new sheet with proper positioning
     if target_position is not None:
-        dashboard = workbook.create_sheet(title="ACF_PACF_Dashboard", index=target_position)
+        dashboard = workbook.create_sheet(title="ACF_PACF_Dashboard")
         print(f"[FIX] Created ACF_PACF_Dashboard at position {target_position + 1}")
     else:
         dashboard = workbook.create_sheet(title="ACF_PACF_Dashboard")

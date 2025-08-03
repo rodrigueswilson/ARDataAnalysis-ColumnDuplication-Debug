@@ -853,6 +853,10 @@ class SheetCreator(SpecializedSheetCreator, PipelineSheetCreator):
         Args:
             workbook: openpyxl workbook object
         """
+        print("\n" + "🔥"*80)
+        print("🔥 EXECUTION TRACE: create_all_sheets method called in sheet_creators/__init__.py")
+        print("🔥 THIS IS THE ACTUAL EXECUTION PATH!")
+        print("🔥"*80)
         try:
             print("[INFO] Starting comprehensive sheet creation...")
             
@@ -870,7 +874,8 @@ class SheetCreator(SpecializedSheetCreator, PipelineSheetCreator):
             # Create specialized sheets
             print("[INFO] Creating specialized analysis sheets...")
             self.create_audio_efficiency_details_sheet(workbook)
-            self.create_mp3_duration_analysis_sheet(workbook)
+            # NOTE: MP3 Duration Analysis sheet creation moved to configuration-based system
+            # self.create_mp3_duration_analysis_sheet(workbook)
             
             print("[SUCCESS] All sheets created successfully")
             

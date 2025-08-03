@@ -69,7 +69,7 @@ def create_dashboard_summary(wb):
                 target_position -= 1
         
         # Create the dashboard sheet at the correct position from the start
-        dashboard_ws = wb.create_sheet('ACF_PACF_Dashboard', index=target_position)
+        dashboard_ws = wb.create_sheet('ACF_PACF_Dashboard')
         print(f"[CREATE] Created ACF_PACF_Dashboard at position {target_position + 1} (no movement needed)")
         
         print("[DEBUG] Dashboard sheet prepared, extracting ACF/PACF data...")

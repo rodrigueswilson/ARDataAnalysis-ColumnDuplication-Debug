@@ -70,7 +70,7 @@ class RawDataCreator:
             if total_count == 0:
                 print("[WARNING] No raw data found in database")
                 # Create empty sheet with message
-                ws = workbook.create_sheet(title="Raw Data", index=1)
+                ws = workbook.create_sheet(title="Raw Data")
                 ws.append(["No data available", "The database appears to be empty"])
                 self.formatter.format_sheet(ws)
                 return True
@@ -82,7 +82,7 @@ class RawDataCreator:
             first_doc = next(all_docs_cursor, None)
             if not first_doc:
                 print("[WARNING] No documents found")
-                ws = workbook.create_sheet(title="Raw Data", index=1)
+                ws = workbook.create_sheet(title="Raw Data")
                 ws.append(["No data available", "The database appears to be empty"])
                 self.formatter.format_sheet(ws)
                 return True
@@ -101,9 +101,9 @@ class RawDataCreator:
             
             print(f"[RAW DATA] Schema: {len(column_names)} columns")
             
-            # Create Raw Data Sheet - exact replica including index position
-            ws = workbook.create_sheet(title="Raw Data", index=1)
-            print("[RAW DATA] Created Raw Data worksheet at index 1")
+            # Create Raw Data Sheet (position controlled by configuration)
+            ws = workbook.create_sheet(title="Raw Data")
+            print("[RAW DATA] Created Raw Data worksheet")
             
             # Add header row
             ws.append(column_names)
@@ -170,7 +170,7 @@ class RawDataCreator:
             
             # Create error sheet for transparency
             try:
-                ws = workbook.create_sheet(title="Raw Data", index=1)
+                ws = workbook.create_sheet(title="Raw Data")
                 ws.append(["Error", "Failed to load raw data"])
                 ws.append(["Details", str(e)])
                 self.formatter.format_sheet(ws)

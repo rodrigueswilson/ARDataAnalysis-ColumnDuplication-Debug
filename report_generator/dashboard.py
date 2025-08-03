@@ -697,8 +697,8 @@ class DashboardCreator:
     def _add_dashboard_sheet(self, workbook, df_dashboard):
         """Add the dashboard sheet as the first sheet in the workbook."""
         try:
-            # Create the Dashboard sheet at position 0 (first sheet)
-            ws = workbook.create_sheet(title="Dashboard", index=0)
+            # Create the Dashboard sheet (position controlled by configuration)
+            ws = workbook.create_sheet(title="Dashboard")
             
             # Add headers
             for col_idx, column_name in enumerate(df_dashboard.columns, start=1):
